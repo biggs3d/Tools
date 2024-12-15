@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C# Code Structure Analyzer</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1080px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background-color: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 1.5rem 0;
+        }
+        .grid {
+            display: grid;
+            gap: 1rem;
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 class="title">C# Code Consolidation</h1>
+        <div class="grid">
+            <div>
+                <label for="input">Input C# Code</label>
+                <textarea id="input" placeholder="Paste your C# code here..."></textarea>
+            </div>
+            <div>
+                <label for="output">Parsed Structure</label>
+                <textarea id="output" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function parseCode(code) {
+            // First, strip block comments
+            let cleanCode = code.replace(/\/\*[\s\S]*?\*\//g, '');
+            
+            const files = {};
+            let currentFile = '';
+            let currentNamespace = '';
+            
+            // Get leading spaces from a line
+            const getLeadingSpaces = (str) => {
+                const match = str.match(/^[ ]*/);
+                return match ? match[0] : '';
+            };
+            
+            // Split into lines and process each line
+            const lines = cleanCode.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const trimmedLine = line.trim();
+                if (!trimmedLine || trimmedLine.startsWith('//')) continue;
+
+                // Check for file marker
+                if (trimmedLine.startsWith('# File:')) {
+                    currentFile = trimmedLine.substring(7).trim();
+                    files[currentFile] = { namespace: '', elements: [] };
+                    continue;
+                }
+
+                // Check for namespace
+                if (trimmedLine.startsWith('namespace')) {
+                    currentNamespace = trimmedLine.split(' ')[1];
+                    files[currentFile].namespace = currentNamespace;
+                    continue;
+                }
+
+                // Check for public members
+                if (trimmedLine.startsWith('public') || trimmedLine.startsWith('private class')) {
+                    const leadingSpaces = getLeadingSpaces(line);
+                    let fullDeclaration = line;
+                    
+                    // If line contains opening parenthesis, look for closing one
+                    if (line.includes('(') && !line.includes(')')) {
+                        let j = i + 1;
+                        while (j < Math.min(i + 12, lines.length)) {
+                            const nextLine = lines[j];
+                            fullDeclaration += '\n' + nextLine;
+                            if (nextLine.includes(')')) break;
+                            j++;
+                        }
+                        i = j; // Skip the lines we've consumed
+                    }
+
+                    // Clean up the declaration but preserve indentation
+                    fullDeclaration = fullDeclaration
+                        .replace(/{[^}]*}/, '') // Remove implementation block
+                        .replace(/;/, '')      // Remove semicolon
+                        .replace(/\s+$/, '')   // Remove trailing whitespace
+                        .replace(/\n\s*\n/g, '\n'); // Remove empty lines
+
+                    files[currentFile].elements.push(fullDeclaration);
+                }
+            }
+
+            // Format output
+            let output = '';
+            for (const [file, content] of Object.entries(files)) {
+                output += `# ${file}\n`;
+                if (content.namespace) output += `namespace ${content.namespace}\n`;
+                output += content.elements.join('\n') + '\n\n';
+            }
+
+            return output;
+        }
+
+        // Set up event listener
+        document.getElementById('input').addEventListener('input', function(e) {
+            const output = parseCode(e.target.value);
+            document.getElementById('output').value = output;
+        });
+    </script>
+</body>
+</html>
