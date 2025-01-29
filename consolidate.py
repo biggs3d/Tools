@@ -123,7 +123,7 @@ class FileHandler:
                     return True
         return False
 
-    def get_all_hierarchy_files(self, folder: str, extensions: list[str], max_size_kb: int = 1024) -> list[str]:
+    def get_all_hierarchy_files(self, folder: str, extensions: list[str], max_size_kb: int = 128) -> list[str]:
         """Get all files in the directory hierarchy with specified extensions and below a certain size (in KB)."""
 
         all_files = []
@@ -235,7 +235,7 @@ if __name__ == "__main__":
         directories_to_process = [directory]
 
     for current_directory in directories_to_process:
-        files = file_handler.get_all_hierarchy_files(current_directory, extension_list)
+        files = file_handler.get_all_hierarchy_files(current_directory, extension_list, 64)
 
         file_text_contents_by_full_path = {}
         for file_path in files:
