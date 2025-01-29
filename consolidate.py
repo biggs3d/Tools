@@ -52,9 +52,17 @@ class FileHandler:
         # Pattern for generated files: directory_name_YYYYMMDD_HHMMSS.txt
         self.generated_file_pattern = r'^[^_]+_\d{8}_\d{6}\.txt$'
         self.ignored_folders = [".git", ".venv", "build", "Cesium", ".run", ".github", ".yalc",
-                                ".yarn", ".pnpm", ".turbo", ".nx", ".idea", ".vscode", "test",
-                                "tests", "spec", "specs", "node_modules", "__pycache__", ".DS_Store",
+                                ".yarn", ".pnpm", ".turbo", ".nx", ".idea", ".vscode",
+                                "spec", "specs", "node_modules", "__pycache__", ".DS_Store",
                                 ".vscode-test", ".vscode-server", ".vscode-server-insiders", ".history"]
+        self.ignored_files = [".DS_Store", ".gitkeep", ".gitignore", ".gitattributes", ".editorconfig",
+                              ".prettierignore", "index.mjs", ".babelrc", ".babelrc.json", ".babelrc.js",
+                              ".prettier", ".stylelintrc", ".eslintrc", ".eslintrc.json", ".eslintrc.js",
+                              ".eslintrc.cjs", ".eslintrc.ts", ".eslintrc.yaml", ".eslintrc.yml",
+                              ".eslintignore", ".stylelintignore", "package-lock.json", "package-lock.json",
+                              "pnpm-lock.yaml", "yarn.lock", "index.d.ts", "index.ts"]
+        self.strip_regex = [(r'/\*.*?copyright.*?\*/', re.DOTALL | re.IGNORECASE),
+                            (r'^\s*import\s.*;?\s*$', re.MULTILINE), (r'\n\s*\n+', re.MULTILINE)]
 
     def is_generated_file(self, filename: str) -> bool:
         """Check if the file matches our generated file pattern."""
@@ -144,6 +152,11 @@ class FileHandler:
                 if self.is_generated_file(file_name):
                     continue
 
+                # Skip extra ignored files
+                if file_name in self.ignored_files:
+                    print(f"Skipping extra ignored file: {file_name}")
+                    continue
+
                 full_path = os.path.join(root, file_name)
 
                 # Check extension and ignoring rules
@@ -180,9 +193,10 @@ class FileHandler:
                          f"[y/n] (default: n): ")
         return response.lower() in ["y", "yes"]  # Default to 'n'/false if the input is empty
 
-    @staticmethod
-    def combine_files_with_path_headers(folder: str, files_by_path: dict[str, str],
+    def combine_files_with_path_headers(self, folder: str, files_by_path: dict[str, str],
                                         write_up_a_level: bool = True):
+
+        # Determine output file name with timestamp
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         base_dir_name = os.path.basename(folder)
         safe_dir_name = base_dir_name.replace(os.sep, "_").replace(":", "").strip("_")
@@ -191,7 +205,7 @@ class FileHandler:
             folder = os.path.dirname(folder)
         output_path = os.path.join(folder, filename)
 
-        print(f"Writing to {output_path}")
+        print(f"\nWriting to {output_path}")
 
         non_empty_files = {path: content for path, content in files_by_path.items() if content.strip()}
 
@@ -201,7 +215,9 @@ class FileHandler:
 
         with open(output_path, 'w', encoding='utf-8') as combined_file:
             for path, text in non_empty_files.items():
-                combined_file.write(f"\n\n# File: {path}\n\n{text}")
+                for pattern, flags in self.strip_regex:
+                    text = re.sub(pattern, '', text, flags=flags)
+                combined_file.write(f"\n# File: {path}\n\n{text}")
 
         print(f"Successfully wrote {len(non_empty_files)} non-empty files to {output_path}")
 
