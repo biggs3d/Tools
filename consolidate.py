@@ -1,6 +1,7 @@
 ﻿import datetime
 import fnmatch
 import os
+import re
 
 """
 File Consolidation Script
@@ -48,6 +49,16 @@ class FileHandler:
         self.default_extensions = default_file_extensions
         self.gitignore_patterns = self.read_gitignore()
         self.additional_ignore_patterns = self.parse_additional_ignore(extra_ignores)
+        # Pattern for generated files: directory_name_YYYYMMDD_HHMMSS.txt
+        self.generated_file_pattern = r'^[^_]+_\d{8}_\d{6}\.txt$'
+        self.ignored_folders = [".git", ".venv", "build", "Cesium", ".run", ".github", ".yalc",
+                                ".yarn", ".pnpm", ".turbo", ".nx", ".idea", ".vscode", "test",
+                                "tests", "spec", "specs", "node_modules", "__pycache__", ".DS_Store",
+                                ".vscode-test", ".vscode-server", ".vscode-server-insiders", ".history"]
+
+    def is_generated_file(self, filename: str) -> bool:
+        """Check if the file matches our generated file pattern."""
+        return bool(re.match(self.generated_file_pattern, os.path.basename(filename)))
 
     @staticmethod
     def parse_additional_ignore(ignores: str) -> list[str]:
@@ -112,28 +123,52 @@ class FileHandler:
                     return True
         return False
 
-    def get_all_hierarchy_files(self, folder: str, extensions: list[str]) -> list[str]:
+    def get_all_hierarchy_files(self, folder: str, extensions: list[str], max_size_kb: int = 1024) -> list[str]:
+        """Get all files in the directory hierarchy with specified extensions and below a certain size (in KB)."""
+
         all_files = []
         if not os.path.exists(folder) or not os.access(folder, os.R_OK):
             print(f"Directory {folder} is not accessible.")
             return all_files
 
         for root, dirs, file_list in os.walk(folder):
-            # Remove directories to ignore
-            dirs[:] = [d for d in dirs if not self.should_ignore(os.path.join(root, d))]
+            # Combine directory filtering in one comprehension
+            dirs[:] = [
+                d for d in dirs
+                if not self.should_ignore(os.path.join(root, d))
+                   and d not in self.ignored_folders
+            ]
 
-            for file in file_list:
-                full_path = os.path.join(root, file)
-                if file.endswith(tuple(extensions)) and not self.should_ignore(full_path):
+            for file_name in file_list:
+                # Skip generated files
+                if self.is_generated_file(file_name):
+                    continue
+
+                full_path = os.path.join(root, file_name)
+
+                # Check extension and ignoring rules
+                if file_name.endswith(tuple(extensions)) and not self.should_ignore(full_path):
                     if os.access(full_path, os.R_OK):
-                        if os.path.getsize(full_path) > 0:  # Check if file is not empty
-                            all_files.append(full_path)
-                        else:
+                        file_size = os.path.getsize(full_path)  # bytes
+                        file_size_kb = file_size / 1024.0
+
+                        # Skip files larger than our cutoff
+                        if file_size_kb > max_size_kb:
+                            print(f"Skipping large file: {full_path} ({file_size_kb:.2f} KB)")
+                            continue
+
+                        # Skip empty files
+                        if file_size == 0:
                             print(f"Skipping empty file: {full_path}")
+                            continue
+
+                        # Everything passed checks, add to our list
+                        all_files.append(full_path)
                     else:
                         print(f"File {full_path} is not readable.")
 
-        return [f for f in all_files if "consolidate.py" not in f]  # Exclude this script, return the rest
+        # Exclude this script from the returned list
+        return [f for f in all_files if "consolidate.py" not in f]
 
     @staticmethod
     def get_child_directories(folder: str) -> list[str]:
@@ -142,7 +177,7 @@ class FileHandler:
     @staticmethod
     def ask_user() -> bool:
         response = input(f"Do you want to run the script just on the child directories (separate output)? "
-                         f"[y/n] (default: y): ")
+                         f"[y/n] (default: n): ")
         return response.lower() in ["y", "yes"]  # Default to 'n'/false if the input is empty
 
     @staticmethod
