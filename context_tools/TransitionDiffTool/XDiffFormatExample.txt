@@ -1,0 +1,28 @@
+### File: Models/FileTreeItem.cs
+```diff
+@@ -15,7 +15,8 @@
+     public string Name { get; set; }
+     public string FullPath { get; set; }
+     public bool IsDirectory { get; set; }
+-    public bool IsSelected { get; set; }
++    public bool IsSelected { get; set; } 
++    public DateTime LastModified { get; set; }
+     public ObservableCollection<FileTreeItem> Children { get; set; }
+ }
+```
+
+### File: Services/ContextCollectorService.cs
+```diff
+@@ -42,6 +42,11 @@
+     {
+         var selectedFiles = GetSelectedFiles();
+         var contextBuilder = new StringBuilder();
++        
++        // Add timestamp and selection information
++        contextBuilder.AppendLine($"// Context collected on {DateTime.Now}");
++        contextBuilder.AppendLine($"// {selectedFiles.Count} files selected");
++        contextBuilder.AppendLine();
+ 
+         foreach (var file in selectedFiles)
+         {
+```
