@@ -1,4 +1,20 @@
-### File: Models/FileTreeItem.cs
+# XDiff Format Example
+
+The XDiff format is used to specify file changes in a clear, structured way. Each file change is preceded by a header indicating the target file path.
+
+## Format Structure
+
+```
+### File: <relative-or-absolute-path-to-file>
+```diff
+@@ -<start-line>,<line-count> +<start-line>,<line-count> @@
+-<removed-line>
++<added-line>
+```
+
+## Example
+
+### File: src/example/MyFile.cs
 ```diff
 @@ -15,7 +15,8 @@
      public string Name { get; set; }
@@ -8,10 +24,9 @@
 +    public bool IsSelected { get; set; } 
 +    public DateTime LastModified { get; set; }
      public ObservableCollection<FileTreeItem> Children { get; set; }
- }
 ```
 
-### File: Services/ContextCollectorService.cs
+### File: src/services/MyService.cs
 ```diff
 @@ -42,6 +42,11 @@
      {
@@ -26,3 +41,10 @@
          foreach (var file in selectedFiles)
          {
 ```
+
+## Notes
+- Each file change must start with `### File:` followed by the target file path
+- The diff format follows standard diff syntax with `-` for removed lines and `+` for added lines
+- Line numbers in the diff header (e.g., `@@ -15,7 +15,8 @@`) indicate the location of changes
+- Multiple files can be changed in a single XDiff block
+- File paths can be relative to the project root or absolute

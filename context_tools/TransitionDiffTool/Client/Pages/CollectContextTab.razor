@@ -1,0 +1,161 @@
+@page "/collect-context"
+@using MudBlazor
+@using System.IO
+@using System.Collections.ObjectModel
+@using TransitionDiffTool.Shared.Models
+@inject IDialogService DialogService
+
+<MudPaper Class="pa-4" Elevation="3">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_selectedPath" 
+                         Label="Root Directory" 
+                         Variant="Variant.Outlined" 
+                         Adornment="Adornment.End" 
+                         AdornmentIcon="@Icons.Material.Filled.Folder"
+                         OnAdornmentClick="OpenFolderDialog"
+                         Class="mb-4" />
+        </MudItem>
+        
+        <MudItem xs="12">
+            <MudPaper Class="pa-2" Style="max-height: 500px; overflow-y: auto;">
+                <MudList Dense="true">
+                    @foreach (var item in _fileTree)
+                    {
+                        <MudListItem>
+                            <MudCheckBox Checked="@item.IsSelected" 
+                                       Color="Color.Primary" 
+                                       CheckedChanged="@((bool value) => OnItemChecked(item, value))" />
+                            <MudIcon Icon="@(item.IsDirectory ? Icons.Material.Filled.Folder : Icons.Material.Filled.InsertDriveFile)" />
+                            <MudText Class="ml-2">@item.Name</MudText>
+                        </MudListItem>
+                        @if (item.IsDirectory && item.Children.Any())
+                        {
+                            <MudListItem Class="ml-4">
+                                @foreach (var child in item.Children)
+                                {
+                                    <MudListItem>
+                                        <MudCheckBox Checked="@child.IsSelected" 
+                                                   Color="Color.Primary" 
+                                                   CheckedChanged="@((bool value) => OnItemChecked(child, value))" />
+                                        <MudIcon Icon="@(child.IsDirectory ? Icons.Material.Filled.Folder : Icons.Material.Filled.InsertDriveFile)" />
+                                        <MudText Class="ml-2">@child.Name</MudText>
+                                    </MudListItem>
+                                }
+                            </MudListItem>
+                        }
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" Class="d-flex justify-center mt-4">
+            <MudButton Variant="Variant.Filled" 
+                      Color="Color.Primary" 
+                      StartIcon="@Icons.Material.Filled.ContentCopy"
+                      OnClick="CollectAndCopyContext"
+                      Disabled="@(!_checkedItems.Any())">
+                Collect Context
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private string _selectedPath = "";
+    private ObservableCollection<FileTreeItem> _fileTree = new();
+    private HashSet<FileTreeItem> _checkedItems = new();
+
+    private async Task OpenFolderDialog()
+    {
+        var dialog = await DialogService.ShowMessageBox(
+            "Select Directory",
+            "Choose a root directory to scan",
+            yesText: "Select", noText: "Cancel");
+
+        if (dialog == true)
+        {
+            // TODO: Implement folder browser dialog
+            // For now, we'll use a test path
+            _selectedPath = @"C:\Test";
+            await LoadDirectoryTree();
+        }
+    }
+
+    private async Task LoadDirectoryTree()
+    {
+        _fileTree.Clear();
+        if (Directory.Exists(_selectedPath))
+        {
+            var rootItem = new FileTreeItem
+            {
+                Name = Path.GetFileName(_selectedPath),
+                FullPath = _selectedPath,
+                IsDirectory = true,
+                Children = new ObservableCollection<FileTreeItem>()
+            };
+            
+            await LoadDirectoryContents(rootItem);
+            _fileTree.Add(rootItem);
+        }
+    }
+
+    private async Task LoadDirectoryContents(FileTreeItem parent)
+    {
+        try
+        {
+            var dirs = Directory.GetDirectories(parent.FullPath);
+            foreach (var dir in dirs)
+            {
+                var item = new FileTreeItem
+                {
+                    Name = Path.GetFileName(dir),
+                    FullPath = dir,
+                    IsDirectory = true,
+                    Children = new ObservableCollection<FileTreeItem>()
+                };
+                parent.Children.Add(item);
+                await LoadDirectoryContents(item);
+            }
+
+            var files = Directory.GetFiles(parent.FullPath);
+            foreach (var file in files)
+            {
+                parent.Children.Add(new FileTreeItem
+                {
+                    Name = Path.GetFileName(file),
+                    FullPath = file,
+                    IsDirectory = false
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            // TODO: Handle access denied and other errors
+            Console.WriteLine($"Error loading directory {parent.FullPath}: {ex.Message}");
+        }
+    }
+
+    private void OnItemChecked(FileTreeItem item, bool value)
+    {
+        item.IsSelected = value;
+        if (value)
+        {
+            _checkedItems.Add(item);
+        }
+        else
+        {
+            _checkedItems.Remove(item);
+        }
+        StateHasChanged();
+    }
+
+    private async Task CollectAndCopyContext()
+    {
+        // TODO: Implement context collection and clipboard copy
+        var selectedFiles = _checkedItems.Where(x => !x.IsDirectory).Select(x => x.FullPath).ToList();
+        await DialogService.ShowMessageBox(
+            "Context Collected",
+            $"Selected {selectedFiles.Count} files. Clipboard copy functionality coming soon.");
+    }
+} 

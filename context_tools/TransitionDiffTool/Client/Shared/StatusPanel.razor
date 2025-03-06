@@ -1,0 +1,107 @@
+@using MudBlazor
+@using TransitionDiffTool.Shared.Models
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
+
+<MudPaper Class="pa-4" Elevation="3">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudText Typo="Typo.h6" Class="mb-4">Operation Status</MudText>
+            <MudChip Color="@_statusColor" Class="mb-4">@_currentStatus</MudChip>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Class="pa-2" Style="max-height: 500px; overflow-y: auto;">
+                <MudList Dense="true">
+                    @foreach (var log in _logs)
+                    {
+                        <MudListItem>
+                            <MudIcon Icon="@GetLogIcon(log.Type)" Color="@GetLogColor(log.Type)" />
+                            <MudText Class="ml-2">@log.Message</MudText>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" Class="d-flex justify-space-between mt-4">
+            <MudButton Variant="Variant.Outlined"
+                      Color="Color.Default"
+                      StartIcon="@Icons.Material.Filled.Clear"
+                      OnClick="ClearLogs">
+                Clear Logs
+            </MudButton>
+            <MudButton Variant="Variant.Outlined"
+                      Color="Color.Default"
+                      StartIcon="@Icons.Material.Filled.ContentCopy"
+                      OnClick="CopyLogs">
+                Copy Logs
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private string _currentStatus = "Idle";
+    private Color _statusColor = Color.Default;
+    private List<LogEntry> _logs = new();
+
+    protected override void OnInitialized()
+    {
+        AddLog("System initialized", LogType.Info);
+    }
+
+    private void ClearLogs()
+    {
+        _logs.Clear();
+        StateHasChanged();
+    }
+
+    private async Task CopyLogs()
+    {
+        var logText = string.Join("\n", _logs.Select(l => $"[{l.Timestamp:HH:mm:ss}] {l.Message}"));
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", logText);
+        Snackbar.Add("Logs copied to clipboard", Severity.Success);
+    }
+
+    private void AddLog(string message, LogType type = LogType.Info)
+    {
+        _logs.Add(new LogEntry
+        {
+            Message = message,
+            Type = type,
+            Timestamp = DateTime.Now
+        });
+        StateHasChanged();
+    }
+
+    private string GetLogIcon(LogType type) => type switch
+    {
+        LogType.Error => Icons.Material.Filled.Error,
+        LogType.Warning => Icons.Material.Filled.Warning,
+        LogType.Info => Icons.Material.Filled.Info,
+        _ => Icons.Material.Filled.Info
+    };
+
+    private Color GetLogColor(LogType type) => type switch
+    {
+        LogType.Error => Color.Error,
+        LogType.Warning => Color.Warning,
+        LogType.Info => Color.Info,
+        _ => Color.Info
+    };
+}
+
+public class LogEntry
+{
+    public string Message { get; set; }
+    public LogType Type { get; set; }
+    public DateTime Timestamp { get; set; }
+}
+
+public enum LogType
+{
+    Info,
+    Warning,
+    Error
+} 

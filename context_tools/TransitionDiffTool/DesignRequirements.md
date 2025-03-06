@@ -101,7 +101,23 @@ The Code Context Manager is a Blazor-based utility tool designed to:
 - Clear error messages for malformed diffs
 - Line number preservation for accurate diff application
 
-### 5.4. Error Handling
+### 5.4. Data Models
+- FileTreeItem model for directory browsing:
+  ```csharp
+  public class FileTreeItem
+  {
+      public string Name { get; set; }
+      public string FullPath { get; set; }
+      public bool IsDirectory { get; set; }
+      public bool IsSelected { get; set; }
+      public ObservableCollection<FileTreeItem> Children { get; set; }
+  }
+  ```
+- Support for file metadata (last modified, size, etc.)
+- Efficient tree structure for large directory hierarchies
+- Observable collections for real-time UI updates
+
+### 5.5. Error Handling
 - Implement global exception handler
 - Log detailed errors with user-friendly messages
 - Provide recovery options where possible

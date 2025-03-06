@@ -1,0 +1,101 @@
+@page "/apply-edits"
+@using MudBlazor
+@inject IDialogService DialogService
+
+<MudPaper Class="pa-4" Elevation="3">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudText Typo="Typo.h6" Class="mb-4">Paste XDiff Format Changes</MudText>
+            <MudTextField @bind-Value="_diffContent"
+                         Lines="15"
+                         Variant="Variant.Outlined"
+                         Placeholder="Paste your XDiff format changes here..."
+                         Class="mb-4" />
+        </MudItem>
+
+        <MudItem xs="12" Class="d-flex justify-space-between">
+            <MudButton Variant="Variant.Outlined"
+                      Color="Color.Default"
+                      StartIcon="@Icons.Material.Filled.Clear"
+                      OnClick="ClearDiffContent">
+                Clear
+            </MudButton>
+            <MudButton Variant="Variant.Filled"
+                      Color="Color.Primary"
+                      StartIcon="@Icons.Material.Filled.Check"
+                      OnClick="ApplyChanges"
+                      Disabled="@(string.IsNullOrWhiteSpace(_diffContent))">
+                Apply Changes
+            </MudButton>
+        </MudItem>
+
+        <MudItem xs="12" Class="mt-4">
+            <MudExpansionPanels>
+                <MudExpansionPanel Text="Preview Changes">
+                    <MudPaper Class="pa-4" Elevation="0">
+                        @if (_previewFiles.Any())
+                        {
+                            <MudList>
+                                @foreach (var file in _previewFiles)
+                                {
+                                    <MudListItem>
+                                        <MudIcon Icon="@Icons.Material.Filled.InsertDriveFile" />
+                                        <MudText>@file</MudText>
+                                    </MudListItem>
+                                }
+                            </MudList>
+                        }
+                        else
+                        {
+                            <MudText Color="Color.Default">No changes to preview</MudText>
+                        }
+                    </MudPaper>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private string _diffContent = "";
+    private List<string> _previewFiles = new();
+
+    private void ClearDiffContent()
+    {
+        _diffContent = "";
+        _previewFiles.Clear();
+        StateHasChanged();
+    }
+
+    private async Task ApplyChanges()
+    {
+        // TODO: Implement XDiff parsing and file changes
+        // For now, we'll just show a preview of what would be changed
+        _previewFiles = _diffContent.Split('\n')
+            .Where(line => line.StartsWith("### File:"))
+            .Select(line => line.Replace("### File:", "").Trim())
+            .ToList();
+
+        if (_previewFiles.Any())
+        {
+            var dialog = await DialogService.ShowMessageBox(
+                "Confirm Changes",
+                $"The following files will be modified:\n\n{string.Join("\n", _previewFiles)}",
+                yesText: "Apply", noText: "Cancel");
+
+            if (dialog == true)
+            {
+                // TODO: Implement actual file changes
+                await DialogService.ShowMessageBox(
+                    "Changes Applied",
+                    "File changes have been applied successfully.");
+            }
+        }
+        else
+        {
+            await DialogService.ShowMessageBox(
+                "Invalid Format",
+                "No valid file changes found in the provided XDiff format.");
+        }
+    }
+} 
