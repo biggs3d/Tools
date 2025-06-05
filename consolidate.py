@@ -238,6 +238,23 @@ if __name__ == "__main__":
         "cs", "sh", "bat",
         "razor", "cshtml", "vbhtml",
         "js", "ts", "tsx", "jsx",
+        "idl",
+        # FACE-specific additions
+        "face", "acfg", "stg",
+        # Ada
+        "adb", "ads",
+        # Build/config
+        "cmake", "mak", "cfg", "ini", "properties", "def",
+        # Documentation
+        "adoc", "rst",
+        # Testing
+        "gold", "javagold",
+        # Generated
+        "hh", "cc",
+        # Scripts
+        "ps1", "psm1",
+        # Protocol definitions
+        "proto", "thrift"
     ]
 
     file_handler = FileHandler(".", default_extensions, additional_ignore)

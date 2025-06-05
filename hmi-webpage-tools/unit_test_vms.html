@@ -1,0 +1,1171 @@
+<!--
+  ~ ************************  US GOVERNMENT NOTICE   ************************
+  ~
+  ~ CONTAINS TEKTONUX copyrighted code released with UNLIMITED GOVERNMENT
+  ~ RIGHTS to the EUAS PRODUCT OFFICE
+  ~ THIRD PARTY DISCLOSURE REQUIRES WRITTEN APPROVAL
+  ~
+  ~ ************************ NON-US GOVERNMENT NOTICE ***********************
+  ~ TEKTONUX PROPRIETARY
+  ~ NON-US GOVERNMENT recipients may use and disclose only as authorized by
+  ~ TEKTONUX or the US Government.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Model Test Generator</title>
+
+    <!-- React and ReactDOM -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
+    <!-- SVG Favicon -->
+    <link rel="icon" type="image/svg+xml"
+          href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔧</text></svg>'>
+
+    <!-- pull in ./shared/shared.css -->
+    <link rel="stylesheet" href="./shared/shared.css">
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="module">
+    import { allImports } from './shared/gathered_imports.js';
+
+    const { useState } = React;
+
+    // Constants for known property test types
+    const KNOWN_PROPERTY_TEST_TYPES = {
+        // Direct test types
+        'ArrayViewModelTest': 'ArrayViewModelTest',
+        'StringViewModelTest': 'StringViewModelTest',
+        'CommandedStringViewModelTest': 'CommandedStringViewModelTest',
+        'NumberViewModelTest': 'NumberViewModelTest',
+        'CommandedNumberViewModelTest': 'CommandedNumberViewModelTest',
+        'RangedCommandedNumberViewModelTest': 'RangedCommandedNumberViewModelTest',
+        'RangedNumberViewModelTest': 'RangedNumberViewModelTest',
+        'BooleanViewModelTest': 'BooleanViewModelTest',
+        'CommandedBooleanViewModelTest': 'CommandedBooleanViewModelTest',
+        'EnumViewModelTest': 'EnumViewModelTest',
+        'CommandedEnumViewModelTest': 'CommandedEnumViewModelTest',
+
+        // View Model type mappings
+        'ArrayViewModel': 'ArrayViewModelTest',
+        'StringViewModel': 'StringViewModelTest',
+        'CommandedStringViewModel': 'CommandedStringViewModelTest',
+        'NumberViewModel': 'NumberViewModelTest',
+        'CommandedNumberViewModel': 'CommandedNumberViewModelTest',
+        'RangedCommandedNumberViewModel': 'RangedCommandedNumberViewModelTest',
+        'RangedNumberViewModel': 'RangedNumberViewModelTest',
+        'BooleanViewModel': 'BooleanViewModelTest',
+        'CommandedBooleanViewModel': 'CommandedBooleanViewModelTest',
+        'EnumViewModel': 'EnumViewModelTest',
+        'CommandedEnumViewModel': 'CommandedEnumViewModelTest',
+
+        // Interface mappings
+        'IPropertyVM<boolean>': 'BooleanViewModelTest',
+        'IPropertyVM<string>': 'StringViewModelTest',
+        'IPropertyVM<number>': 'NumberViewModelTest',
+        'ICommandedVM<number>': 'CommandedNumberViewModelTest',
+        'ICommandedRangeVM<number>': 'RangedCommandedNumberViewModelTest',
+        'IRangePropertyVM<number>': 'RangedNumberViewModelTest'
+
+        // Type mappings
+        // 'ValueProperty<boolean>' : 'BooleanViewModelTest',
+        // 'ValueProperty<string>' : 'StringViewModelTest',
+        // 'ValueProperty<number>' : 'NumberViewModelTest',
+        // 'CommandedProperty<number>' : 'CommandedNumberViewModelTest',
+        // 'RangedCommandedProperty<number>' : 'RangedCommandedNumberViewModelTest',
+        // 'RangedProperty<number>' : 'RangedNumberViewModelTest',
+        // 'ValueProperty<EnumType>' : 'EnumViewModelTest',
+    };
+
+    // Constants for test templates
+    const TEST_SETUP_TEMPLATE = `
+
+const entityId = makeGuid();
+
+export interface I[[DataObjectType]]Test extends Partial<[[DataObjectType]]> {
+}
+
+// Starting test data
+export const [[UPPERCASE_NAME]]_TEST_INITIAL_DATA: I[[DataObjectType]]Test = {
+    id: entityId,
+    className: [[DataObjectType]].class,
+    [[initialDataProps]]
+};
+
+// Different test data to test change
+export const [[UPPERCASE_NAME]]_TEST_EXPECTED_DATA: I[[DataObjectType]]Test = {
+    [[expectedDataProps]]
+};`;
+
+    const BASE_TEST_TEMPLATE = `
+const [[lowerCaseName]]ViewModelTest = (
+    options: ITestOptions<I[[DataObjectType]]Test>,
+    context?: ITestContext<[[ViewModelType]]>
+) => {
+    const { initialData, actionDelay, includeUnitTests } = options;
+
+    describe('[[ViewModelType]] Tests', async () => {
+        afterEach(async () => {
+            await waitFor(100);
+        });
+        const services: IFrameworkServices = await prepareFrameworkServices(config);
+        options.services = services;
+
+        if (context == null) {
+            // Initial Setup
+            describe('Initial Setup', async () => {
+                await syncViewModelTestData<[[DataObjectType]]>(services, [[DataObjectType]], initialData);
+            });
+
+            // View Model Creation
+            describe('View Model Creation', async () => {
+                test('Constructor', async () => {
+                    let entityVM: [[ViewModelType]] = new [[ViewModelType]](services);
+                    context = {
+                        entityVM: entityVM
+                    };
+                    context.entityVM.resolve(services);
+                    context.entityVM.configure();
+                    expect(context.entityVM).not.toBeNull();
+                });
+
+                test('Start', async () => {
+                    await context.entityVM.start();
+                    expect(context.entityVM.isAlive()).toBeTruthy();
+                });
+
+                test('getEntityClassName', async () => {
+                    expect(context.entityVM.getEntityClassName()).toBe(initialData.className);
+                });
+            });
+
+            describe('EntityVM Setup', async () => {
+                test('setEntityId', action(async () => {
+                    context.entityVM.setEntityId(initialData.id);
+                    expect(context.entityVM.id).toBe(initialData.id);
+                }));
+
+                test('entityIsNull', action(() => {
+                    expect(context.entityVM.entityIsNull).toBeFalsy();
+                }));
+
+                test('entityIsNotNull', action(() => {
+                    expect(context.entityVM.entityIsNotNull).toBeTruthy();
+                }));
+
+                test('entity', action(() => {
+                    expect(context.entityVM.entity).not.toBeNull();
+                }));
+                await waitFor(100);
+            });
+        }
+
+        // Property Tests
+        describe('Properties', async () => {
+            [[propertyTests]]
+        });
+
+        // Cleanup
+        describe('Cleanup', async () => {
+            test('Remove', action(async () => {
+                await context.entityVM.remove();
+                await waitFor(100);
+                expect(context.entityVM.entityIsNull).toBe(true);
+            }));
+        });
+    });
+};
+    `;
+
+    // Preprocessing functions
+
+    /**
+     * Strips metadata and formatting from input code to prepare for parsing.
+     * Removes comments, annotations, and excess whitespace while preserving
+     * essential code structure.
+     *
+     * @param code - Raw source code input
+     * @returns Cleaned code with only essential syntax preserved
+     */
+    function sanitizeSourceCode(code) {
+        return code
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/\/\/.*/g, '')
+            .replace(/@\w+(\([^)]*\))?/g, '')
+            .replace(/^\s*[\r\n]/gm, '')
+            .trim();
+    }
+
+    /**
+     * Extracts view model class name and base name from code.
+     * Identifies the main class declaration and removes common suffixes
+     * like 'ViewModel' or 'VM' to get the core entity name.
+     *
+     * @param code - Cleaned source code
+     * @returns {Object}
+     *   - nameViewModel: Full view model class name
+     *   - name: Base name without ViewModel/VM suffix
+     * @throws {Error} If no valid view model class name is found
+     */
+    function extractModelDetails(code) {
+        const classMatch = code.match(/export\s+(?:abstract\s+)?class\s+(\w+)/);
+        if (!classMatch) {
+            throw new Error('Could not find view model class name');
+        }
+
+        const nameViewModel = classMatch[1];
+        const name = nameViewModel.replace(/(?:View[Mm]odel|VM)$/, '');
+
+        return { nameViewModel, name };
+    }
+
+    /**
+     * Extracts and parses configuration options from a property's configure() call.
+     * Handles nested objects and complex configuration structures while maintaining
+     * type information.
+     *
+     * @param propertySection - Individual property code section
+     * @returns {Object} Parsed configuration options, or empty object if none found
+     */
+    function extractPropertyConfiguration(propertySection) {
+        // Find the configure block start
+        const configureStart = propertySection.indexOf('configure({');
+        if (configureStart === -1) return {};
+
+        // Find the matching closing brace
+        let openBraces = 1;
+        let index = configureStart + 'configure({'.length;
+        let configContent = '';
+
+        while (index < propertySection.length && openBraces > 0) {
+            const char = propertySection[index];
+            if (char === '{') openBraces++;
+            if (char === '}') openBraces--;
+
+            // Only add content while we're inside the first level of braces
+            if (openBraces === 1 && char !== '{') {
+                configContent += char;
+            }
+
+            index++;
+        }
+
+        // If we didn't find a matching brace, return empty object
+        if (openBraces > 0) return {};
+
+        const options = {};
+
+        // Split on commas that are followed by a word and colon
+        const pairs = configContent
+            .split(/,(?=\s*\w+\s*:)/)
+            .map(pair => pair.trim())
+            .filter(pair => pair.length > 0);
+
+        pairs.forEach(pair => {
+            const colonIndex = pair.indexOf(':');
+            if (colonIndex === -1) return;
+
+            const key = pair.substring(0, colonIndex).trim();
+            // Remove any trailing commas from the value
+            const value = pair.substring(colonIndex + 1).trim().replace(/,\s*$/, '');
+
+            if (key && value) {
+                options[key] = value;
+            }
+        });
+
+        return options;
+    }
+
+    /**
+     * Comprehensive property extractor that categorizes class members into
+     * view model properties, computed properties, and methods.
+     * Filters out constructor and common inherited methods.
+     *
+     * @param code - Cleaned source code
+     * @returns {Object}
+     *   - viewModelProps: Array of view model property objects
+     *   - computedProps: Array of computed property objects
+     *   - methods: Array of method objects
+     */
+    function categorizeClassMembers(code) {
+        // Three types of properties we need to capture:
+        // 1. View Model Properties (return this.createPropertyVM...)
+        // 2. Computed Properties (getters that return calculations/values)
+        // 3. Regular Methods (not getters)
+
+        const methodPattern = /(?:(?:public|private|protected)\s+)?(?:get\s+)?(\w+)\s*\([^)]*\)\s*(?::\s*[^{]+)?\s*{([^}]*)}/g;
+        const properties = {
+            viewModelProps: [],
+            computedProps: [],
+            methods: []
+        };
+
+        let match;
+        while ((match = methodPattern.exec(code)) !== null) {
+            const [fullMatch, name, body] = match;
+            const isGetter = fullMatch.includes('get ');
+            const isViewModelProp = body.includes('createPropertyVM') ||
+                body.includes('IPropertyVM') ||
+                body.includes('ICommandedVM');
+
+            // Skip constructor and common inherited methods
+            if (name === 'constructor' ||
+                name === 'resolve' ||
+                name === 'configure' ||
+                name === 'start') {
+                continue;
+            }
+
+            if (isGetter) {
+                if (isViewModelProp) {
+                    const parsedProp = parsePropertyMetadata(fullMatch);
+                    properties.viewModelProps.push(parsedProp);
+                } else {
+                    properties.computedProps.push({
+                        propertyName: name,
+                        propertySection: fullMatch,
+                        type: 'computed'
+                    });
+                }
+            } else {
+                properties.methods.push({
+                    methodName: name,
+                    methodSection: fullMatch,
+                    type: 'method'
+                });
+            }
+        }
+
+        // Filter out the following methods if they exist
+        const extraneousMethodNames = new Set(['getEntityClassName', 'getEntityCtr', 'if']);
+        properties.methods = properties.methods.filter(method => !extraneousMethodNames.has(method.methodName));
+
+
+        return properties;
+    }
+
+    /**
+     * Extracts the specific enum type from an EnumViewModel property definition.
+     * Handles generic type parameter extraction for enum-based properties.
+     *
+     * @param propertySection - Individual property code section
+     * @returns Extracted enum type name or empty string if not found
+     */
+    function extractEnumType(propertySection) {
+        const enumTypeMatch = propertySection.match(/EnumViewModel<([^>]+)>/);
+        return enumTypeMatch ? enumTypeMatch[1].trim() : '';
+    }
+
+    /**
+     * Comprehensive property parser that extracts all relevant metadata from
+     * a property definition including name, access type, test type, and configuration.
+     * Handles multiple property types and interfaces with special case handling
+     * for enums and commands.
+     *
+     * @param propertySection - Individual property code section
+     * @returns {Object} Parsed property metadata including:
+     *   - propertyName: Name of the property
+     *   - propertyAccess: Access type (Value/Commanded)
+     *   - propertySpecificType: Specific type for enums
+     *   - propertyTest: Associated test type
+     *   - propertySection: Original code section
+     *   - configOptions: Parsed configuration options
+     * @throws {Error} If property name cannot be parsed
+     */
+    function parsePropertyMetadata(propertySection) {
+        const nameMatch = propertySection.match(/get\s+(\w+)(?:VM)?\s*\(/);
+        if (!nameMatch) {
+            throw new Error(`Could not parse property name from section: ${propertySection}`);
+        }
+        const propertyName = nameMatch[1];
+
+        let propertyAccess = 'ValueProperty';
+        let propertyTest = 'unknown';
+        let propertySpecificType = 'unknown';
+        let configOptions = extractPropertyConfiguration(propertySection);
+
+        // First check for actual ViewModel creation type
+        const createVMMatch = propertySection.match(/createPropertyVM\([^,]+,\s*(\w+)/);
+        if (createVMMatch) {
+            const vmType = createVMMatch[1];
+            propertyTest = KNOWN_PROPERTY_TEST_TYPES[vmType] || 'unknown';
+
+            // Set propertyAccess based on the test type
+            if (propertyTest.includes('Commanded')) {
+                propertyAccess = 'CommandedProperty';
+            }
+
+            // Handle enum types
+            if (vmType.includes('EnumViewModel')) {
+                propertySpecificType = extractEnumType(propertySection);
+            }
+
+            if (propertyTest !== 'unknown') {
+                return {
+                    propertyName,
+                    propertyAccess,
+                    propertySpecificType,
+                    propertyTest,
+                    propertySection,
+                    configOptions
+                };
+            }
+        }
+
+        // Check for interface types
+        const interfacePatterns = [
+            /ICommandedRangeVM<([^,>]+)/,
+            /IRangePropertyVM<([^,>]+)/,
+            /ICommandedVM<([^,>]+)/,
+            /IPropertyVM<(boolean|string|number)>/
+        ];
+
+        for (const pattern of interfacePatterns) {
+            const match = propertySection.match(pattern);
+            if (match) {
+                const fullInterface = match[0];
+                propertyTest = KNOWN_PROPERTY_TEST_TYPES[fullInterface];
+                if (propertyTest) {
+                    propertyAccess = propertyTest.includes('Commanded') ? 'CommandedProperty' : 'ValueProperty';
+                    return {
+                        propertyName,
+                        propertyAccess,
+                        propertySpecificType,
+                        propertyTest,
+                        propertySection,
+                        configOptions
+                    };
+                }
+            }
+        }
+
+        // Fallback check for type in property section
+        for (const [key, value] of Object.entries(KNOWN_PROPERTY_TEST_TYPES)) {
+            if (propertySection.includes(key)) {
+                propertyTest = value;
+                propertyAccess = value.includes('Commanded') ? 'CommandedProperty' : 'ValueProperty';
+
+                // Handle enum types in fallback
+                if (key.includes('EnumViewModel')) {
+                    propertySpecificType = extractEnumType(propertySection);
+                }
+
+                break;
+            }
+        }
+
+        return {
+            propertyName,
+            propertyAccess,
+            propertySpecificType,
+            propertyTest,
+            propertySection,
+            configOptions
+        };
+    }
+
+    /**
+     * Converts property test types to their corresponding TypeScript type definitions.
+     * Handles special cases for commanded properties, enums, and arrays while
+     * maintaining proper generic type parameters.
+     *
+     * @param propertyTest - Property test type identifier
+     * @returns Corresponding TypeScript type definition
+     */
+    function mapTestTypeToPropertyType(propertyTest) {
+        switch (propertyTest) {
+            case 'CommandNumberViewModelTest':
+            case 'CommandedNumberViewModelTest':
+                return 'CommandedProperty<number>';
+            case 'RangedCommandedNumberViewModelTest':
+                return 'RangedCommandedProperty<number>';
+            case 'CommandedBooleanViewModelTest':
+                return 'CommandedProperty<boolean>';
+            case 'CommandedEnumViewModelTest':
+                return 'CommandedProperty<EnumType>';
+            case 'CommandedStringViewModelTest':
+                return 'CommandedProperty<string>';
+            case 'NumberViewModelTest':
+                return 'ValueProperty<number>';
+            case 'BooleanViewModelTest':
+                return 'ValueProperty<boolean>';
+            case 'StringViewModelTest':
+                return 'ValueProperty<string>';
+            case 'ArrayViewModelTest':
+                return 'ValueProperty<string[]>';
+            case 'EnumViewModelTest':
+                return 'ValueProperty<EnumType>';
+            case 'RangedNumberViewModelTest':
+                return 'RangedProperty<number>';
+            default:
+                return `${propertyTest}`;
+        }
+    }
+
+    /**
+     * Parses data object class definitions including inheritance hierarchies.
+     * Tracks property sources through inheritance chain and handles optional
+     * properties and type definitions.
+     *
+     * @param code - Cleaned source code
+     * @param toggleValue - Flag to use first or last class definition
+     * @returns {Object} Parsed class information including:
+     *   - className: Name of the target class
+     *   - parentClass: Name of parent class if any
+     *   - properties: Array of all properties including inherited
+     * @throws {Error} If no valid class definitions found
+     */
+    function parseDataObjectHierarchy(code, toggleValue) {
+        const cleanedCode = sanitizeSourceCode(code);
+
+        // Split code into separate class definitions
+        const classDefinitions = cleanedCode.split(/(?=export\s+(?:declare\s+)?class\s+\w+)/);
+
+        // Parse each class and track inheritance
+        const classMap = new Map();
+
+        classDefinitions.forEach(classDef => {
+            if (!classDef.trim()) return;
+
+            // Extract class name and parent
+            const classMatch = classDef.match(/export\s+(?:declare\s+)?class\s+(\w+)(?:\s+extends\s+(\w+))?/);
+            if (!classMatch) return;
+
+            const [, className, parentClass] = classMatch;
+
+            // Get properties for this class
+            const properties = [];
+            const classContent = classDef.match(/\{([\s\S]*?)(?:constructor|$)/)?.[1] || '';
+
+            // Updated property pattern to match all *Property types
+            const propertyPattern = /^\s*(\w+)\??:\s*([A-Za-z]+Property)<([^>]+)>/gm;
+            let match;
+
+            while ((match = propertyPattern.exec(classContent)) !== null) {
+                // Skip static properties
+                if (classContent.slice(Math.max(0, match.index - 20), match.index).includes('static')) {
+                    continue;
+                }
+
+                properties.push({
+                    name: match[1],
+                    propertyType: match[2] + (match[3] ? '<' + match[3] + '>' : ''),
+                    isOptional: classContent.slice(match.index, match.index + match[0].length).includes('?'),
+                    source: className // Track which class this property came from
+                });
+            }
+
+            classMap.set(className, { className, parentClass, properties });
+        });
+
+        // Find the target class
+        const lastClass = toggleValue === 'Last' ? Array.from(classMap.values()).pop() : Array.from(classMap.values())[0];
+        if (!lastClass) {
+            throw new Error('No valid class definitions found');
+        }
+
+        // Collect all inherited properties
+        const allProperties = new Map();
+        let currentClass = lastClass;
+
+        while (currentClass) {
+            currentClass.properties.forEach(prop => {
+                // Only add if not already present (child class properties take precedence)
+                if (!allProperties.has(prop.name)) {
+                    allProperties.set(prop.name, prop);
+                }
+            });
+
+            currentClass = classMap.get(currentClass.parentClass);
+        }
+
+        return {
+            className: lastClass.className,
+            parentClass: lastClass.parentClass,
+            properties: Array.from(allProperties.values())
+        };
+    }
+
+    /**
+     * Normalizes property names by removing VM suffix for consistent comparison.
+     * Ensures property names match between view model and data object.
+     *
+     * @param name - Raw property name
+     * @returns Normalized property name without VM suffix
+     */
+    function normalizePropertyName(name) {
+        return name.replace(/VM$/, '');
+    }
+
+    /**
+     * Normalizes type definitions for consistent comparison between
+     * view model and data object types. Handles interface to concrete
+     * type conversions and special cases for property types.
+     *
+     * @param type - Raw type definition
+     * @returns Normalized type string for comparison
+     */
+    function normalizePropertyType(type) {
+        // Handle IPropertyVM to ValueProperty conversion
+        if (type.includes('IPropertyVM<')) {
+            const baseType = type.match(/IPropertyVM<([^,>]+)/)?.[1];
+            return `ValueProperty<${baseType}>`;
+        }
+
+        // Handle IRangePropertyVM to RangedProperty conversion
+        if (type.includes('IRangePropertyVM<')) {
+            const baseType = type.match(/IRangePropertyVM<([^,>]+)/)?.[1];
+            return `RangedProperty<${baseType}>`;
+        }
+
+        // Handle ICommandedRangeVM to RangedCommandedProperty conversion
+        if (type.includes('ICommandedRangeVM<')) {
+            const baseType = type.match(/ICommandedRangeVM<([^,>]+)/)?.[1];
+            return `RangedCommandedProperty<${baseType}>`;
+        }
+
+        // Handle ICommandedVM to CommandedProperty conversion
+        if (type.includes('ICommandedVM<')) {
+            const baseType = type.match(/ICommandedVM<([^,>]+)/)?.[1];
+            return `CommandedProperty<${baseType}>`;
+        }
+
+        return type;
+    }
+
+    /**
+     * Compares view model properties against data object properties to identify
+     * matches, mismatches, and missing properties. Generates detailed report
+     * of comparison results including type compatibility.
+     *
+     * @param viewModelProps - Array of view model properties
+     * @param dataObjectProps - Array of data object properties
+     * @returns {Object} Comparison report including:
+     *   - summary: Array of summary messages
+     *   - matches: Array of matching property names
+     *   - typeMismatches: Array of type mismatch details
+     *   - missingInViewModel: Array of missing view model properties
+     *   - missingInDataObject: Array of missing data object properties
+     */
+    function comparePropertyDefinitions(viewModelProps, dataObjectProps) {
+        const report = {
+            summary: [],
+            matches: [],
+            typeMismatches: [],
+            missingInViewModel: [],
+            missingInDataObject: []
+        };
+
+        // Create maps for easier lookup
+        const vmPropsMap = new Map(
+            viewModelProps.map(p => [normalizePropertyName(p.propertyName), p])
+        );
+
+        const doPropsMap = new Map(
+            dataObjectProps.map(p => [p.name, p])
+        );
+
+        // Check each Data Object property
+        for (const [doName, doProp] of doPropsMap) {
+            const vmProp = vmPropsMap.get(doName);
+
+            if (!vmProp) {
+                report.missingInViewModel.push(doName);
+            } else {
+                // Property name found in both, check type matching
+                let vmType = mapTestTypeToPropertyType(vmProp.propertyTest);
+                let doType = doProp.propertyType;
+
+                // Handle enum types
+                const vmIsEnumType = vmType.includes('Property<EnumType>');
+                const doIsProbablyEnumType = /Property<[^>]+Type>/.test(doProp.propertyType); // Matches any Property with *Type
+
+                if (vmIsEnumType && doIsProbablyEnumType) {
+                    // EnumType is generic, so we can't compare directly
+                    vmType = vmType.replace(/<EnumType>/, '');
+                    doType = doType.replace(/<[^>]+Type>/, '');
+                }
+
+                // Normalize types before comparison
+                vmType = normalizePropertyType(vmType);
+                doType = normalizePropertyType(doType);
+
+                // Special handling for Ranged properties
+                const vmIsRanged = vmType.startsWith('Ranged');
+                const doIsRanged = doType.startsWith('Ranged');
+
+                if (vmIsRanged !== doIsRanged || vmType !== doType) {
+                    report.typeMismatches.push({
+                        propertyName: doName,
+                        viewModelType: vmType,
+                        dataObjectType: doType
+                    });
+                } else {
+                    report.matches.push(doName);
+                }
+            }
+        }
+
+        // Check for properties in ViewModel but not in Data Object
+        for (const [vmName] of vmPropsMap) {
+            if (!doPropsMap.has(vmName)) {
+                report.missingInDataObject.push(vmName);
+            }
+        }
+
+        // Generate summary
+        const summaryParts = [];
+
+        if (report.matches.length > 0) {
+            summaryParts.push(`✓ ${report.matches.length} properties matched correctly`);
+        }
+
+        if (report.missingInViewModel.length > 0) {
+            summaryParts.push(`⚠ Missing in ViewModel: ${report.missingInViewModel.join(', ')}`);
+        }
+
+        if (report.missingInDataObject.length > 0) {
+            summaryParts.push(`⚠ Missing in DataObject: ${report.missingInDataObject.join(', ')}`);
+        }
+
+        if (report.typeMismatches.length > 0) {
+            const mismatches = report.typeMismatches.map(m =>
+                `${m.propertyName} (VM: ${m.viewModelType}, DM: ${m.dataObjectType})`
+            );
+            summaryParts.push(`⚠ ${mismatches.length} type mismatches:`);
+            summaryParts.push(...mismatches);
+        }
+
+        report.summary = summaryParts;
+        return report;
+    }
+
+    /**
+     * Orchestrates the complete preprocessing pipeline for view model analysis.
+     * Coordinates the cleaning, parsing, and comparison of view model and data
+     * object code to generate a comprehensive analysis result.
+     *
+     * @param code - Raw view model source code
+     * @param dataObjectCode - Raw data object source code
+     * @param toggleValue - Flag to determine which class to use when multiple are present
+     * @returns {Object} Processed analysis including:
+     *   - summary: Array of analysis findings and potential issues
+     *   - nameViewModel: View model class name
+     *   - name: Base name without suffix
+     *   - properties: Array of view model properties
+     *   - computedProperties: Array of computed properties
+     *   - methods: Array of class methods
+     *   - dataObject: Parsed data object information
+     */
+    function analyzeViewModelStructure(code, dataObjectCode, toggleValue) {
+        const cleanedCode = sanitizeSourceCode(code);
+        const { nameViewModel, name } = extractModelDetails(cleanedCode);
+        const allProperties = categorizeClassMembers(cleanedCode);
+        const dataObject = parseDataObjectHierarchy(dataObjectCode, toggleValue);
+
+        // Compare only view model properties with data object
+        const comparedResults = comparePropertyDefinitions(allProperties.viewModelProps, dataObject.properties);
+        const comparedResultsSummary = comparedResults.summary;
+
+        // Add computed properties to summary if they exist
+        if (allProperties.computedProps.length > 0) {
+            comparedResultsSummary.push(
+                `Found ${allProperties.computedProps.length} computed properties:`,
+                ...allProperties.computedProps.map(p => `  - ${p.propertyName}`)
+            );
+        } else {
+            comparedResultsSummary.push('No computed properties found');
+        }
+
+        // Add methods to summary if they exist
+        if (allProperties.methods.length > 0) {
+            comparedResultsSummary.push(
+                `Found ${allProperties.methods.length} methods:`,
+                ...allProperties.methods.map(m => `  - ${m.methodName}`)
+            );
+        } else {
+            comparedResultsSummary.push('No methods found');
+        }
+
+        return {
+            summary: comparedResultsSummary,
+            nameViewModel,
+            name,
+            properties: allProperties.viewModelProps,
+            computedProperties: allProperties.computedProps,
+            methods: allProperties.methods,
+            dataObject
+        };
+    }
+
+    /**
+     * Generates TypeScript code lines for the imports needed for unique properties used in the test.
+     * Collects all unique property types and extra types used in the test and generates import lines.
+     * Handles unknown types by commenting them out and marking them as unknown.
+     *
+     * @param properties - Array of parsed property metadata
+     * @param extraTypes - Set of additional types used in the test
+     */
+    function collectImports(properties, extraTypes) {
+        const imports = new Set();
+        extraTypes.forEach(type => imports.add(type));
+        properties.forEach(prop => {
+            const specificType = prop.propertySpecificType;
+            if (specificType && specificType !== 'unknown') {
+                imports.add(specificType);
+            }
+            const configType = prop.configOptions['labelConverter'];
+            if (configType && configType !== 'unknown' && !configType.includes('boolean')) {
+                imports.add(configType);
+            }
+        });
+
+        const lines = Array.from(imports).map(imp => {
+            const project = allImports[imp];
+            return project ? `import { ${imp} } from '${project}';` : `// import { ${imp} } from 'unknown';`;
+        });
+
+        return lines.join('\n');
+    }
+
+    /**
+     * Generates test data structure for view model properties.
+     * Creates appropriate test values based on property types including
+     * special handling for commanded properties, enums, and arrays.
+     *
+     * @param properties - Array of parsed property metadata
+     * @param doChangeUpData - Flag to generate different test data ("expected" test values), default: false
+     * @returns Formatted string of test data declarations
+     */
+    function generateTestData(properties, doChangeUpData = false) {
+        return properties.map(prop => {
+            const name = prop.propertyName.replace('VM', '');
+            const swap = doChangeUpData;
+            const section = prop.propertySection; // Full entry (placeholder if needed)
+
+            if (prop.propertyAccess === 'CommandedProperty') {
+                if (prop.propertyTest === 'CommandedStringViewModelTest') return `${name}: { commanded: '${swap ? 'StringA' : 'StringB'}', actual: '${swap ? 'StringA' : 'StringB'}', reported: '${swap ? 'StringA' : 'StringB'}' }`;
+                if (prop.propertyTest === 'CommandedBooleanViewModelTest') return `${name}: { commanded: ${swap ? 'true' : 'false'}, actual: ${swap ? 'true' : 'false'}, reported: ${swap ? 'true' : 'false'} }`;
+                if (prop.propertyTest === 'CommandedNumberViewModelTest') return `${name}: { commanded: ${swap ? '1' : '2'}, actual: ${swap ? '1' : '2'}, reported: ${swap ? '1' : '2'} }`;
+                if (prop.propertyTest === 'RangedCommandedNumberViewModelTest') {
+                    const value = swap ? '1' : '2';
+                    return `${name}: { commanded: ${value}, actual: ${value}, reported: ${value}, min: ${value}, max: ${value}, thresholds: { 'low': ${value}, 'high': ${value} }, unitOfMeasure: '${swap ? 'Apm' : 'Bpm'}' }`;
+                }
+                if (prop.propertyTest === 'CommandedEnumViewModelTest') {
+                    // if the propertySpecificType
+                    const enumValue = `getEnum(${prop.propertySpecificType}, ${swap ? '0' : '1'})`; // Uses a helper function to get the enum value
+                    return `${name}: { commanded: ${enumValue}, actual: ${enumValue}, reported: ${enumValue} }`;
+                }
+                return `${name}: { commanded: null, actual: null, reported: null }`; // Anything else commanded
+            } else // if (prop.propertyAccess === 'ValueProperty') {
+            {
+                // Handle array properties, currently always arrays of string[]
+                if (prop.propertyTest === 'ArrayViewModelTest') return `${name}: { value: ['${doChangeUpData ? 'A' : 'B'}', '${doChangeUpData ? 'C' : 'D'}'] }`;
+                if (prop.propertyTest === 'StringViewModelTest') return `${name}: { value: '${doChangeUpData ? 'StringA' : 'StringB'}' }`;
+                if (prop.propertyTest === 'BooleanViewModelTest') return `${name}: { value: ${doChangeUpData ? 'true' : 'false'} }`;
+                if (prop.propertyTest === 'NumberViewModelTest') return `${name}: { value: ${doChangeUpData ? '1' : '2'} }`;
+                if (prop.propertyTest === 'RangedNumberViewModelTest') {
+                    const value = doChangeUpData ? '1' : '2';
+                    return `${name}: { value: ${value}, min: ${value}, max: ${value}, thresholds: { 'low': ${value}, 'high': ${value} }, unitOfMeasure: '${doChangeUpData ? 'UnitA' : 'UnitB'}' }`;
+                }
+                if (prop.propertyTest === 'EnumViewModelTest') {
+                    const enumValue = `getEnum(${prop.propertySpecificType}, ${doChangeUpData ? '0' : '1'})`; // Assuming integer-backed enums for now
+                    return `${name}: { value: ${enumValue} }`;
+                }
+
+                return `${name}: { value: null }`; // Default to null for any other types of value properties
+            }
+        }).join(',\n    ');
+    }
+
+    /**
+     * Generates test code for individual properties including computed
+     * properties and methods. Handles different test types and includes
+     * appropriate test configuration.
+     *
+     * @param prop - Property metadata object
+     * @returns Generated test code string for the property
+     */
+    function generatePropertyTestCode(prop) {
+
+        // Handle computed properties (non-VM getters)
+        if (prop.type === 'computed') {
+            return `
+            // Computed property: ${prop.propertyName} : ${prop.propertySection.match(/:\s*([^{]+)\{/)?.[1]?.trim() || 'unknown type'}`;
+        }
+
+        // Handle methods
+        if (prop.type === 'method') {
+            return `
+            // Method: ${prop.methodName}`;
+        }
+
+        // Handle view model properties
+        const testType = resolvePropertyTestType(prop.propertyTest);
+        if (testType.startsWith('unknown')) {
+            return `
+            // Unknown property type, could not match with a pre-existing test: ${testType.replace('unknown', '')}`;
+        }
+
+        // Handle label formatter for enum properties
+        let formatter = '';
+        if (prop.configOptions?.labelConverter) {
+            if (prop.configOptions.labelConverter.toString().includes('boolean')) // ex. booleanONOFFLabel is _not_ a regular label
+                formatter += `,\n                    ${prop.configOptions.labelConverter}`;
+            else
+                formatter += `,\n                    ${prop.configOptions.labelConverter}`;
+
+            if (prop.configOptions?.defaultValue) {
+                formatter += ` ?? ${prop.configOptions.labelConverter}[${prop.configOptions.defaultValue}]`;
+            }
+        }
+
+        return `
+            describe('${prop.propertyName}', async () => {
+                ${testType}(options, '${prop.propertyName.replace('VM', '')}',
+                    () => context.entityVM.${prop.propertyName},
+                    () => context.entityVM${formatter}
+                );
+            });`;
+    }
+
+    /**
+     * Maps property test identifiers to actual test implementations.
+     * Provides fallback for unknown test types.
+     *
+     * @param propertyTest - Property test identifier
+     * @returns Test implementation name or unknown marker
+     */
+    function resolvePropertyTestType(propertyTest) {
+        return KNOWN_PROPERTY_TEST_TYPES[propertyTest] || `unknown${propertyTest}`;
+    }
+
+    /**
+     * Generates complete unit test file including imports, setup,
+     * test implementations, and execution code. Combines all property
+     * tests and handles test configuration.
+     *
+     * @param data - Preprocessed view model and data object information
+     * @returns Complete unit test file content
+     */
+    function generateUnitTest(data) {
+        const viewModelName = data.nameViewModel;
+        const dataObjectName = data.name.trim().replace(/Entity$/, '');
+        // const dataObjectProperties = data.dataObject.properties; // NOTE: Not used at this time, but wanted a handle
+        const allCapsName = dataObjectName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+        const firstLetterLowercaseName = dataObjectName.charAt(0).toLowerCase() + dataObjectName.slice(1);
+
+        // Generate initial data model object test values (only for VM properties that need it)
+        const testDataProperties = data.properties.filter(p => !p.type || p.type === 'viewModel');
+        const initialData = generateTestData(testDataProperties);
+        const expectedData = generateTestData(testDataProperties, true);
+        const extraImports = collectImports(data.properties, [viewModelName, dataObjectName]);
+
+        // Combine all property tests, with computed properties as comments
+        const generateAllPropertyTests = () => {
+            const vmTests = (data.properties || [])
+                .filter(p => !p.type || p.type === 'viewModel')
+                .map(generatePropertyTestCode);
+
+            const computedTests = (data.computedProperties || [])
+                .map(generatePropertyTestCode);
+
+            const methodComments = (data.methods || [])
+                .map(method => `
+            // Method: ${method.methodName}
+            // Implementation available but no automated tests generated`);
+
+            return [...vmTests, ...computedTests, ...methodComments].join('\n');
+        };
+
+        const propertyTests = generateAllPropertyTests();
+
+        const genericIncludesSection = `
+import { afterEach, describe, expect, test } from 'vitest';
+import { action } from 'mobx';
+import { makeGuid } from '@tektonux/framework-shared-utils';
+import { IFrameworkServices } from '@tektonux/framework-api';
+import {
+    ArrayViewModelTest,
+    BooleanViewModelTest,
+    CommandedBooleanViewModelTest,
+    CommandedEnumViewModelTest,
+    CommandedNumberViewModelTest,
+    CommandedStringViewModelTest,
+    EnumViewModelTest, getEnum,
+    ITestContext,
+    ITestOptions,
+    NumberViewModelTest,
+    prepareFrameworkServices,
+    RangedCommandedNumberViewModelTest,
+    RangedNumberViewModelTest,
+    StringViewModelTest,
+    syncViewModelTestData,
+    toFirstUpperCase,
+    waitFor
+} from '@tektonux/phoenix-tests-shared';
+import config from '../../online.startup.config.json'`;
+        const setupSection = TEST_SETUP_TEMPLATE
+            .replace(/\[\[DataObjectType\]\]/g, dataObjectName)
+            .replace(/\[\[UPPERCASE_NAME\]\]/g, allCapsName)
+            .replace(/\[\[initialDataProps\]\]/g, initialData)
+            .replace(/\[\[expectedDataProps\]\]/g, expectedData);
+
+        const testSection = BASE_TEST_TEMPLATE
+            .replace(/\[\[ViewModelType\]\]/g, viewModelName)
+            .replace(/\[\[DataObjectType\]\]/g, dataObjectName)
+            .replace(/\[\[lowerCaseName\]\]/g, firstLetterLowercaseName)
+            .replace(/\[\[propertyTests\]\]/g, propertyTests);
+
+        const executionSection = `
+// Test Execution
+${firstLetterLowercaseName}ViewModelTest({
+    expectedData: ${allCapsName}_TEST_EXPECTED_DATA,
+    initialData: ${allCapsName}_TEST_INITIAL_DATA,
+    actionDelay: 300,
+    includeUnitTests: true,
+    includeUpdate: true
+});`;
+
+        return `${genericIncludesSection}\n${extraImports}\n${setupSection}\n${testSection}\n${executionSection}`;
+    }
+
+    /**
+     * TestGenerator is a React component that provides a UI for generating unit tests
+     * for view models based on provided source code. It allows users to input view model
+     * and data model code, preprocess it, and generate test code.
+     *
+     * @component
+     * @example
+     * return (
+     *   <TestGenerator />
+     * )
+     */
+    function TestGenerator() {
+        const [gatheredImports, setGatheredImports] = useState('');
+        const [viewModelCode, setViewModelCode] = useState('');
+        const [dataObjectCode, setDataObjectCode] = useState('');
+        const [processedOutput, setProcessedOutput] = useState('');
+        const [finalOutput, setFinalOutput] = useState('');
+        const [toggleValue, setToggleValue] = useState('First'); // Add state for toggle
+
+        // Preprocess view model and data object code
+        const handlePreProcess = () => {
+            try {
+                const result = analyzeViewModelStructure(viewModelCode, dataObjectCode, toggleValue);
+                setProcessedOutput(JSON.stringify(result, null, 2));
+            } catch (error) {
+                setProcessedOutput(`Error during preprocessing: ${error.message}`);
+            }
+        };
+
+        // Recombine processed output into final test code
+        const handleRecombine = () => {
+            try {
+                const result = JSON.parse(processedOutput);
+                const testCode = generateUnitTest(result);
+                setFinalOutput(testCode);
+            } catch (error) {
+                setFinalOutput(`Error during recombination: ${error.message}`);
+            }
+        };
+
+        // Toggle between using first or last class definition as the target name
+        const handleToggle = () => {
+            setToggleValue(prevValue => (prevValue === 'First' ? 'Last' : 'First'));
+        };
+
+        // Render the UI
+        return React.createElement('div', { className: 'container' },
+            // Left Column
+            React.createElement('div', { className: 'column' },
+                React.createElement('div', { className: 'input-group' },
+                    React.createElement('label', { className: 'label' }, 'Gathered Imports'),
+                    React.createElement('span', { className: 'guidance-imports italic' },
+                        'python ./tools/shared/testing/gather_all_imports.py'),
+                    React.createElement('span', { className: 'guidance-imports' },
+                        ' - run this command in the root to write solution imports to ./shared/gathered_imports.js')
+                ),
+                React.createElement('div', { className: 'input-group' },
+                    React.createElement('label', { className: 'label' }, 'View Model Code'),
+                    React.createElement('textarea', {
+                        className: 'textarea',
+                        value: viewModelCode,
+                        onChange: (e) => setViewModelCode(e.target.value),
+                        placeholder: 'Paste your view model code here...'
+                    })
+                ),
+                React.createElement('div', { className: 'input-group' },
+                    React.createElement('label', { className: 'label' }, 'Data Model Class(s)'),
+                    React.createElement('textarea', {
+                        className: 'textarea',
+                        value: dataObjectCode,
+                        onChange: (e) => setDataObjectCode(e.target.value),
+                        placeholder: 'Paste your data model class(s) here...'
+                    })
+                ),
+                React.createElement('div', { className: 'button-group' },
+                    React.createElement('button', {
+                        className: 'button',
+                        onClick: handleToggle,
+                        tooltip: 'When pasting in multiple classes, this will toggle between using the first or last class as the target name.'
+                    }, `Model Name Used: ${toggleValue}`), // Add toggle button
+                    React.createElement('button', {
+                        className: 'button primary',
+                        onClick: handlePreProcess
+                    }, 'Pre-Process'),
+                    React.createElement('button', {
+                        className: 'button secondary',
+                        onClick: handleRecombine
+                    }, 'Generate Test')
+                ),
+                React.createElement('div', { className: 'input-group' },
+                    React.createElement('label', { className: 'label' }, 'Processing Output'),
+                    React.createElement('textarea', {
+                            className: 'textarea small',
+                            value: processedOutput,
+                            readOnly: true,
+                            placeholder: 'Processing output will appear here...'
+                        }
+                    )
+                )
+            ),
+            // Right Column
+            React.createElement('div', { className: 'column' },
+                React.createElement('label', { className: 'label' }, 'Generated Test Code'),
+                React.createElement('textarea', {
+                    className: 'textarea output-area',
+                    value: finalOutput,
+                    readOnly: true,
+                    placeholder: 'Generated test code combined will appear here...'
+                }),
+                React.createElement('button', {
+                    className: 'button copy-button',
+                    onClick: () => navigator.clipboard.writeText(finalOutput)
+                }, 'Copy'),
+                React.createElement('div', { className: 'guidance' },
+                    React.createElement('p', null, '' +
+                        '- If the view model inherits from multiple data models, the properties will be combined if you paste both in. However, you may have to leave the Type off the INITIAL_DATA structure in the test.'),
+                    React.createElement('p', null, '' +
+                        '- If it\'s an abstract type, you may have to bump the instance it\'s testing to an inheritor'),
+                    React.createElement('p', null, '' +
+                        '- ')
+                )
+            )
+        );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(TestGenerator));
+
+    </script>
+    </body>
+    </html>
