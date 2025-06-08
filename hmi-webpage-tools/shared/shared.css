@@ -1,0 +1,206 @@
+:root {
+    /* Base colors */
+    --color-bg-primary: #1a1a1a;
+    --color-bg-secondary: #2d2d2d;
+    --color-bg-tertiary: #333333;
+    --color-bg-input: #1f1f1f;
+    --color-bg-readonly: #262626;
+
+    /* Text colors */
+    --color-text-primary: #e0e0e0;
+    --color-text-secondary: #b0b0b0;
+
+    /* Border colors */
+    --color-border: #404040;
+
+    /* Button colors */
+    --color-button-default: #404040;
+    --color-button-hover: #4d4d4d;
+    --color-button-primary: #2563eb;
+    --color-button-primary-hover: #1d4ed8;
+    --color-button-secondary: #059669;
+    --color-button-secondary-hover: #047857;
+    --color-button-copy: #4a5568;
+    --color-button-copy-hover: #2d3748;
+
+    /* Focus/Accent colors */
+    --color-focus: #4a9eff;
+    --color-focus-shadow: rgba(74, 158, 255, 0.2);
+
+    /* Scrollbar colors */
+    --color-scrollbar-track: #262626;
+    --color-scrollbar-thumb: #4a5568;
+    --color-scrollbar-thumb-hover: #718096;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-bg-primary);
+    min-height: 100vh;
+    color: var(--color-text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.container {
+    display: flex;
+    min-height: 97vh;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.column {
+    width: 50%;
+    background: var(--color-bg-secondary);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.guidance {
+    margin: 0.5rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    background-color: var(--color-bg-tertiary);
+    width: 90%;
+    height: calc(10% + 2.5rem);
+    color: var(--color-text-secondary);
+    translate: 5rem -2rem;
+}
+
+.textarea {
+    width: 99.5%;
+    height: 16rem;
+    resize: vertical;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    background-color: var(--color-bg-input);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+}
+
+.guidance-imports {
+    padding-left: 5rem;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 2px var(--color-focus-shadow);
+}
+
+.textarea.output-area {
+    height: 80%;
+}
+
+.textarea.small {
+    height: 12rem;
+}
+
+.textarea.readonly {
+    background-color: var(--color-bg-readonly);
+    cursor: default;
+}
+
+.button-group {
+    display: flex;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.button {
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background-color: var(--color-button-default);
+    color: var(--color-text-primary);
+}
+
+.button:hover {
+    background-color: var(--color-button-hover);
+    transform: translateY(-1px);
+}
+
+.button:active {
+    transform: translateY(0);
+}
+
+.button.primary {
+    background-color: var(--color-button-primary);
+    color: white;
+}
+
+.button.primary:hover {
+    background-color: var(--color-button-primary-hover);
+}
+
+.button.secondary {
+    background-color: var(--color-button-secondary);
+    color: white;
+}
+
+.button.secondary:hover {
+    background-color: var(--color-button-secondary-hover);
+}
+
+.copy-button {
+    background-color: var(--color-button-copy);
+    color: var(--color-text-primary);
+    margin-top: 0.5rem;
+}
+
+.copy-button:hover {
+    background-color: var(--color-button-copy-hover);
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-scrollbar-thumb);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-scrollbar-thumb-hover);
+}
+
+/* Selection color */
+::selection {
+    background: var(--color-button-primary);
+    color: white;
+}

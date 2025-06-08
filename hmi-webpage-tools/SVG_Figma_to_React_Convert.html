@@ -1,0 +1,747 @@
+<!--
+README: Simple web interface for converting SVG code into a React component.
+You can paste your SVG code copied directly from Figma, specify a component name,
+and generate a formatted React component.
+NOTES:
+    - If the page stops responding, check the console for errors in your SVG input syntax.
+Questions: Steve Biggs
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG to React Component Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/standalone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/parser-typescript.js"></script>
+
+    <!-- SVG Favicon -->
+    <link rel="icon" type="image/svg+xml"
+          href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔧</text></svg>'>
+
+    <style>
+        :root {
+            --color-bg-primary: #1a1a1a;
+            --color-bg-secondary: #2d2d2d;
+            --color-bg-tertiary: #333333;
+            --color-bg-input: #1f1f1f;
+            --color-bg-readonly: #262626;
+            --color-text-primary: #e0e0e0;
+            --color-text-secondary: #b0b0b0;
+            --color-border: #404040;
+            --color-button-default: #404040;
+            --color-button-hover: #4d4d4d;
+            --color-button-primary: #2563eb;
+            --color-button-primary-hover: #1d4ed8;
+            --color-button-secondary: #059669;
+            --color-button-secondary-hover: #047857;
+            --color-button-copy: #4a5568;
+            --color-button-copy-hover: #2d3748;
+            --color-focus: #4a9eff;
+            --color-focus-shadow: rgba(74, 158, 255, 0.2);
+            --color-preview-bg: #333333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            min-height: 96vh;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .column {
+            flex: 1;
+            background-color: var(--color-bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .output-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .output-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+            background-color: var(--color-bg-input);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-focus);
+            box-shadow: 0 0 0 2px var(--color-focus-shadow);
+        }
+
+        textarea[readonly] {
+            background-color: var(--color-bg-readonly);
+            cursor: default;
+        }
+
+        textarea.output {
+            height: 40%;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--color-button-primary);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--color-button-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            background-color: var(--color-bg-input);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        button.convert-json {
+            background-color: #9C27B0;
+        }
+
+        button.copy {
+            background-color: #008CBA;
+        }
+
+        input[type="text"] {
+            width: 100%;
+        }
+
+        .size-input {
+            width: 3rem;
+        }
+
+        /* Hide the spinner arrows in number input fields */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--color-focus);
+            box-shadow: 0 0 0 2px var(--color-focus-shadow);
+        }
+
+        #copyButton {
+            background-color: var(--color-button-copy);
+        }
+
+        #copyButton:hover {
+            background-color: var(--color-button-copy-hover);
+        }
+
+        .preview {
+            width: 100%;
+            height: 200px;
+            background-color: var(--color-preview-bg);
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 4px;
+            border: 1px solid var(--color-border);
+        }
+
+        .preview svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+        }
+
+        .color-options {
+            display: flex;
+            justify-content: right;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--color-border);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .size-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: baseline;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-button-copy);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-button-copy-hover);
+        }
+
+        ::selection {
+            background: var(--color-button-primary);
+            color: white;
+        }
+
+        .invalid {
+            border-color: #ff4444 !important;
+            background-color: rgba(255, 68, 68, 0.1) !important;
+        }
+    </style>
+
+    <script>
+        // Parse a simple transform attribute (assuming only translate and scale)
+        function parseTransform(transformStr) {
+            if (!transformStr) return { translateX: 0, translateY: 0, scaleX: 1, scaleY: 1 };
+
+            const result = { translateX: 0, translateY: 0, scaleX: 1, scaleY: 1 };
+            const transforms = transformStr.trim().match(/\w+\([^)]*\)/g);
+            if (!transforms) return result;
+
+            transforms.forEach(t => {
+                const [type, values] = t.split('(');
+                const vals = values.replace(')', '').split(/[\s,]+/).map(Number);
+                if (type === 'translate') {
+                    result.translateX = vals[0] || 0;
+                    result.translateY = vals[1] || 0;
+                } else if (type === 'scale') {
+                    result.scaleX = vals[0] || 1;
+                    result.scaleY = vals[1] || vals[0] || 1;
+                } else {
+                    console.warn('Unsupported transform:', type);
+                }
+            });
+
+            return result;
+        }
+
+        // Recursively compute bounding box by considering all child elements
+        function computeGlobalBBox(element, parentTransforms = { translateX: 0, translateY: 0, scaleX: 1, scaleY: 1 }) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+            // Merge parent transforms with current element's transform
+            const currentTransform = parseTransform(element.getAttribute('transform'));
+            const mergedTransform = {
+                translateX: parentTransforms.translateX + currentTransform.translateX * parentTransforms.scaleX,
+                translateY: parentTransforms.translateY + currentTransform.translateY * parentTransforms.scaleY,
+                scaleX: parentTransforms.scaleX * currentTransform.scaleX,
+                scaleY: parentTransforms.scaleY * currentTransform.scaleY
+            };
+
+            // If element has a bbox
+            if (element.getBBox) {
+                try {
+                    const bbox = element.getBBox();
+                    if (bbox.width || bbox.height) {
+                        const x1 = mergedTransform.scaleX * bbox.x + mergedTransform.translateX;
+                        const y1 = mergedTransform.scaleY * bbox.y + mergedTransform.translateY;
+                        const x2 = mergedTransform.scaleX * (bbox.x + bbox.width) + mergedTransform.translateX;
+                        const y2 = mergedTransform.scaleY * (bbox.y + bbox.height) + mergedTransform.translateY;
+                        minX = Math.min(minX, x1);
+                        minY = Math.min(minY, y1);
+                        maxX = Math.max(maxX, x2);
+                        maxY = Math.max(maxY, y2);
+                    }
+                } catch (err) {
+                    console.warn('Error getting bbox for element:', err);
+                }
+            }
+
+            // Recurse on children
+            const children = element.children || [];
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i];
+                const childBBox = computeGlobalBBox(child, mergedTransform);
+                minX = Math.min(minX, childBBox.minX);
+                minY = Math.min(minY, childBBox.minY);
+                maxX = Math.max(maxX, childBBox.maxX);
+                maxY = Math.max(maxY, childBBox.maxY);
+            }
+
+            return {
+                minX: isFinite(minX) ? minX : Infinity,
+                minY: isFinite(minY) ? minY : Infinity,
+                maxX: isFinite(maxX) ? maxX : -Infinity,
+                maxY: isFinite(maxY) ? maxY : -Infinity
+            };
+        }
+
+        function getBoundingBox(svgElement) {
+            // Attempt to derive from viewBox
+            const viewBox = svgElement.getAttribute('viewBox');
+            if (viewBox) {
+                const [x, y, width, height] = viewBox.split(' ').map(Number);
+                return { x, y, width, height };
+            }
+
+            // Attempt to derive from width/height
+            const width = parseFloat(svgElement.getAttribute('width'));
+            const height = parseFloat(svgElement.getAttribute('height'));
+            if (!isNaN(width) && !isNaN(height)) {
+                return { x: 0, y: 0, width, height };
+            }
+
+            // Compute from all children
+            const bbox = computeGlobalBBox(svgElement);
+            if (bbox.minX === Infinity || bbox.minY === Infinity || bbox.maxX === -Infinity || bbox.maxY === -Infinity) {
+                // Fallback if no elements found
+                return { x: 0, y: 0, width: 100, height: 100 };
+            }
+
+            return {
+                x: bbox.minX,
+                y: bbox.minY,
+                width: bbox.maxX - bbox.minX,
+                height: bbox.maxY - bbox.minY
+            };
+        }
+
+        /**
+         * Resize and fit the SVG to the given target dimensions, center it, and apply optional offsets.
+         * @param {string} svgString - The raw SVG string.
+         * @param {number} targetWidth - Desired width in px.
+         * @param {number} targetHeight - Desired height in px.
+         * @param {number} xOffset - Optional horizontal offset.
+         * @param {number} yOffset - Optional vertical offset.
+         */
+        function resizeSVG(svgString, targetWidth, targetHeight, xOffset = 0, yOffset = 0) {
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgString, 'image/svg+xml');
+            const svgElement = svgDoc.documentElement;
+
+            // Get current bounding box
+            let bbox = getBoundingBox(svgElement);
+
+            // Ensure we have a valid bounding box
+            if (bbox.width <= 0 || bbox.height <= 0) {
+                console.warn('Invalid bounding box, using default.');
+                bbox = { x: 0, y: 0, width: 100, height: 100 };
+            }
+
+            // Calculate aspect ratios and scaling
+            const currentRatio = bbox.width / bbox.height;
+            const targetRatio = targetWidth / targetHeight;
+
+            let finalWidth, finalHeight;
+            if (currentRatio > targetRatio) {
+                // Match width
+                finalWidth = targetWidth;
+                finalHeight = targetWidth / currentRatio;
+            } else {
+                // Match height
+                finalHeight = targetHeight;
+                finalWidth = targetHeight * currentRatio;
+            }
+
+            // Center the content within the target box
+            const widthDiff = (targetWidth - finalWidth) / 2;
+            const heightDiff = (targetHeight - finalHeight) / 2;
+
+            // Compute the scaling factor from original bbox to final dimensions
+            const scaleX = finalWidth / bbox.width;
+            const scaleY = finalHeight / bbox.height;
+
+            // Define the new viewBox:
+            // We want the content to start at 0,0 after scaling, so we translate the original bbox.x,y and apply offsets.
+            const newX = bbox.x - (widthDiff / scaleX) - xOffset / scaleX;
+            const newY = bbox.y - (heightDiff / scaleY) - yOffset / scaleY;
+            const newViewBox = [newX, newY, targetWidth / scaleX, targetHeight / scaleY];
+
+            svgElement.setAttribute('viewBox', newViewBox.join(' '));
+            svgElement.setAttribute('width', targetWidth.toString());
+            svgElement.setAttribute('height', targetHeight.toString());
+
+            return svgElement.outerHTML;
+        }
+
+        function updatePreviews() {
+            try {
+                const input = document.getElementById('input').value;
+                const targetWidth = parseInt(document.getElementById('targetWidth').value);
+                const targetHeight = parseInt(document.getElementById('targetHeight').value);
+
+                // Clear previews if no input
+                if (!input) {
+                    document.getElementById('inputPreview').innerHTML = '';
+                    document.getElementById('resizedPreview').innerHTML = '';
+                    return;
+                }
+
+                // Update original preview
+                const inputPreview = document.getElementById('inputPreview');
+                inputPreview.innerHTML = '';
+                const originalSVGContainer = createPreviewContainer();
+                originalSVGContainer.innerHTML = input;
+                inputPreview.appendChild(originalSVGContainer);
+
+                // Only update resized preview if we have valid dimensions
+                if (!isNaN(targetWidth) && !isNaN(targetHeight) && targetWidth > 0 && targetHeight > 0) {
+                    const xOffset = 0;
+                    const yOffset = 0;
+
+                    try {
+                        const resizedSVG = resizeSVG(input, targetWidth, targetHeight, xOffset, yOffset);
+                        const resizedPreview = document.getElementById('resizedPreview');
+                        resizedPreview.innerHTML = '';
+                        const resizedSVGContainer = createPreviewContainer();
+                        resizedSVGContainer.innerHTML = resizedSVG;
+                        resizedPreview.appendChild(resizedSVGContainer);
+                    } catch (resizeError) {
+                        console.error('Error resizing SVG:', resizeError);
+                        document.getElementById('resizedPreview').innerHTML =
+                            '<div style="color: red;">Error resizing SVG with current dimensions</div>';
+                    }
+                } else {
+                    // Clear resized preview if dimensions are invalid
+                    document.getElementById('resizedPreview').innerHTML =
+                        '<div style="color: yellow;">Please enter valid dimensions (greater than 0)</div>';
+                }
+            } catch (error) {
+                console.error('Error updating previews:', error);
+                document.getElementById('inputPreview').innerHTML =
+                    '<div style="color: red;">Error displaying SVG preview</div>';
+            }
+        }
+
+        // Helper function to create consistent preview containers
+        function createPreviewContainer() {
+            const container = document.createElement('div');
+            container.style.width = '100%';
+            container.style.height = '100%';
+            container.style.display = 'flex';
+            container.style.justifyContent = 'center';
+            container.style.alignItems = 'center';
+            return container;
+        }
+
+        // Improved event listeners with debouncing
+        function setupEventListeners() {
+            let updateTimeout;
+
+            function debouncedUpdate() {
+                clearTimeout(updateTimeout);
+                updateTimeout = setTimeout(updatePreviews, 100);
+            }
+
+            // Input event listeners
+            document.getElementById('targetWidth').addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (value === '' || parseInt(value) <= 0) {
+                    e.target.classList.add('invalid');
+                } else {
+                    e.target.classList.remove('invalid');
+                }
+                debouncedUpdate();
+            });
+
+            document.getElementById('targetHeight').addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (value === '' || parseInt(value) <= 0) {
+                    e.target.classList.add('invalid');
+                } else {
+                    e.target.classList.remove('invalid');
+                }
+                debouncedUpdate();
+            });
+
+            document.getElementById('input').addEventListener('input', debouncedUpdate);
+        }
+
+        // Call this when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            updatePreviews(); // Initial preview update
+        });
+
+        function changePreviewBackground(color) {
+            document.getElementById('inputPreview').style.backgroundColor = color;
+            document.getElementById('resizedPreview').style.backgroundColor = color;
+        }
+
+        const DEFAULT_SIZE = 32;
+
+        function convertSVG() {
+            const input = document.getElementById('input').value;
+            const componentName = document.getElementById('componentName').value || 'IconNameSVG';
+            const targetWidth = parseInt(document.getElementById('targetWidth').value) || DEFAULT_SIZE;
+            const targetHeight = parseInt(document.getElementById('targetHeight').value) || DEFAULT_SIZE;
+            const targetXOffset = parseInt(document.getElementById('xOffset').value) || 0;
+            const targetYOffset = parseInt(document.getElementById('yOffset').value) || 0;
+
+            const resizedSVG = resizeSVG(input, targetWidth, targetHeight, targetXOffset, targetYOffset);
+
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(resizedSVG, 'image/svg+xml');
+            const svgElement = svgDoc.documentElement;
+
+            const attributes = Array.prototype.map.call(svgElement.attributes, function(attr) {
+                const name = attr.name.replace(/-([a-z])/g, function(g) {
+                    return g[1].toUpperCase();
+                });
+                return name + '="' + attr.value + '"';
+            }).join(' ');
+
+            const children = Array.prototype.map.call(svgElement.children, function(child) {
+                return child.outerHTML.replace(/-([a-z])/g, function(_, letter) {
+                    return letter.toUpperCase();
+                });
+            }).join('\n');
+
+            const reactComponent = 'import React from \'react\';\n\n' +
+                'export const ' + componentName + ' = (props: React.SVGAttributes<SVGSVGElement>) => (\n' +
+                '    <svg ' + attributes + ' {...props}>\n' +
+                '        ' + children + '\n' +
+                '    </svg>\n' +
+                ');';
+
+            const formattedOutput = prettier.format(reactComponent, {
+                parser: 'typescript',
+                plugins: prettierPlugins
+            });
+
+            document.getElementById('output').value = formattedOutput;
+        }
+
+        function copyOutput() {
+            const output = document.getElementById('output');
+            output.select();
+            document.execCommand('copy');
+
+            const copyButton = document.getElementById('copyButton');
+            const originalText = copyButton.textContent;
+            copyButton.textContent = 'Copied!';
+            setTimeout(function() {
+                copyButton.textContent = originalText;
+            }, 2000);
+        }
+
+        document.getElementById('targetWidth').addEventListener('input', updatePreviews);
+        document.getElementById('targetHeight').addEventListener('input', updatePreviews);
+
+        document.getElementById('xOffset').addEventListener('input', updatePreviews);
+        document.getElementById('yOffset').addEventListener('input', updatePreviews);
+
+        // Initialize previews
+        updatePreviews();
+
+    </script>
+
+</head>
+<body>
+<div class="container">
+    <div class="column">
+        <h2>Input SVG</h2>
+        <div class="preview-container">
+            <div id="inputPreview" class="preview"></div>
+            <div class="color-options">
+                <div class="color-option" style="background-color: white;"
+                     onclick="changePreviewBackground('white')"></div>
+                <div class="color-option" style="background-color: grey;"
+                     onclick="changePreviewBackground('grey')"></div>
+                <div class="color-option" style="background-color: black;"
+                     onclick="changePreviewBackground('black')"></div>
+            </div>
+        </div>
+        <textarea id="input" placeholder="Paste your SVG copied from Figma here" oninput="updatePreviews()"></textarea>
+        <input type="text" id="componentName" placeholder="Enter component name (ex. IconNameSVG)">
+        <div class="button-group">
+            <button onclick="convertSVG()">Convert to React</button>
+            <button class="convert-json" onclick="convertToJson()">Convert to JSON</button>
+        </div>
+        <div id="inputPreview" class="preview"></div>
+        <div class="color-options">
+            <div class="color-option" style="background-color: white;" onclick="changePreviewBackground('white')"></div>
+            <div class="color-option" style="background-color: grey;" onclick="changePreviewBackground('grey')"></div>
+            <div class="color-option" style="background-color: black;" onclick="changePreviewBackground('black')"></div>
+        </div>
+    </div>
+    <div class="column">
+        <div class="output-section">
+            <h2>React Component</h2>
+            <textarea id="output" readonly></textarea>
+            <button class="copy" onclick="copyOutput('output', 'copyReactButton')">Copy React Output</button>
+        </div>
+        <div class="output-section">
+            <h2>JSON String</h2>
+            <textarea id="outputJson" readonly></textarea>
+            <button class="copy" onclick="copyOutput('outputJson', 'copyJsonButton')">Copy JSON Output</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateInputPreview() {
+        var input = document.getElementById('input').value;
+        var preview = document.getElementById('inputPreview');
+        preview.innerHTML = input;
+    }
+
+    function changePreviewBackground(color) {
+        var preview = document.getElementById('inputPreview');
+        preview.style.backgroundColor = color;
+    }
+
+    function convertToJson() {
+        var input = document.getElementById('input').value;
+        var componentName = document.getElementById('componentName').value || 'iconName';
+
+        // Clean up the SVG
+        const cleanedSvg = input
+            .replace(/\{className\}/g, componentName + '-icon')
+            .replace(/\s+/g, ' ')
+            .replace(/>\s+</g, '><')
+            .trim();
+
+        // Create the JSON object
+        const jsonObject = {
+            name: componentName,
+            svg: cleanedSvg
+        };
+
+        // Convert to formatted JSON string
+        const jsonString = JSON.stringify(jsonObject, null, 2);
+
+        document.getElementById('outputJson').value = jsonString;
+    }
+
+    function convertSVG() {
+        var input = document.getElementById('input').value;
+        var componentName = document.getElementById('componentName').value || 'IconNameSVG';
+
+        // Parse the SVG
+        var parser = new DOMParser();
+        var svgDoc = parser.parseFromString(input, 'image/svg+xml');
+        var svgElement = svgDoc.documentElement;
+
+        // Convert attributes
+        var attributes = Array.prototype.map.call(svgElement.attributes, function(attr) {
+            var name = attr.name.replace(/-([a-z])/g, function(g) {
+                return g[1].toUpperCase();
+            });
+            return name + '="' + attr.value + '"';
+        }).join(' ');
+
+        // Convert child elements
+        var children = Array.prototype.map.call(svgElement.children, function(child) {
+            return child.outerHTML.replace(/-([a-z])/g, function(_, letter) {
+                return letter.toUpperCase();
+            });
+        }).join('\n');
+
+        // Create the React component
+        var reactComponent = 'import React from \'react\';\n\n' +
+            'export const ' + componentName + ' = (props: React.SVGAttributes<SVGSVGElement>) => (\n' +
+            '    <svg ' + attributes + ' {...props}>\n' +
+            '        ' + children + '\n' +
+            '    </svg>\n' +
+            ');';
+
+        // Format the output using Prettier
+        var formattedOutput = prettier.format(reactComponent, {
+            parser: 'typescript',
+            plugins: prettierPlugins
+        });
+
+        document.getElementById('output').value = formattedOutput;
+    }
+
+    function copyOutput(elementId, buttonId) {
+        var output = document.getElementById(elementId);
+        output.select();
+        document.execCommand('copy');
+
+        // Visual feedback
+        var button = document.activeElement;
+        var originalText = button.textContent;
+        button.textContent = 'Copied!';
+        setTimeout(function() {
+            button.textContent = originalText;
+        }, 2000);
+    }
+
+    // Initialize input preview
+    updateInputPreview();
+</script>
+</body>
+</html>
+
