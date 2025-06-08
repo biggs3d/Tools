@@ -63,15 +63,34 @@ npm test
 ### Adding to Claude Code
 
 ```bash
-# Add as global MCP server
-claude mcp add <server-name> -s user -- node /path/to/server/index.js
+# Add as global MCP server (recommended for system-wide access)
+claude mcp add gemini-bridge -s user -- node /mnt/d/Tools/mcp/gemini_bridge/index.js
 
-# Or configure in project's .mcp.json (User preference)
+# Or configure in project's .mcp.json
 {
-  "servers": {
-    "gemini_bridge": {
-      "path": "./gemini_bridge/index.js",
-      "tools": ["tool1", "tool2"]
+  "mcpServers": {
+    "gemini-bridge": {
+      "command": "node",
+      "args": [
+        "/mnt/d/Tools/mcp/gemini_bridge/index.js"
+      ],
+      "cwd": "/mnt/d/Tools/mcp/gemini_bridge"
+    }
+  }
+}
+
+# With API key in .mcp.json (optional if you have it in .env):
+{
+  "mcpServers": {
+    "gemini-bridge": {
+      "command": "node",
+      "args": [
+        "/mnt/d/Tools/mcp/gemini_bridge/index.js"
+      ],
+      "cwd": "/mnt/d/Tools/mcp/gemini_bridge",
+      "env": {
+        "GEMINI_API_KEY": "your-api-key-here"
+      }
     }
   }
 }
@@ -86,3 +105,22 @@ When adding a new MCP server:
 3. Document all tools and their parameters
 4. Include environment setup instructions
 5. Add the server to this README's structure section
+
+## Troubleshooting
+
+### MCP Server Connection Issues
+
+**"Connection closed" errors:**
+- Often caused by undefined functions or runtime errors during server startup
+- Check server logs with: `node /path/to/server/index.js` to verify it starts without errors
+- Test MCP protocol manually: `echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}}' | node server.js`
+- If server works standalone but fails in Claude Code, restart Claude Code or refresh MCP connection:
+  ```bash
+  claude mcp remove server-name
+  claude mcp add server-name -s user -- node /path/to/server.js
+  ```
+
+**Environment variable issues:**
+- Ensure `.env` files are properly configured with required API keys
+- Use `import 'dotenv/config';` at the top of server files for automatic loading
+- Verify environment loading with smoke tests before troubleshooting MCP connections

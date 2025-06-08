@@ -10,12 +10,19 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "test": "node --test",
-    "test:watch": "node --test --watch"
+    "test": "node --test test/unit.test.js && node --test test/integration.test.js",
+    "test:unit": "node --test test/unit.test.js",
+    "test:integration": "node --test test/integration.test.js",
+    "test:watch": "node --test --watch test/",
+    "test:verbose": "node --test --verbose test/",
+    "health-check": "node test/health-check.js",
+    "smoke-test": "node test/smoke-test.js",
+    "create-test-data": "node test/create-test-data.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.4",
     "@google/generative-ai": "^0.21.0",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "dotenv": "^16.5.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

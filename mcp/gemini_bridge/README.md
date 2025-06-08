@@ -56,7 +56,7 @@ npm start
 
 ```bash
 # Add as a global MCP server available in all projects
-claude mcp add gemini-bridge -s user -- node /path/to/gemini_bridge/index.js
+claude mcp add gemini-bridge -- node /mnt/d/Tools/mcp/gemini_bridge/index.js
 ```
 
 #### Option 2: Project-specific Configuration
@@ -69,8 +69,25 @@ Add to your project's `.mcp.json`:
         "gemini-bridge": {
             "command": "node",
             "args": [
-                "/path/to/gemini_bridge/index.js"
+                "/mnt/d/Tools/mcp/gemini_bridge/index.js"
             ],
+            "cwd": "/mnt/d/Tools/mcp/gemini_bridge"
+        }
+    }
+}
+```
+
+**With API key in .mcp.json (optional if you have it in .env):**
+
+```json
+{
+    "mcpServers": {
+        "gemini-bridge": {
+            "command": "node",
+            "args": [
+                "/mnt/d/Tools/mcp/gemini_bridge/index.js"
+            ],
+            "cwd": "/mnt/d/Tools/mcp/gemini_bridge",
             "env": {
                 "GEMINI_API_KEY": "your-api-key-here"
             }
