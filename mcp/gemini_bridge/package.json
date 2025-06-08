@@ -1,0 +1,48 @@
+{
+  "name": "gemini-context-bridge-mcp",
+  "version": "2.0.0",
+  "description": "MCP server for bridging Claude Code to Gemini's large context window (up to 2M tokens)",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "gemini-bridge-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test",
+    "test:watch": "node --test --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@google/generative-ai": "^0.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude-code",
+    "gemini",
+    "google-ai",
+    "context-bridge",
+    "ai-tools",
+    "code-analysis"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/biggs3d/Tools"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ]
+}
