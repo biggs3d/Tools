@@ -271,7 +271,7 @@ class FileHandler:
                                 "spec", "specs", "node_modules", "__pycache__", ".DS_Store",
                                 ".vscode-test", ".vscode-server", ".vscode-server-insiders", ".history"]
         self.ignored_files = [".DS_Store", ".gitkeep", ".gitignore", ".gitattributes", ".editorconfig",
-                              ".prettierignore", "index.mjs", ".babelrc", ".babelrc.json", ".babelrc.js",
+                              ".prettierignore", ".babelrc", ".babelrc.json", ".babelrc.js",
                               ".prettier", ".stylelintrc", ".eslintrc", ".eslintrc.json", ".eslintrc.js",
                               ".eslintrc.cjs", ".eslintrc.ts", ".eslintrc.yaml", ".eslintrc.yml",
                               ".eslintignore", ".stylelintignore", "package-lock.json",
@@ -470,7 +470,7 @@ if __name__ == "__main__":
     default_extensions = [
         "c", "h", "cpp", "hpp", "txt", "md",
         "py", "java", "js", "html", "css", "json", "xml", "yaml",
-        "cs", "sh", "bat",
+        "cs", "sh", "bat", "mjs", "json",
         "razor", "cshtml", "vbhtml",
         "js", "ts", "tsx", "jsx",
         "idl",
