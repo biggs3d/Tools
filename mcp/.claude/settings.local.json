@@ -15,10 +15,13 @@
       "mcp__gemini-bridge__estimate_context_size",
       "Bash(timeout:*)",
       "Bash(claude mcp:*)",
-      "mcp__gemini-bridge__analyze_code_patterns"
+      "mcp__gemini-bridge__analyze_code_patterns",
+      "Bash(npm view:*)",
+      "Bash(npm run test:all:*)"
     ],
     "deny": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "gemini-bridge"
   ]

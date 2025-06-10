@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Debug MCP Test Page</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        button {
+            background: #333;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #444;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #0f0;
+        }
+        h2 {
+            margin: 0 0 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Browser Debug MCP Test Page</h1>
+    
+    <div class="section">
+        <h2>Basic Console Messages</h2>
+        <button onclick="testBasicLogs()">Test Basic Logs</button>
+        <button onclick="testWarnings()">Test Warnings</button>
+        <button onclick="testErrors()">Test Errors</button>
+        <button onclick="testInfo()">Test Info</button>
+    </div>
+
+    <div class="section">
+        <h2>Error Scenarios</h2>
+        <button onclick="throwError()">Throw Uncaught Error</button>
+        <button onclick="referenceError()">Cause Reference Error</button>
+        <button onclick="typeError()">Cause Type Error</button>
+        <button onclick="syntaxErrorEval()">Eval Syntax Error</button>
+    </div>
+
+    <div class="section">
+        <h2>Network Errors</h2>
+        <button onclick="fetchBadUrl()">Fetch Non-Existent URL</button>
+        <button onclick="loadBadImage()">Load Bad Image</button>
+        <button onclick="loadBadScript()">Load Bad Script</button>
+    </div>
+
+    <div class="section">
+        <h2>Complex Scenarios</h2>
+        <button onclick="multipleArgs()">Console with Multiple Args</button>
+        <button onclick="nestedError()">Nested Error with Stack</button>
+        <button onclick="rapidFire()">Rapid Fire Logs</button>
+        <button onclick="promiseRejection()">Unhandled Promise Rejection</button>
+    </div>
+
+    <div class="section">
+        <h2>Edge Cases</h2>
+        <button onclick="veryLongMessage()">Very Long Message</button>
+        <button onclick="specialCharacters()">Special Characters</button>
+        <button onclick="circularReference()">Circular Reference</button>
+        <button onclick="consoleTrace()">Console Trace</button>
+    </div>
+
+    <script>
+        // Basic logging functions
+        function testBasicLogs() {
+            console.log('This is a basic log message');
+            console.log('Log with number:', 42);
+            console.log('Log with object:', { key: 'value', nested: { data: true } });
+            console.log('Log with array:', [1, 2, 3, 'four', { five: 5 }]);
+        }
+
+        function testWarnings() {
+            console.warn('This is a warning message');
+            console.warn('Deprecation warning: This feature will be removed in v2.0');
+            console.warn('Performance warning: Operation took', 1234, 'ms');
+        }
+
+        function testErrors() {
+            console.error('This is an error message');
+            console.error('Critical error:', new Error('Something went wrong'));
+            console.error('Multiple values:', 'Error code:', 500, { details: 'Server error' });
+        }
+
+        function testInfo() {
+            console.info('This is an info message');
+            console.info('Application started at', new Date().toISOString());
+            console.info('Environment:', { mode: 'test', debug: true });
+        }
+
+        // Error scenarios
+        function throwError() {
+            throw new Error('This is an uncaught error with a stack trace');
+        }
+
+        function referenceError() {
+            // This will cause: ReferenceError: undefinedVariable is not defined
+            console.log(undefinedVariable);
+        }
+
+        function typeError() {
+            // This will cause: TypeError: Cannot read property 'foo' of null
+            const obj = null;
+            console.log(obj.foo);
+        }
+
+        function syntaxErrorEval() {
+            try {
+                eval('this is not valid javascript {');
+            } catch (e) {
+                console.error('Caught eval error:', e.message);
+                throw e; // Re-throw to test uncaught error
+            }
+        }
+
+        // Network error scenarios
+        async function fetchBadUrl() {
+            try {
+                await fetch('https://this-domain-definitely-does-not-exist-123456.com/api/data');
+            } catch (e) {
+                console.error('Fetch error:', e);
+            }
+        }
+
+        function loadBadImage() {
+            const img = new Image();
+            img.onerror = () => console.error('Image failed to load');
+            img.src = '/non-existent-image-12345.jpg';
+            document.body.appendChild(img);
+            setTimeout(() => document.body.removeChild(img), 1000);
+        }
+
+        function loadBadScript() {
+            const script = document.createElement('script');
+            script.onerror = () => console.error('Script failed to load');
+            script.src = '/non-existent-script-12345.js';
+            document.head.appendChild(script);
+            setTimeout(() => document.head.removeChild(script), 1000);
+        }
+
+        // Complex scenarios
+        function multipleArgs() {
+            console.log('Multiple', 'arguments', 'in', 'one', 'call:', 123, true, { obj: 'value' }, [1, 2, 3]);
+            console.warn('Warning with', 5, 'different', 'arguments', { complex: true });
+            console.error('Error', 'with', 'many', 'parts:', new Error('test'), 'and more');
+        }
+
+        function nestedError() {
+            function innerFunction() {
+                function deeperFunction() {
+                    throw new Error('Error from deeply nested function');
+                }
+                deeperFunction();
+            }
+            
+            try {
+                innerFunction();
+            } catch (e) {
+                console.error('Caught nested error:', e);
+                throw e; // Re-throw to see full stack
+            }
+        }
+
+        function rapidFire() {
+            console.log('Starting rapid fire test...');
+            for (let i = 0; i < 50; i++) {
+                console.log(`Rapid log ${i + 1}/50`);
+                if (i % 10 === 0) {
+                    console.warn(`Warning at iteration ${i}`);
+                }
+                if (i % 15 === 0) {
+                    console.error(`Error at iteration ${i}`);
+                }
+            }
+            console.log('Rapid fire test complete!');
+        }
+
+        function promiseRejection() {
+            // Create unhandled promise rejection
+            Promise.reject(new Error('Unhandled promise rejection'));
+            
+            // Also create one that's caught after a delay
+            const delayedRejection = Promise.reject(new Error('Delayed rejection'));
+            setTimeout(() => {
+                delayedRejection.catch(e => console.error('Caught delayed rejection:', e));
+            }, 1000);
+        }
+
+        // Edge cases
+        function veryLongMessage() {
+            const longString = 'A'.repeat(1000) + ' [Middle] ' + 'Z'.repeat(1000);
+            console.log('Very long message:', longString);
+            console.error('Long error:', new Error(longString));
+        }
+
+        function specialCharacters() {
+            console.log('Special chars: \n\t\r\b\f\v\0\x00\u0000');
+            console.log('Unicode: 🚀 🎉 🔥 ❤️ 👍');
+            console.log('HTML injection attempt: <script>alert("xss")<' + '/script>');
+            console.log('JSON: {"key": "value", "nested": {"array": [1, 2, 3]}}');
+        }
+
+        function circularReference() {
+            const obj = { name: 'circular' };
+            obj.self = obj;
+            console.log('Circular reference object:', obj);
+            
+            const arr = [1, 2, 3];
+            arr.push(arr);
+            console.log('Circular reference array:', arr);
+        }
+
+        function consoleTrace() {
+            console.trace('Trace example - shows call stack');
+            
+            function nested1() {
+                function nested2() {
+                    console.trace('Nested trace');
+                }
+                nested2();
+            }
+            nested1();
+        }
+
+        // Auto-run some initial logs
+        function initLogs() {
+            console.log('Test page loaded at', new Date().toISOString());
+            console.info('Browser:', navigator.userAgent);
+            console.info('Ready for testing! Click buttons to generate different console messages.');
+        }
+        
+        // Run on load and also immediately if already loaded
+        if (document.readyState === 'complete') {
+            initLogs();
+        } else {
+            window.addEventListener('load', initLogs);
+        }
+
+        // Test unhandled rejection handler
+        window.addEventListener('unhandledrejection', event => {
+            console.error('Unhandled promise rejection:', event.reason);
+        });
+    </script>
+</body>
+</html>

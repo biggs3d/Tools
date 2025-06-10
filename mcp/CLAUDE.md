@@ -11,6 +11,7 @@ follows the MCP standard for tool integration with Claude and other AI assistant
 ## Repository Structure
 
 - `/gemini_bridge/` - MCP server for bridging Claude Code to Gemini's large context window
+- `/browser_debug/` - MCP server for browser debugging and console logging via Puppeteer
 - Additional MCP servers will be added as subdirectories
 
 ## Development Guidelines
@@ -22,12 +23,98 @@ follows the MCP standard for tool integration with Claude and other AI assistant
 - Follow the MCP SDK patterns for tool implementation
 - Include clear setup documentation
 
+### Critical Implementation Pattern
+
+**IMPORTANT**: MCP servers require a specific architecture for proper stdio handling:
+
+1. **index.js wrapper** (entry point) - Spawns the actual server as a child process
+2. **server.js** - Contains the actual MCP server implementation
+3. Use `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js`, not generic `Server`
+
+The index.js wrapper is ESSENTIAL because:
+- MCP protocol requires precise stdio piping between processes
+- Direct server execution often causes "Connection closed" errors
+- The wrapper handles signal forwarding for graceful shutdown
+
+Example index.js structure:
+```javascript
+#!/usr/bin/env node
+import { spawn } from 'child_process';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const serverPath = resolve(__dirname, 'server.js');
+const child = spawn('node', [serverPath], {
+  cwd: __dirname,
+  stdio: ['pipe', 'pipe', 'pipe']
+});
+
+process.stdin.pipe(child.stdin);
+child.stdout.pipe(process.stdout);
+child.stderr.pipe(process.stderr);
+
+// Handle exit and signals...
+```
+
+### Tool Registration Pattern
+
+**CRITICAL**: Tool registration must follow this exact pattern:
+
+```javascript
+this.server.tool(
+  'tool_name',
+  'Tool description',
+  {
+    // Zod schema object directly - NOT wrapped in inputSchema
+    param1: z.string().describe('Parameter description'),
+    param2: z.number().optional().default(10).describe('Optional param')
+  },
+  async ({ param1, param2 }) => {
+    // Handler receives destructured arguments directly
+    // NOT a context object with nested arguments
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(result, null, 2)
+      }]
+    };
+  }
+);
+```
+
+Common mistakes to avoid:
+- ❌ Don't pass `tool.inputSchema` - pass the Zod schema object directly
+- ❌ Don't expect `context.arguments.param` - arguments are destructured in handler
+- ❌ Don't use generic `Server` class - use `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js`
+
 ### Code Style
 
 - Use ES modules (`type: "module"` in package.json)
+- Load environment variables with `import 'dotenv/config';` at the top of server.js
 - Implement proper error handling and validation
 - Use Zod for schema validation
 - Keep tools focused and single-purpose
+- Modularize code - keep server.js slim, use lib/ directory for logic
+
+### Recommended Project Structure
+
+```
+server_name/
+├── index.js           # Stdio wrapper (entry point)
+├── server.js          # MCP server setup
+├── package.json       # Dependencies and scripts
+├── .env.example       # Environment variable template
+├── README.md          # Setup and usage docs
+├── lib/               # Core logic modules
+│   ├── config.js      # Configuration management
+│   ├── tools.js       # MCP tool definitions
+│   └── [feature].js   # Feature-specific modules
+└── test/              # Test files
+    └── smoke-test.js  # Basic functionality test
+```
 
 ### Documentation
 
@@ -37,12 +124,45 @@ Each MCP server should include:
 - Environment variable requirements
 - Usage examples
 - Troubleshooting guide
+- Architecture explanation
 
 ### Testing
 
 - Include basic tests for each server
 - Test MCP protocol compliance
 - Verify tool functionality
+- Include smoke tests that can run standalone
+- Create comprehensive test suites:
+  - Smoke test - Quick verification of core functionality
+  - Integration test - Real-world scenarios with test pages/data
+  - MCP protocol test - Direct JSON-RPC communication testing
+
+### Development Tips
+
+1. **Package Versions**: Keep dependencies up to date
+   - Use latest stable versions of `@modelcontextprotocol/sdk`
+   - Check for API changes between versions
+
+2. **Browser-based Tools** (Puppeteer, Playwright):
+   - Always handle async console events properly
+   - Console messages may need text extraction from args
+   - Use `page.on('console', async (msg) => ...)` for proper capture
+   - Remember to normalize log types (warn → warning)
+   - **WSL/Linux**: Install Chrome dependencies including `libasound2-dev` for audio support
+
+3. **Error Messages in HTML**: 
+   - Be careful with `</script>` tags in strings - break them up: `'</scr' + 'ipt>'`
+   - This prevents HTML parser from ending script blocks prematurely
+
+4. **Testing MCP Servers**:
+   - Test with actual MCP protocol, not just unit tests
+   - Use local test files/pages rather than external URLs when possible
+   - Always test all tools including edge cases
+
+5. **Class-based Architecture**:
+   - Use a class that extends nothing (just encapsulation)
+   - Initialize resources in `async start()` method
+   - Handle cleanup in signal handlers and dispose methods
 
 ## Common Commands
 
@@ -65,8 +185,29 @@ npm test
 ```bash
 # Add as global MCP server (recommended for system-wide access)
 claude mcp add gemini-bridge -s user -- node /mnt/d/Tools/mcp/gemini_bridge/index.js
+claude mcp add browser-debug -s user -- node /mnt/d/Tools/mcp/browser_debug/index.js
 
-# Or configure in project's .mcp.json
+# Or configure in project's .mcp.json (Windows paths)
+{
+  "mcpServers": {
+    "gemini-bridge": {
+      "command": "node",
+      "args": [
+        "D:\\Tools\\mcp\\gemini_bridge\\index.js"
+      ],
+      "cwd": "D:\\Tools\\mcp\\gemini_bridge"
+    },
+    "browser-debug": {
+      "command": "node", 
+      "args": [
+        "D:\\Tools\\mcp\\browser_debug\\index.js"
+      ],
+      "cwd": "D:\\Tools\\mcp\\browser_debug"
+    }
+  }
+}
+
+# Or with Unix-style paths (also works on Windows)
 {
   "mcpServers": {
     "gemini-bridge": {
@@ -75,6 +216,13 @@ claude mcp add gemini-bridge -s user -- node /mnt/d/Tools/mcp/gemini_bridge/inde
         "/mnt/d/Tools/mcp/gemini_bridge/index.js"
       ],
       "cwd": "/mnt/d/Tools/mcp/gemini_bridge"
+    },
+    "browser-debug": {
+      "command": "node", 
+      "args": [
+        "/mnt/d/Tools/mcp/browser_debug/index.js"
+      ],
+      "cwd": "/mnt/d/Tools/mcp/browser_debug"
     }
   }
 }
@@ -101,10 +249,13 @@ claude mcp add gemini-bridge -s user -- node /mnt/d/Tools/mcp/gemini_bridge/inde
 When adding a new MCP server:
 
 1. Create a new subdirectory with descriptive name
-2. Follow the existing structure (see gemini_bridge example)
-3. Document all tools and their parameters
-4. Include environment setup instructions
-5. Add the server to this README's structure section
+2. Follow the recommended project structure above
+3. **ALWAYS include index.js wrapper** - this is critical for MCP protocol compatibility
+4. Use `McpServer` class, not generic `Server`
+5. Document all tools and their parameters
+6. Include environment setup instructions
+7. Add the server to this README's structure section
+8. Use modular architecture - keep server.js under 100 lines by extracting logic to lib/
 
 ## Troubleshooting
 
@@ -112,12 +263,13 @@ When adding a new MCP server:
 
 **"Connection closed" errors:**
 - Often caused by undefined functions or runtime errors during server startup
+- **CRITICAL**: Always use index.js as entry point, not server.js directly
 - Check server logs with: `node /path/to/server/index.js` to verify it starts without errors
-- Test MCP protocol manually: `echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}}' | node server.js`
+- Test MCP protocol manually: `echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}}' | node index.js`
 - If server works standalone but fails in Claude Code, restart Claude Code or refresh MCP connection:
   ```bash
   claude mcp remove server-name
-  claude mcp add server-name -s user -- node /path/to/server.js
+  claude mcp add server-name -s user -- node /path/to/server/index.js
   ```
 
 **Environment variable issues:**
