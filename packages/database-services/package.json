@@ -1,0 +1,76 @@
+{
+  "name": "@mcp/database-services",
+  "version": "0.0.2",
+  "description": "Database abstraction layer providing a unified interface for multiple database providers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "author": "Steve Biggs",
+  "license": "ISC",
+  "repository": {
+    "type": "git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "uuid": "*"
+  },
+  "devDependencies": {
+    "@types/mongodb": "*",
+    "@types/node": "*",
+    "@types/sqlite3": "*",
+    "@types/uuid": "*",
+    "mongodb-memory-server": "*",
+    "typescript": "*",
+    "vitest": "*"
+  },
+  "peerDependencies": {
+    "lodash": "^4.17.21",
+    "mongodb": "^6.16.0",
+    "simple-git": "*",
+    "sqlite3": "^5.1.7"
+  },
+  "peerDependenciesMeta": {
+    "lodash": {
+      "optional": true
+    },
+    "mongodb": {
+      "optional": true
+    },
+    "sqlite3": {
+      "optional": true
+    },
+    "simple-git": {
+      "optional": true
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "IMPLEMENTATION.md"
+  ],
+  "keywords": [
+    "database",
+    "abstraction",
+    "interface",
+    "provider",
+    "persistence",
+    "memory-services"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

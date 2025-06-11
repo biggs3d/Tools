@@ -26,9 +26,9 @@ For WSL or Linux environments, you'll need Chrome dependencies:
 sudo apt-get update
 sudo apt-get install -y \
     libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
+    libatk1.0-0t64 \
+    libatk-bridge2.0-0t64 \
+    libcups2t64 \
     libdrm2 \
     libxkbcommon0 \
     libxcomposite1 \
@@ -36,7 +36,7 @@ sudo apt-get install -y \
     libxfixes3 \
     libxrandr2 \
     libgbm1 \
-    libasound2 \
+    libasound2t64 \
     libasound2-dev
 
 # Then install Puppeteer's bundled Chrome

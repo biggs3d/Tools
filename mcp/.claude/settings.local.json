@@ -23,6 +23,7 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "gemini-bridge"
+    "gemini-bridge",
+    "browser-debug"
   ]
 }

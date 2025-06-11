@@ -1,0 +1,26 @@
+{
+  "name": "@mcp/memory-link",
+  "version": "0.1.0",
+  "description": "MCP server for persistent, queryable agent memory.",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@mcp/database-services": "*",
+    "@mcp/shared-types": "*",
+    "dotenv": "^16.5.0",
+    "zod": "^3.23.8",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0"
+  }
+}

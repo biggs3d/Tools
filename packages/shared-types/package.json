@@ -1,0 +1,13 @@
+{
+  "name": "@mcp/shared-types",
+  "version": "0.0.1",
+  "description": "Shared TypeScript types for MCP Memory Server",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json",
+    "test": "echo \"No tests\"",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  }
+}
