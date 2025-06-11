@@ -48,8 +48,9 @@ export class MemoryService {
         const queryLower = query.toLowerCase();
         const filtered = allMemories.filter(record => {
             const contentMatch = record.content.toLowerCase().includes(queryLower);
-            const tagMatch = tags ? tags.every(tag => record.tags.includes(tag)) : true;
-            return contentMatch && tagMatch;
+            const tagQueryMatch = queryLower ? record.tags.some(tag => tag.toLowerCase().includes(queryLower)) : true;
+            const tagFilterMatch = tags ? tags.every(tag => record.tags.includes(tag)) : true;
+            return (contentMatch || tagQueryMatch) && tagFilterMatch;
         });
 
         // Sort by importance and recency

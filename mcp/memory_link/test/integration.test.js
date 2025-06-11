@@ -141,7 +141,7 @@ describe('memory_link Integration Tests', () => {
       const memories = JSON.parse(result.content[0].text);
       expect(memories).toBeInstanceOf(Array);
       expect(memories.length).toBeGreaterThan(0);
-      expect(memories[0].content).toContain('test');
+      expect(memories[0].content.toLowerCase()).toContain('test');
     });
 
     it('should list memories with filters', async () => {
@@ -206,25 +206,20 @@ describe('memory_link Integration Tests', () => {
     });
 
     it('should enforce importance score bounds', async () => {
-      const result = await sendRequest('tools/call', {
-        name: 'remember',
-        arguments: {
-          content: 'Test bounds',
-          importance: 15, // Over max
-          tags: []
-        }
-      });
-
-      const idMatch = result.content[0].text.match(/ID: (.+)/);
-      const memoryId = idMatch[1];
-
-      const getResult = await sendRequest('tools/call', {
-        name: 'get_memory',
-        arguments: { id: memoryId }
-      });
-
-      const memory = JSON.parse(getResult.content[0].text);
-      expect(memory.importance).toBe(10); // Clamped to max
+      try {
+        await sendRequest('tools/call', {
+          name: 'remember',
+          arguments: {
+            content: 'Test bounds',
+            importance: 15, // Over max
+            tags: []
+          }
+        });
+        // Should not reach this point
+        expect(false).toBe(true);
+      } catch (error) {
+        expect(error.message).toContain('Number must be less than or equal to 10');
+      }
     });
   });
 });

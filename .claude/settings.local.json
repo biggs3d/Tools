@@ -24,7 +24,8 @@
       "Bash(npm install:*)",
       "Bash(npm ls:*)",
       "Bash(npm run clean:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": []
   },
