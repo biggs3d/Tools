@@ -543,11 +543,11 @@ export class MongoDBProvider implements IDatabaseProvider {
     private createIdFilter(id: string): Filter<Document> {
         // Check if ID is a valid ObjectId
         if (this.isValidObjectId(id)) {
-            return { $or: [{ _id: new ObjectId(id) }, { _id: id }, { id }] };
+            return { $or: [{ _id: new ObjectId(id) }, { _id: id as any }, { id }] };
         }
         
         // Regular string ID
-        return { $or: [{ _id: id }, { id }] };
+        return { $or: [{ _id: id as any }, { id }] };
     }
 
     /**
@@ -695,7 +695,7 @@ export class MongoDBProvider implements IDatabaseProvider {
             sort = {};
             
             queryOptions.sortBy.forEach(sortField => {
-                sort![sortField.field] = sortField.order === 'asc' ? 1 : -1;
+                (sort as any)[sortField.field] = sortField.order === 'asc' ? 1 : -1;
             });
         }
         

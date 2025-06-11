@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { DatabaseService, createDatabaseService, IDatabaseConfig, QueryOptions } from '@mcp/database-services';
-import { MemoryRecord } from '@mcp/shared-types';
+import { DatabaseService, createDatabaseService, IDatabaseConfig } from '@mcp/database-services';
+import type { MemoryRecord } from '@mcp/shared-types';
 
 const MEMORIES_COLLECTION = 'memories';
 
@@ -81,5 +81,58 @@ export class MemoryService {
     async forget(id: string): Promise<boolean> {
         const provider = await this.dbService.getProvider();
         return provider.delete(MEMORIES_COLLECTION, id);
+    }
+
+    async listMemories(tags?: string[], limit: number = 20, sortBy: 'createdAt' | 'lastAccessed' | 'importance' = 'createdAt'): Promise<MemoryRecord[]> {
+        const provider = await this.dbService.getProvider();
+        const allMemories = await provider.query<MemoryRecord>(MEMORIES_COLLECTION, {});
+
+        let filtered = allMemories;
+        if (tags && tags.length > 0) {
+            filtered = allMemories.filter(record => 
+                tags.every(tag => record.tags.includes(tag))
+            );
+        }
+
+        // Sort based on sortBy parameter
+        filtered.sort((a, b) => {
+            switch (sortBy) {
+                case 'importance':
+                    return b.importance - a.importance;
+                case 'lastAccessed':
+                    return new Date(b.lastAccessed).getTime() - new Date(a.lastAccessed).getTime();
+                case 'createdAt':
+                default:
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            }
+        });
+
+        return filtered.slice(0, limit);
+    }
+
+    async updateMemory(id: string, content?: string, importance?: number, tags?: string[]): Promise<MemoryRecord | null> {
+        const provider = await this.dbService.getProvider();
+        const existing = await provider.read<MemoryRecord>(MEMORIES_COLLECTION, id);
+        
+        if (!existing) {
+            return null;
+        }
+
+        const updates: Partial<MemoryRecord> = {
+            lastAccessed: new Date().toISOString(),
+        };
+
+        if (content !== undefined) {
+            updates.content = content;
+        }
+        if (importance !== undefined) {
+            updates.importance = Math.max(0, Math.min(10, importance));
+        }
+        if (tags !== undefined) {
+            updates.tags = tags;
+        }
+
+        const updated = await provider.update<MemoryRecord>(MEMORIES_COLLECTION, id, updates);
+        return updated;
     }
 }

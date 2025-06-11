@@ -83,3 +83,25 @@ export interface SearchOptions extends MemoryQueryOptions {
     searchEntityNames?: boolean;              // Whether to search entity names
     searchEntityTypes?: boolean;              // Whether to search entity types
 }
+
+/**
+ * Core memory record structure for memory_link
+ */
+export interface MemoryRecord {
+    /** A unique UUID for the memory. */
+    id: string;
+    /** The core text content of the memory. */
+    content: string;
+    /** A 0-10 score of the memory's importance. */
+    importance: number;
+    /** An array of strings for categorization and filtering. */
+    tags: string[];
+    /** Vector embedding for semantic search (added in Phase 2). */
+    embedding?: number[];
+    /** ISO timestamp of when the memory was created. */
+    createdAt: string;
+    /** ISO timestamp of the last time the memory was accessed. */
+    lastAccessed: string;
+    /** A simple counter for how many times the memory has been accessed. */
+    accessCount: number;
+}

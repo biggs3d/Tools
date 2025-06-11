@@ -2,9 +2,16 @@
   "name": "@mcp/database-services",
   "version": "0.0.2",
   "description": "Database abstraction layer providing a unified interface for multiple database providers",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
   "author": "Steve Biggs",
   "license": "ISC",
   "repository": {
@@ -33,8 +40,7 @@
   "peerDependencies": {
     "lodash": "^4.17.21",
     "mongodb": "^6.16.0",
-    "simple-git": "*",
-    "sqlite3": "^5.1.7"
+    "simple-git": "^3.28.0"
   },
   "peerDependenciesMeta": {
     "lodash": {
@@ -48,13 +54,6 @@
     },
     "simple-git": {
       "optional": true
-    }
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
     }
   },
   "files": [
@@ -72,5 +71,8 @@
   ],
   "engines": {
     "node": ">=18"
+  },
+  "optionalDependencies": {
+    "sqlite3": "^5.1.7"
   }
 }

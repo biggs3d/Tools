@@ -17,7 +17,14 @@
       "Bash(claude mcp:*)",
       "mcp__gemini-bridge__analyze_code_patterns",
       "Bash(npm view:*)",
-      "Bash(npm run test:all:*)"
+      "Bash(npm run test:all:*)",
+      "Bash(npm install)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm run clean:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   },

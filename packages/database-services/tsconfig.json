@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "./dist",
     "module": "nodenext",
     "types": ["node"],
     "lib": ["es2022", "DOM"]

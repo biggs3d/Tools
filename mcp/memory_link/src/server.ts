@@ -1,5 +1,7 @@
-import { McpServer, StdioServerTransport } from '@modelcontextprotocol/sdk/server';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
+import 'dotenv/config';
 import { MemoryService } from './memory.service.js';
 import { getAppConfig } from './config.js';
 
@@ -68,6 +70,38 @@ async function main(): Promise<void> {
             const success = await memoryService.forget(id);
             const message = success ? `Memory ${id} forgotten.` : `Memory with ID ${id} not found.`;
             return { content: [{ type: 'text', text: message }], isError: !success };
+        }
+    );
+
+    server.tool(
+        'list_memories',
+        'Lists memories with filtering and sorting options.',
+        {
+            tags: z.array(z.string()).optional().describe('Filter memories by tags.'),
+            limit: z.number().optional().default(20).describe('Maximum number of memories to return.'),
+            sortBy: z.enum(['createdAt', 'lastAccessed', 'importance']).optional().default('createdAt').describe('Sort criteria for results.'),
+        },
+        async ({ tags, limit, sortBy }) => {
+            const records = await memoryService.listMemories(tags, limit, sortBy);
+            return { content: [{ type: 'text', text: JSON.stringify(records, null, 2) }] };
+        }
+    );
+
+    server.tool(
+        'update_memory',
+        'Updates an existing memory.',
+        {
+            id: z.string().describe('The unique ID of the memory to update.'),
+            content: z.string().optional().describe('New content for the memory.'),
+            importance: z.number().min(0).max(10).optional().describe('New importance score.'),
+            tags: z.array(z.string()).optional().describe('New tags for the memory.'),
+        },
+        async ({ id, content, importance, tags }) => {
+            const updated = await memoryService.updateMemory(id, content, importance, tags);
+            if (!updated) {
+                return { content: [{ type: 'text', text: `Memory with ID ${id} not found.` }], isError: true };
+            }
+            return { content: [{ type: 'text', text: JSON.stringify(updated, null, 2) }] };
         }
     );
 

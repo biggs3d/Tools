@@ -7,8 +7,7 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 // Import simple-git properly to ensure mocking works correctly
-import simpleGit from 'simple-git';
-import type { SimpleGit } from 'simple-git';
+import { simpleGit, SimpleGit } from 'simple-git';
 import { IDatabaseProvider, QueryOptions } from '../database-provider.interface.js';
 import { 
     ConnectionError, 
@@ -704,14 +703,15 @@ export class GitSyncProvider implements IDatabaseProvider {
                 // Check if the configured branch exists
                 const branches = await git.branchLocal();
                 
-                if (!branches.all.includes(this.config.syncOptions.branch)) {
+                const branchName = this.config.syncOptions.branch!;
+                if (!branches.all.includes(branchName)) {
                     // Create the branch if it doesn't exist
-                    await git.checkoutLocalBranch(this.config.syncOptions.branch);
-                    logDebug(`Created branch: ${this.config.syncOptions.branch}`);
+                    await git.checkoutLocalBranch(branchName);
+                    logDebug(`Created branch: ${branchName}`);
                 } else {
                     // Switch to the configured branch
-                    await git.checkout(this.config.syncOptions.branch);
-                    logDebug(`Switched to branch: ${this.config.syncOptions.branch}`);
+                    await git.checkout(branchName);
+                    logDebug(`Switched to branch: ${branchName}`);
                 }
             }
             
