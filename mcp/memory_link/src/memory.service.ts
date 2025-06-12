@@ -1,25 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
 import { DatabaseService, createDatabaseService, IDatabaseConfig } from '@mcp/database-services';
 import type { MemoryRecord } from '@mcp/shared-types';
-
-const MEMORIES_COLLECTION = 'memories';
+import { MemoryRepository, MemoryQuery } from './memory.repository.js';
 
 export class MemoryService {
     private dbService: DatabaseService;
+    private memoryRepository: MemoryRepository;
 
     constructor(dbConfig: IDatabaseConfig) {
         this.dbService = createDatabaseService(dbConfig);
+        this.memoryRepository = new MemoryRepository(this.dbService);
     }
 
     async initialize(): Promise<void> {
-        const provider = await this.dbService.getProvider();
-        // In a real scenario with SQLite, you might ensure a schema here.
-        // For JsonFileProvider, this is not necessary.
-        console.log('MemoryService initialized with provider:', provider.constructor.name);
+        // Initialize the repository (which gets the provider)
+        await this.memoryRepository.initialize();
+        console.error('MemoryService initialized successfully');
     }
 
     async remember(content: string, importance: number, tags: string[]): Promise<MemoryRecord> {
-        const provider = await this.dbService.getProvider();
         const now = new Date().toISOString();
 
         const newRecord: MemoryRecord = {
@@ -32,90 +31,61 @@ export class MemoryService {
             accessCount: 1,
         };
 
-        // The 'create' method in database-services should handle adding the item.
-        // We pass the full object. The provider will use the 'id' field.
-        const createdRecord = await provider.create<MemoryRecord>(MEMORIES_COLLECTION, newRecord);
-        return createdRecord;
+        return this.memoryRepository.add(newRecord);
     }
 
     async recall(query: string, tags?: string[], limit: number = 10): Promise<MemoryRecord[]> {
-        const provider = await this.dbService.getProvider();
+        // Use repository's find method with constructed query
+        const memoryQuery: MemoryQuery = {
+            textQuery: query,
+            tags: tags,
+            limit: limit,
+            sortBy: 'relevance', // Use relevance-based sorting (importance in Phase 1)
+            sortOrder: 'desc',
+            searchStrategy: 'text', // Phase 1: always text search
+        };
 
-        // Phase 1: Simple text search.
-        // Phase 2 will involve vector search here.
-        const allMemories = await provider.query<MemoryRecord>(MEMORIES_COLLECTION, {});
-
-        const queryLower = query.toLowerCase();
-        const filtered = allMemories.filter(record => {
-            const contentMatch = record.content.toLowerCase().includes(queryLower);
-            const tagQueryMatch = queryLower ? record.tags.some(tag => tag.toLowerCase().includes(queryLower)) : true;
-            const tagFilterMatch = tags ? tags.every(tag => record.tags.includes(tag)) : true;
-            return (contentMatch || tagQueryMatch) && tagFilterMatch;
-        });
-
-        // Sort by importance and recency
-        filtered.sort((a, b) => {
-            if (b.importance !== a.importance) {
-                return b.importance - a.importance;
-            }
-            return new Date(b.lastAccessed).getTime() - new Date(a.lastAccessed).getTime();
-        });
-
-        return filtered.slice(0, limit);
+        return this.memoryRepository.find(memoryQuery);
     }
 
     async getMemory(id: string): Promise<MemoryRecord | null> {
-        const provider = await this.dbService.getProvider();
-        const memory = await provider.read<MemoryRecord>(MEMORIES_COLLECTION, id);
+        const memory = await this.memoryRepository.getById(id);
 
         if (memory) {
-            memory.lastAccessed = new Date().toISOString();
-            memory.accessCount++;
-            await provider.update<MemoryRecord>(MEMORIES_COLLECTION, id, {
-                lastAccessed: memory.lastAccessed,
-                accessCount: memory.accessCount
-            });
+            // Business logic: Update access tracking
+            // NOTE: Potential race condition - accessCount increment is not atomic
+            // In Phase 2, consider using atomic updates or versioning
+            const updates = {
+                lastAccessed: new Date().toISOString(),
+                accessCount: memory.accessCount + 1,
+            };
+            
+            const updated = await this.memoryRepository.update(id, updates);
+            return updated || memory; // Return updated version or fallback to original
         }
-        return memory;
+        return null;
     }
 
     async forget(id: string): Promise<boolean> {
-        const provider = await this.dbService.getProvider();
-        return provider.delete(MEMORIES_COLLECTION, id);
+        return this.memoryRepository.delete(id);
     }
 
-    async listMemories(tags?: string[], limit: number = 20, sortBy: 'createdAt' | 'lastAccessed' | 'importance' = 'createdAt'): Promise<MemoryRecord[]> {
-        const provider = await this.dbService.getProvider();
-        const allMemories = await provider.query<MemoryRecord>(MEMORIES_COLLECTION, {});
+    async listMemories(tags?: string[], limit: number = 20, sortBy: 'createdAt' | 'lastAccessed' | 'importance' = 'createdAt', offset: number = 0): Promise<MemoryRecord[]> {
+        // Use repository's find method for consistent querying
+        const memoryQuery: MemoryQuery = {
+            tags: tags,
+            limit: limit,
+            offset: offset,
+            sortBy: sortBy,
+            sortOrder: 'desc', // Default to descending for list views
+        };
 
-        let filtered = allMemories;
-        if (tags && tags.length > 0) {
-            filtered = allMemories.filter(record => 
-                tags.every(tag => record.tags.includes(tag))
-            );
-        }
-
-        // Sort based on sortBy parameter
-        filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'importance':
-                    return b.importance - a.importance;
-                case 'lastAccessed':
-                    return new Date(b.lastAccessed).getTime() - new Date(a.lastAccessed).getTime();
-                case 'createdAt':
-                default:
-                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            }
-        });
-
-        return filtered.slice(0, limit);
+        return this.memoryRepository.find(memoryQuery);
     }
 
     async updateMemory(id: string, content?: string, importance?: number, tags?: string[]): Promise<MemoryRecord | null> {
-        const provider = await this.dbService.getProvider();
-        const existing = await provider.read<MemoryRecord>(MEMORIES_COLLECTION, id);
-        
-        if (!existing) {
+        // Check if memory exists
+        if (!(await this.memoryRepository.exists(id))) {
             return null;
         }
 
@@ -133,7 +103,6 @@ export class MemoryService {
             updates.tags = tags;
         }
 
-        const updated = await provider.update<MemoryRecord>(MEMORIES_COLLECTION, id, updates);
-        return updated;
+        return this.memoryRepository.update(id, updates);
     }
 }

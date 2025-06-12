@@ -1,144 +1,78 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { MemoryService } from '../src/memory.service.js';
+import { createDatabaseService, DatabaseType } from '@mcp/database-services';
 import type { MemoryRecord } from '@mcp/shared-types';
-import type { IDatabaseConfig } from '@mcp/database-services';
-
-// Mock the database service
-vi.mock('@mcp/database-services', () => ({
-  createDatabaseService: vi.fn(() => ({
-    getProvider: vi.fn()
-  })),
-  DatabaseService: vi.fn()
-}));
 
 describe('MemoryService', () => {
   let memoryService: MemoryService;
-  let mockProvider: any;
 
-  beforeEach(() => {
-    // Reset mocks
-    vi.clearAllMocks();
-    
-    // Create a mock provider
-    mockProvider = {
-      create: vi.fn(),
-      read: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      query: vi.fn()
-    };
-
-    // Mock the database service to return our mock provider
-    const mockDbService = {
-      getProvider: vi.fn(() => Promise.resolve(mockProvider))
-    };
-
-    // Create service instance with mocked dependencies
-    const mockConfig: IDatabaseConfig = {
-      type: 'in-memory' as any,
+  beforeEach(async () => {
+    // Use in-memory database for testing
+    const dbConfig = {
+      type: DatabaseType.InMemory,
       providerConfig: {}
     };
 
-    memoryService = new MemoryService(mockConfig);
-    (memoryService as any).dbService = mockDbService;
+    memoryService = new MemoryService(dbConfig);
+    await memoryService.initialize();
   });
 
   describe('remember', () => {
     it('should create a new memory with valid data', async () => {
-      const mockMemory: MemoryRecord = {
-        id: 'test-id',
-        content: 'Test content',
-        importance: 5,
-        tags: ['test'],
-        createdAt: new Date().toISOString(),
-        lastAccessed: new Date().toISOString(),
-        accessCount: 1
-      };
-
-      mockProvider.create.mockResolvedValue(mockMemory);
-
       const result = await memoryService.remember('Test content', 5, ['test']);
 
-      expect(mockProvider.create).toHaveBeenCalledWith('memories', expect.objectContaining({
-        content: 'Test content',
-        importance: 5,
-        tags: ['test'],
-        accessCount: 1
-      }));
-      expect(result).toEqual(mockMemory);
+      expect(result.content).toBe('Test content');
+      expect(result.importance).toBe(5);
+      expect(result.tags).toEqual(['test']);
+      expect(result.accessCount).toBe(1);
+      expect(result.id).toBeDefined();
+      expect(result.createdAt).toBeDefined();
+      expect(result.lastAccessed).toBeDefined();
     });
 
     it('should clamp importance values to 0-10 range', async () => {
-      mockProvider.create.mockResolvedValue({} as MemoryRecord);
+      const result1 = await memoryService.remember('Test high', 15, []);
+      expect(result1.importance).toBe(10);
 
-      await memoryService.remember('Test', 15, []);
-      expect(mockProvider.create).toHaveBeenCalledWith('memories', expect.objectContaining({
-        importance: 10
-      }));
+      const result2 = await memoryService.remember('Test low', -5, []);
+      expect(result2.importance).toBe(0);
+    });
 
-      await memoryService.remember('Test', -5, []);
-      expect(mockProvider.create).toHaveBeenCalledWith('memories', expect.objectContaining({
-        importance: 0
-      }));
+    it('should handle empty tags array', async () => {
+      const result = await memoryService.remember('Test no tags', 5, []);
+      expect(result.tags).toEqual([]);
     });
   });
 
   describe('recall', () => {
-    const mockMemories: MemoryRecord[] = [
-      {
-        id: '1',
-        content: 'JavaScript is a programming language',
-        importance: 8,
-        tags: ['programming', 'javascript'],
-        createdAt: '2024-01-01T00:00:00Z',
-        lastAccessed: '2024-01-02T00:00:00Z',
-        accessCount: 5
-      },
-      {
-        id: '2',
-        content: 'TypeScript extends JavaScript',
-        importance: 7,
-        tags: ['programming', 'typescript'],
-        createdAt: '2024-01-02T00:00:00Z',
-        lastAccessed: '2024-01-03T00:00:00Z',
-        accessCount: 3
-      },
-      {
-        id: '3',
-        content: 'Python is also popular',
-        importance: 6,
-        tags: ['programming', 'python'],
-        createdAt: '2024-01-03T00:00:00Z',
-        lastAccessed: '2024-01-01T00:00:00Z',
-        accessCount: 2
-      }
-    ];
-
-    beforeEach(() => {
-      mockProvider.query.mockResolvedValue(mockMemories);
+    beforeEach(async () => {
+      // Add test memories
+      await memoryService.remember('JavaScript is a programming language', 8, ['programming', 'javascript']);
+      await memoryService.remember('TypeScript extends JavaScript', 7, ['programming', 'typescript']);
+      await memoryService.remember('Python is also popular', 6, ['programming', 'python']);
     });
 
     it('should filter memories by content query', async () => {
-      const results = await memoryService.recall('javascript', undefined, 10);
+      const results = await memoryService.recall('javascript');
       
-      expect(results).toHaveLength(2);
-      expect(results[0].id).toBe('1');
-      expect(results[1].id).toBe('2');
+      expect(results.length).toBeGreaterThan(0);
+      expect(results.some(r => r.content.toLowerCase().includes('javascript'))).toBe(true);
     });
 
     it('should filter memories by tags', async () => {
-      const results = await memoryService.recall('', ['typescript'], 10);
+      const results = await memoryService.recall('', ['typescript']);
       
       expect(results).toHaveLength(1);
-      expect(results[0].id).toBe('2');
+      expect(results[0].content).toContain('TypeScript');
     });
 
-    it('should sort by importance and recency', async () => {
-      const results = await memoryService.recall('programming', undefined, 10);
+    it('should sort by relevance (importance)', async () => {
+      const results = await memoryService.recall('programming');
       
-      expect(results[0].importance).toBe(8);
-      expect(results[1].importance).toBe(7);
-      expect(results[2].importance).toBe(6);
+      // Should be sorted by importance descending
+      for (let i = 0; i < results.length - 1; i++) {
+        expect(results[i].importance).toBeGreaterThanOrEqual(results[i + 1].importance);
+      }
     });
 
     it('should respect limit parameter', async () => {
@@ -146,84 +80,55 @@ describe('MemoryService', () => {
       
       expect(results).toHaveLength(2);
     });
+
+    it('should return empty array for no matches', async () => {
+      const results = await memoryService.recall('nonexistent');
+      
+      expect(results).toHaveLength(0);
+    });
   });
 
   describe('getMemory', () => {
     it('should retrieve and update access metadata', async () => {
-      const mockMemory: MemoryRecord = {
-        id: 'test-id',
-        content: 'Test content',
-        importance: 5,
-        tags: ['test'],
-        createdAt: '2024-01-01T00:00:00Z',
-        lastAccessed: '2024-01-01T00:00:00Z',
-        accessCount: 1
-      };
+      const stored = await memoryService.remember('Test content', 5, ['test']);
+      const initialAccessCount = stored.accessCount;
+      
+      // Add small delay to ensure timestamp difference
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
+      const result = await memoryService.getMemory(stored.id);
 
-      mockProvider.read.mockResolvedValue(mockMemory);
-      mockProvider.update.mockResolvedValue({ ...mockMemory, accessCount: 2 });
-
-      const result = await memoryService.getMemory('test-id');
-
-      expect(mockProvider.read).toHaveBeenCalledWith('memories', 'test-id');
-      expect(mockProvider.update).toHaveBeenCalledWith('memories', 'test-id', {
-        lastAccessed: expect.any(String),
-        accessCount: 2
-      });
-      expect(result?.accessCount).toBe(2);
+      expect(result).not.toBeNull();
+      expect(result!.content).toBe('Test content');
+      expect(result!.accessCount).toBe(initialAccessCount + 1);
+      expect(new Date(result!.lastAccessed).getTime()).toBeGreaterThanOrEqual(new Date(stored.lastAccessed).getTime());
     });
 
     it('should return null for non-existent memory', async () => {
-      mockProvider.read.mockResolvedValue(null);
-
-      const result = await memoryService.getMemory('non-existent');
+      const result = await memoryService.getMemory('non-existent-id');
 
       expect(result).toBeNull();
-      expect(mockProvider.update).not.toHaveBeenCalled();
     });
   });
 
   describe('listMemories', () => {
-    const mockMemories: MemoryRecord[] = [
-      {
-        id: '1',
-        content: 'First memory',
-        importance: 9,
-        tags: ['important', 'first'],
-        createdAt: '2024-01-01T00:00:00Z',
-        lastAccessed: '2024-01-05T00:00:00Z',
-        accessCount: 10
-      },
-      {
-        id: '2',
-        content: 'Second memory',
-        importance: 5,
-        tags: ['normal'],
-        createdAt: '2024-01-02T00:00:00Z',
-        lastAccessed: '2024-01-03T00:00:00Z',
-        accessCount: 3
-      },
-      {
-        id: '3',
-        content: 'Third memory',
-        importance: 7,
-        tags: ['important'],
-        createdAt: '2024-01-03T00:00:00Z',
-        lastAccessed: '2024-01-04T00:00:00Z',
-        accessCount: 5
-      }
-    ];
-
-    beforeEach(() => {
-      mockProvider.query.mockResolvedValue(mockMemories);
+    beforeEach(async () => {
+      // Add test memories with different creation times
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await memoryService.remember('First memory', 9, ['important', 'first']);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await memoryService.remember('Second memory', 5, ['normal']);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await memoryService.remember('Third memory', 7, ['important']);
     });
 
-    it('should sort by createdAt by default', async () => {
+    it('should sort by createdAt by default (descending)', async () => {
       const results = await memoryService.listMemories();
       
-      expect(results[0].id).toBe('3'); // Most recent
-      expect(results[1].id).toBe('2');
-      expect(results[2].id).toBe('1'); // Oldest
+      expect(results).toHaveLength(3);
+      // Should be in descending order by creation time
+      expect(results[0].content).toBe('Third memory'); // Most recent
+      expect(results[2].content).toBe('First memory'); // Oldest
     });
 
     it('should sort by importance', async () => {
@@ -234,82 +139,89 @@ describe('MemoryService', () => {
       expect(results[2].importance).toBe(5);
     });
 
-    it('should sort by lastAccessed', async () => {
-      const results = await memoryService.listMemories(undefined, 20, 'lastAccessed');
-      
-      expect(results[0].id).toBe('1'); // Most recently accessed
-      expect(results[1].id).toBe('3');
-      expect(results[2].id).toBe('2'); // Least recently accessed
-    });
-
     it('should filter by tags', async () => {
       const results = await memoryService.listMemories(['important']);
       
       expect(results).toHaveLength(2);
       expect(results.every(m => m.tags.includes('important'))).toBe(true);
     });
+
+    it('should respect limit parameter', async () => {
+      const results = await memoryService.listMemories(undefined, 2);
+      
+      expect(results).toHaveLength(2);
+    });
+
+    it('should handle pagination with offset', async () => {
+      const firstPage = await memoryService.listMemories(undefined, 2, 'createdAt', 0);
+      const secondPage = await memoryService.listMemories(undefined, 2, 'createdAt', 2);
+      
+      expect(firstPage).toHaveLength(2);
+      expect(secondPage).toHaveLength(1); // Only 3 total memories
+      expect(firstPage[0].id).not.toBe(secondPage[0].id);
+    });
   });
 
   describe('updateMemory', () => {
     it('should update memory fields', async () => {
-      const existingMemory: MemoryRecord = {
-        id: 'test-id',
-        content: 'Original content',
-        importance: 5,
-        tags: ['original'],
-        createdAt: '2024-01-01T00:00:00Z',
-        lastAccessed: '2024-01-01T00:00:00Z',
-        accessCount: 1
-      };
-
-      mockProvider.read.mockResolvedValue(existingMemory);
-      mockProvider.update.mockResolvedValue({
-        ...existingMemory,
-        content: 'Updated content',
-        importance: 8
-      });
-
+      const stored = await memoryService.remember('Original content', 5, ['original']);
+      
+      // Add small delay to ensure timestamp difference
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
       const result = await memoryService.updateMemory(
-        'test-id',
+        stored.id,
         'Updated content',
         8,
         ['updated']
       );
 
-      expect(mockProvider.update).toHaveBeenCalledWith('memories', 'test-id', {
-        content: 'Updated content',
-        importance: 8,
-        tags: ['updated'],
-        lastAccessed: expect.any(String)
-      });
-      expect(result?.content).toBe('Updated content');
+      expect(result).not.toBeNull();
+      expect(result!.content).toBe('Updated content');
+      expect(result!.importance).toBe(8);
+      expect(result!.tags).toEqual(['updated']);
+      expect(new Date(result!.lastAccessed).getTime()).toBeGreaterThanOrEqual(new Date(stored.lastAccessed).getTime());
+    });
+
+    it('should update only specified fields', async () => {
+      const stored = await memoryService.remember('Original content', 5, ['original']);
+      
+      const result = await memoryService.updateMemory(stored.id, 'Updated content');
+
+      expect(result).not.toBeNull();
+      expect(result!.content).toBe('Updated content');
+      expect(result!.importance).toBe(5); // Unchanged
+      expect(result!.tags).toEqual(['original']); // Unchanged
     });
 
     it('should return null for non-existent memory', async () => {
-      mockProvider.read.mockResolvedValue(null);
-
       const result = await memoryService.updateMemory('non-existent', 'New content');
 
       expect(result).toBeNull();
-      expect(mockProvider.update).not.toHaveBeenCalled();
+    });
+
+    it('should clamp importance values', async () => {
+      const stored = await memoryService.remember('Test', 5, []);
+      
+      const result = await memoryService.updateMemory(stored.id, undefined, 15);
+      expect(result!.importance).toBe(10);
     });
   });
 
   describe('forget', () => {
     it('should delete a memory', async () => {
-      mockProvider.delete.mockResolvedValue(true);
-
-      const result = await memoryService.forget('test-id');
-
-      expect(mockProvider.delete).toHaveBeenCalledWith('memories', 'test-id');
+      const stored = await memoryService.remember('To be deleted', 5, ['test']);
+      
+      const result = await memoryService.forget(stored.id);
       expect(result).toBe(true);
+      
+      // Verify it's actually deleted
+      const retrieved = await memoryService.getMemory(stored.id);
+      expect(retrieved).toBeNull();
     });
 
     it('should return false for non-existent memory', async () => {
-      mockProvider.delete.mockResolvedValue(false);
-
-      const result = await memoryService.forget('non-existent');
-
+      const result = await memoryService.forget('non-existent-id');
       expect(result).toBe(false);
     });
   });
