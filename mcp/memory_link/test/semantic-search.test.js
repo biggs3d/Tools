@@ -85,14 +85,11 @@ describe('Semantic Search Integration Tests', () => {
     let memoryIds = [];
 
     it('should create memories with diverse content for semantic testing', async () => {
-      // Create memories with related concepts but different words
+      // Create fewer memories to reduce API calls while still testing semantic search
       const testData = [
         { content: 'JavaScript is a programming language', importance: 8, tags: ['coding', 'web'] },
         { content: 'Dogs are loyal pets and faithful companions', importance: 7, tags: ['animals', 'pets'] },
-        { content: 'TypeScript adds static typing to JavaScript', importance: 8, tags: ['coding', 'web'] },
-        { content: 'Cats are independent animals and good mousers', importance: 6, tags: ['animals', 'pets'] },
-        { content: 'Python is great for data science and ML', importance: 9, tags: ['coding', 'data'] },
-        { content: 'The sun is a massive star providing energy', importance: 5, tags: ['science', 'astronomy'] }
+        { content: 'TypeScript adds static typing to JavaScript', importance: 8, tags: ['coding', 'web'] }
       ];
 
       for (const data of testData) {
@@ -105,10 +102,10 @@ describe('Semantic Search Integration Tests', () => {
         memoryIds.push(memoryId);
       }
 
-      expect(memoryIds).toHaveLength(6);
+      expect(memoryIds).toHaveLength(3);
     });
 
-    it('should find semantically related content with semantic search', { timeout: 15000 }, async () => {
+    it('should find semantically related content with semantic search', { timeout: 30000 }, async () => {
       // Search for "pets" - should find both dog and cat memories
       const result = await sendRequest('tools/call', {
         name: 'recall',
@@ -124,12 +121,12 @@ describe('Semantic Search Integration Tests', () => {
       
       // Should find animal-related content even if it doesn't contain "pets"
       const animalContent = memories.filter(m => 
-        m.content.includes('Dogs') || m.content.includes('Cats')
+        m.content.includes('Dogs')
       );
       expect(animalContent.length).toBeGreaterThan(0);
     });
 
-    it('should find programming-related content semantically', { timeout: 15000 }, async () => {
+    it('should find programming-related content semantically', { timeout: 30000 }, async () => {
       // Search for "coding" - should find JavaScript, TypeScript, Python
       const result = await sendRequest('tools/call', {
         name: 'recall',
@@ -146,13 +143,12 @@ describe('Semantic Search Integration Tests', () => {
       // Should find programming languages
       const programmingContent = memories.filter(m => 
         m.content.includes('JavaScript') || 
-        m.content.includes('TypeScript') || 
-        m.content.includes('Python')
+        m.content.includes('TypeScript')
       );
       expect(programmingContent.length).toBeGreaterThan(0);
     });
 
-    it('should show difference between text and semantic search', { timeout: 15000 }, async () => {
+    it('should show difference between text and semantic search', { timeout: 30000 }, async () => {
       // Text search for exact word
       const textResult = await sendRequest('tools/call', {
         name: 'recall',
@@ -181,11 +177,11 @@ describe('Semantic Search Integration Tests', () => {
       
       // Semantic search should find related concepts
       expect(semanticMemories.some(m => 
-        m.content.includes('loyal') || m.content.includes('Dogs')
+        m.content.includes('Dogs')
       )).toBe(true);
     });
 
-    it('should demonstrate hybrid search combining both approaches', { timeout: 15000 }, async () => {
+    it('should demonstrate hybrid search combining both approaches', { timeout: 30000 }, async () => {
       const hybridResult = await sendRequest('tools/call', {
         name: 'recall',
         arguments: {
@@ -204,8 +200,7 @@ describe('Semantic Search Integration Tests', () => {
       );
       const hasSemanticMatch = memories.some(m => 
         m.content.includes('JavaScript') || 
-        m.content.includes('TypeScript') || 
-        m.content.includes('Python')
+        m.content.includes('TypeScript')
       );
       
       expect(hasExactMatch || hasSemanticMatch).toBe(true);

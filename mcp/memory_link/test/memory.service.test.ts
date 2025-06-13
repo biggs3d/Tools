@@ -36,7 +36,15 @@ describe('MemoryService', () => {
       similarityThreshold: 0.7
     };
 
-    memoryService = new MemoryService(dbConfig, embeddingConfig);
+    // Phase 4: Add background processing config
+    const backgroundConfig = {
+      maxOperationsPerRun: 5,
+      maxTimePerRun: 2000,
+      enableEmbeddingBackfill: true,
+      enableImportanceDecay: true
+    };
+
+    memoryService = new MemoryService(dbConfig, embeddingConfig, backgroundConfig);
     await memoryService.initialize();
   });
 
@@ -246,6 +254,260 @@ describe('MemoryService', () => {
     it('should return false for non-existent memory', async () => {
       const result = await memoryService.forget('non-existent-id');
       expect(result).toBe(false);
+    });
+  });
+
+  // Phase 4 Tests - Data Integrity & Performance
+  describe('Phase 4: Atomicity in Memory Consolidation', () => {
+    it('should use consolidationStatus for atomic consolidation', async () => {
+      const memory1 = await memoryService.remember('First related concept', 7, ['concept']);
+      const memory2 = await memoryService.remember('Second related concept', 6, ['concept']);
+      
+      const consolidated = await memoryService.consolidateMemories([memory1.id, memory2.id]);
+      
+      expect(consolidated.consolidationStatus).toBe('completed');
+      expect(consolidated.isConsolidated).toBe(true);
+      expect(consolidated.consolidatedFrom).toEqual([memory1.id, memory2.id]);
+      expect(consolidated.importance).toBeGreaterThan(Math.max(memory1.importance, memory2.importance));
+    });
+
+    it('should handle consolidation errors gracefully', async () => {
+      const memory1 = await memoryService.remember('Valid memory', 7, ['test']);
+      const invalidId = 'non-existent-id';
+      
+      await expect(memoryService.consolidateMemories([memory1.id, invalidId]))
+        .rejects.toThrow('Memory(s) with ID(s) non-existent-id not found');
+    });
+
+    it('should require at least 2 memories for consolidation', async () => {
+      const memory1 = await memoryService.remember('Single memory', 7, ['test']);
+      
+      await expect(memoryService.consolidateMemories([memory1.id]))
+        .rejects.toThrow('At least 2 memories are required for consolidation');
+    });
+
+    it('should clean up orphaned consolidations', async () => {
+      // This test would need to simulate orphaned consolidations
+      // For now, just test that the cleanup method exists and runs
+      const result = await memoryService.cleanupOrphanedConsolidations(1000);
+      expect(result).toHaveProperty('cleaned');
+      expect(result).toHaveProperty('errors');
+      expect(Array.isArray(result.errors)).toBe(true);
+    });
+  });
+
+  describe('Phase 4: Optimistic Locking for Race Conditions', () => {
+    it('should initialize new memories with version 1', async () => {
+      const memory = await memoryService.remember('Test version', 5, ['test']);
+      expect(memory.version).toBe(1);
+    });
+
+    it('should increment access count atomically', async () => {
+      const memory = await memoryService.remember('Test access count', 5, ['test']);
+      const initialVersion = memory.version;
+      
+      const retrieved = await memoryService.getMemory(memory.id);
+      
+      expect(retrieved).not.toBeNull();
+      expect(retrieved!.accessCount).toBe(memory.accessCount + 1);
+      expect(retrieved!.version).toBe(initialVersion! + 1);
+    });
+
+    it('should handle concurrent access gracefully', async () => {
+      const memory = await memoryService.remember('Concurrent test', 5, ['test']);
+      
+      // Simulate concurrent access (in real scenario, this would be from different processes)
+      const promises = Array.from({ length: 5 }, () => memoryService.getMemory(memory.id));
+      const results = await Promise.all(promises);
+      
+      // All should succeed
+      results.forEach(result => {
+        expect(result).not.toBeNull();
+        expect(result!.id).toBe(memory.id);
+      });
+    });
+  });
+
+  describe('Phase 4: Pagination for Scalability', () => {
+    beforeEach(async () => {
+      // Create multiple memories for pagination testing
+      for (let i = 0; i < 25; i++) {
+        await memoryService.remember(`Memory ${i}`, 5, ['pagination-test']);
+      }
+    });
+
+    it('should handle large collections in generateEmbeddingsForExisting', async () => {
+      const result = await memoryService.generateEmbeddingsForExisting(5);
+      
+      expect(result).toHaveProperty('processed');
+      expect(result).toHaveProperty('updated');
+      expect(result).toHaveProperty('errors');
+      expect(Array.isArray(result.errors)).toBe(true);
+    });
+
+    it('should use pagination in cleanup operations', async () => {
+      const result = await memoryService.cleanupOrphanedConsolidations(1000);
+      
+      // Should complete without errors even with many memories
+      expect(result).toHaveProperty('cleaned');
+      expect(result).toHaveProperty('errors');
+    });
+  });
+
+  describe('Phase 4: Knowledge Graph Features', () => {
+    let memory1: any, memory2: any, memory3: any;
+
+    beforeEach(async () => {
+      memory1 = await memoryService.remember('Graph node 1', 7, ['graph']);
+      memory2 = await memoryService.remember('Graph node 2', 6, ['graph']);
+      memory3 = await memoryService.remember('Graph node 3', 5, ['graph']);
+    });
+
+    it('should link memories bidirectionally', async () => {
+      const success = await memoryService.linkMemories(memory1.id, memory2.id);
+      expect(success).toBe(true);
+      
+      const updated1 = await memoryService.getMemory(memory1.id);
+      const updated2 = await memoryService.getMemory(memory2.id);
+      
+      expect(updated1!.relatedMemories).toContain(memory2.id);
+      expect(updated2!.relatedMemories).toContain(memory1.id);
+    });
+
+    it('should unlink memories bidirectionally', async () => {
+      // First link them
+      await memoryService.linkMemories(memory1.id, memory2.id);
+      
+      // Then unlink
+      const success = await memoryService.unlinkMemories(memory1.id, memory2.id);
+      expect(success).toBe(true);
+      
+      const updated1 = await memoryService.getMemory(memory1.id);
+      const updated2 = await memoryService.getMemory(memory2.id);
+      
+      expect(updated1!.relatedMemories || []).not.toContain(memory2.id);
+      expect(updated2!.relatedMemories || []).not.toContain(memory1.id);
+    });
+
+    it('should handle linking non-existent memories gracefully', async () => {
+      const success = await memoryService.linkMemories(memory1.id, 'non-existent');
+      expect(success).toBe(false);
+    });
+
+    it('should auto-link similar memories', async () => {
+      const result = await memoryService.autoLinkSimilarMemories(0.5, 2);
+      
+      expect(result).toHaveProperty('linked');
+      expect(result).toHaveProperty('errors');
+      expect(typeof result.linked).toBe('number');
+      expect(Array.isArray(result.errors)).toBe(true);
+    });
+
+    it('should get related memories through various connection types', async () => {
+      // Link some memories
+      await memoryService.linkMemories(memory1.id, memory2.id);
+      
+      const related = await memoryService.getRelatedMemories(memory1.id);
+      
+      expect(related).toHaveProperty('consolidatedFrom');
+      expect(related).toHaveProperty('consolidatedInto');
+      expect(related).toHaveProperty('similar');
+      expect(related).toHaveProperty('relatedByTags');
+      expect(Array.isArray(related.consolidatedFrom)).toBe(true);
+      expect(Array.isArray(related.consolidatedInto)).toBe(true);
+      expect(Array.isArray(related.similar)).toBe(true);
+      expect(Array.isArray(related.relatedByTags)).toBe(true);
+    });
+  });
+
+  describe('Phase 4: Similarity Scores Enhancement', () => {
+    let testMemory: any;
+
+    beforeEach(async () => {
+      testMemory = await memoryService.remember('Machine learning algorithms', 8, ['ml', 'algorithms']);
+      await memoryService.remember('Deep learning networks', 7, ['ml', 'deep-learning']);
+      await memoryService.remember('Natural language processing', 6, ['ml', 'nlp']);
+    });
+
+    it('should find similar memories with scores', async () => {
+      const similar = await memoryService.findSimilarMemoriesWithScores(testMemory.id, 0.0, 5);
+      
+      expect(Array.isArray(similar)).toBe(true);
+      similar.forEach(memory => {
+        expect(memory).toHaveProperty('similarity');
+        expect(typeof memory.similarity).toBe('number');
+        expect(memory.similarity).toBeGreaterThanOrEqual(-1.000001); // Full cosine similarity range  
+        expect(memory.similarity).toBeLessThanOrEqual(1.000001); // Allow floating point precision
+      });
+    });
+
+    it('should respect similarity threshold', async () => {
+      const similar = await memoryService.findSimilarMemoriesWithScores(testMemory.id, 0.9, 5);
+      
+      similar.forEach(memory => {
+        expect(memory.similarity).toBeGreaterThanOrEqual(0.9);
+      });
+    });
+
+    it('should maintain backward compatibility with findSimilarMemories', async () => {
+      const similar = await memoryService.findSimilarMemories(testMemory.id, 0.0, 5);
+      
+      expect(Array.isArray(similar)).toBe(true);
+      similar.forEach(memory => {
+        expect(memory).not.toHaveProperty('similarity');
+      });
+    });
+  });
+
+  describe('Phase 4: Batch Fetching Performance', () => {
+    let memoryIds: string[];
+
+    beforeEach(async () => {
+      memoryIds = [];
+      for (let i = 0; i < 10; i++) {
+        const memory = await memoryService.remember(`Batch memory ${i}`, 5, ['batch']);
+        memoryIds.push(memory.id);
+      }
+    });
+
+    it('should fetch multiple memories efficiently', async () => {
+      // Access the repository directly for this test
+      const memories = await (memoryService as any).memoryRepository.getManyByIds(memoryIds);
+      
+      expect(memories).toHaveLength(memoryIds.length);
+      memories.forEach((memory, index) => {
+        expect(memory.content).toBe(`Batch memory ${index}`);
+      });
+    });
+
+    it('should handle empty ID arrays', async () => {
+      const memories = await (memoryService as any).memoryRepository.getManyByIds([]);
+      expect(memories).toHaveLength(0);
+    });
+
+    it('should handle non-existent IDs gracefully', async () => {
+      const mixedIds = [memoryIds[0], 'non-existent', memoryIds[1]];
+      const memories = await (memoryService as any).memoryRepository.getManyByIds(mixedIds);
+      
+      expect(memories).toHaveLength(2);
+    });
+  });
+
+  describe('Phase 4: Proper Disposal Cleanup', () => {
+    it('should dispose gracefully', async () => {
+      // Test that dispose method exists and can be called
+      await expect(memoryService.dispose()).resolves.not.toThrow();
+    });
+
+    it('should handle disposal errors gracefully', async () => {
+      // Mock a disposal error scenario
+      const originalDispose = (memoryService as any).backgroundService.dispose;
+      (memoryService as any).backgroundService.dispose = vi.fn().mockRejectedValue(new Error('Disposal error'));
+      
+      await expect(memoryService.dispose()).rejects.toThrow('Disposal error');
+      
+      // Restore original method
+      (memoryService as any).backgroundService.dispose = originalDispose;
     });
   });
 });

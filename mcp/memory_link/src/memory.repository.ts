@@ -1,5 +1,5 @@
 import { DatabaseService, IDatabaseProvider } from '@mcp/database-services';
-import type { MemoryRecord } from '@mcp/shared-types';
+import type { MemoryRecord, MemorySearchResult } from '@mcp/shared-types';
 
 const MEMORIES_COLLECTION = 'memories';
 
@@ -32,6 +32,7 @@ export interface MemoryQuery {
     
     // Performance hints
     includeAccessTracking?: boolean; // Whether to update access stats during retrieval
+    includeSimilarityScores?: boolean; // Whether to include similarity scores in vector search results (Phase 4)
 }
 
 /**
@@ -100,6 +101,7 @@ export class MemoryRepository {
     /**
      * Find memories based on flexible query criteria
      * Phase 2: Implements text, vector, and hybrid search
+     * Phase 4: Optionally includes similarity scores in results
      * 
      * PERFORMANCE NOTE: This implementation loads all memories into memory
      * and performs search operations in-memory. For datasets >5-10K memories,
@@ -127,7 +129,7 @@ export class MemoryRepository {
                 if (!query.vectorQuery) {
                     throw new Error('Vector query is required for vector search strategy');
                 }
-                results = this.applyVectorSearch(allMemories, query.vectorQuery);
+                results = this.applyVectorSearch(allMemories, query.vectorQuery, query.includeSimilarityScores);
                 // Apply other filters (tags, importance, etc.) but skip text filter
                 const vectorOnlyQuery = { ...query, textQuery: undefined };
                 results = this.applyFilters(results, vectorOnlyQuery);
@@ -146,7 +148,7 @@ export class MemoryRepository {
 
                 // Get vector search results
                 const vectorQuery = { ...query, textQuery: undefined };
-                let vectorResults = this.applyVectorSearch(allMemories, query.vectorQuery);
+                let vectorResults = this.applyVectorSearch(allMemories, query.vectorQuery, query.includeSimilarityScores);
                 vectorResults = this.applyFilters(vectorResults, vectorQuery);
 
                 // Combine using RRF
@@ -197,18 +199,35 @@ export class MemoryRepository {
 
     /**
      * Apply vector search to memories
+     * Phase 4: Optionally preserve similarity scores in results
      * NOTE: This is an in-memory implementation for Phase 2 MVP
      * For production use with >5-10K memories, this should be replaced
      * with a proper vector database (e.g., Pinecone, Weaviate, PostgreSQL with pgvector)
      */
-    private applyVectorSearch(memories: MemoryRecord[], queryEmbedding: number[]): MemoryRecord[] {
-        return memories
+    private applyVectorSearch(memories: MemoryRecord[], queryEmbedding: number[], includeSimilarityScores: boolean = false): MemoryRecord[] {
+        const memoriesWithSimilarity = memories
             .filter(memory => memory.embedding) // Only memories with embeddings
-            .map(memory => ({
-                ...memory,
-                similarity: this.calculateCosineSimilarity(queryEmbedding, memory.embedding!)
-            }))
-            .sort((a, b) => (b as any).similarity - (a as any).similarity); // Sort by similarity descending
+            .map(memory => {
+                const similarity = this.calculateCosineSimilarity(queryEmbedding, memory.embedding!);
+                return includeSimilarityScores ? 
+                    { ...memory, similarity } as MemorySearchResult :
+                    { ...memory, _tempSimilarity: similarity };
+            })
+            .sort((a, b) => {
+                const simA = (a as any).similarity || (a as any)._tempSimilarity;
+                const simB = (b as any).similarity || (b as any)._tempSimilarity;
+                return simB - simA;
+            });
+
+        // Clean up temporary similarity scores if not preserving them
+        if (!includeSimilarityScores) {
+            return memoriesWithSimilarity.map(memory => {
+                const { _tempSimilarity, ...cleanMemory } = memory as any;
+                return cleanMemory;
+            });
+        }
+
+        return memoriesWithSimilarity;
     }
 
     /**
@@ -357,5 +376,34 @@ export class MemoryRepository {
     async exists(id: string): Promise<boolean> {
         const memory = await this.getById(id);
         return memory !== null;
+    }
+
+    /**
+     * Get multiple memories by their IDs (Phase 4: Performance optimization)
+     * This method reduces the number of database round-trips when fetching multiple memories
+     */
+    async getManyByIds(ids: string[]): Promise<MemoryRecord[]> {
+        if (ids.length === 0) {
+            return [];
+        }
+
+        const provider = this.ensureProvider();
+        const results: MemoryRecord[] = [];
+        
+        // For now, we'll use multiple individual queries since the interface doesn't support batch gets
+        // In a production environment, this should be optimized to use a single query
+        for (const id of ids) {
+            try {
+                const memory = await provider.read<MemoryRecord>(MEMORIES_COLLECTION, id);
+                if (memory) {
+                    results.push(memory);
+                }
+            } catch (error) {
+                console.error(`Failed to fetch memory ${id}:`, error);
+                // Continue with other IDs even if one fails
+            }
+        }
+
+        return results;
     }
 }

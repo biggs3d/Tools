@@ -9,7 +9,25 @@ export interface EmbeddingConfig {
     similarityThreshold: number;
 }
 
-export function getAppConfig(): { dbConfig: IDatabaseConfig; embeddingConfig: EmbeddingConfig } {
+export interface BackgroundProcessingConfig {
+    maxOperationsPerRun: number;
+    maxTimePerRun: number;
+    enableEmbeddingBackfill: boolean;
+    enableImportanceDecay: boolean;
+}
+
+export interface MCPResponseConfig {
+    tokenLimit: number;
+    tokenBuffer: number;
+    fullMemoryTokenThreshold: number;
+}
+
+export function getAppConfig(): { 
+    dbConfig: IDatabaseConfig; 
+    embeddingConfig: EmbeddingConfig; 
+    backgroundConfig: BackgroundProcessingConfig;
+    mcpResponseConfig: MCPResponseConfig;
+} {
     const dbConfig = loadDatabaseConfig();
 
     // Set default to json-file if not specified
@@ -30,8 +48,24 @@ export function getAppConfig(): { dbConfig: IDatabaseConfig; embeddingConfig: Em
         similarityThreshold: parseFloat(process.env.SIMILARITY_THRESHOLD || '0.7')
     };
 
+    // Phase 4: Centralized background processing configuration
+    const backgroundConfig: BackgroundProcessingConfig = {
+        maxOperationsPerRun: parseInt(process.env.BG_MAX_OPERATIONS || '5'),
+        maxTimePerRun: parseInt(process.env.BG_MAX_TIME_MS || '2000'),
+        enableEmbeddingBackfill: process.env.BG_ENABLE_EMBEDDING_BACKFILL !== 'false',
+        enableImportanceDecay: process.env.BG_ENABLE_IMPORTANCE_DECAY !== 'false'
+    };
+
+    const mcpResponseConfig: MCPResponseConfig = {
+        tokenLimit: parseInt(process.env.MCP_TOKEN_LIMIT || '25000'),
+        tokenBuffer: parseInt(process.env.MCP_TOKEN_BUFFER || '2000'), // Increased safety margin from 1000 to 2000
+        fullMemoryTokenThreshold: parseFloat(process.env.MCP_FULL_MEMORY_TOKEN_THRESHOLD || '0.7')
+    };
+
     return {
         dbConfig,
         embeddingConfig,
+        backgroundConfig,
+        mcpResponseConfig,
     };
 }

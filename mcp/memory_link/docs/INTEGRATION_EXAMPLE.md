@@ -77,29 +77,57 @@ remember({
 
 1. **Claude checks memories at start:**
 ```javascript
-// Automatic checks when starting work
-recall({ tags: ["user_preference"] })
+// Text search for exact user preferences
+recall({ 
+    query: "arrow functions", 
+    search_type: "text",
+    tags: ["user_preference"] 
+})
 // => Finds: "User prefers arrow functions for React components"
 
-recall({ tags: ["project:myapp"] })  
-// => Finds: Tech stack, auth pattern, Tailwind lesson
+// Semantic search for project concepts  
+recall({ 
+    query: "authentication patterns", 
+    search_type: "semantic",
+    tags: ["project:myapp"] 
+})
+// => Finds: useAuth hook usage, login flows, auth-related patterns
 
-recall({ query: "component", tags: ["pattern", "project:myapp"] })
-// => Finds: Component patterns specific to this project
+// Hybrid search for component patterns (best approach)
+recall({ 
+    query: "component architecture", 
+    search_type: "hybrid",
+    tags: ["pattern", "project:myapp"],
+    limit: 5
+})
+// => Combines exact matches + conceptually similar memories
 ```
 
-2. **Combined knowledge from both systems:**
-- CLAUDE.md: "Use functional components" (static rule)
-- Memory: "User prefers arrow functions" (personal preference)
-- Result: Creates components using arrow function syntax
+2. **Semantic discovery of related knowledge:**
+```javascript
+// User asks: "How should I handle form state?"
+recall({ 
+    query: "form state management", 
+    search_type: "semantic"
+})
+// => Discovers: form validation patterns, useAuth hook, state patterns
+// Even if exact "form state" wasn't mentioned before!
+```
 
-3. **New learning gets saved:**
+3. **Combined knowledge from both systems:**
+- CLAUDE.md: "Use functional components" (static rule)
+- Memory (text): "User prefers arrow functions" (exact preference)
+- Memory (semantic): Related component patterns, state management approaches
+- Result: Creates components using arrow function syntax with appropriate state patterns
+
+4. **New learning gets saved with embedding:**
 ```javascript
 remember({
     content: "MyApp's form validation uses react-hook-form with yup schemas stored in /src/schemas",
     importance: 6,
     tags: ["project:myapp", "pattern", "forms", "validation"]
 })
+// => Automatically generates embedding for future semantic search
 ```
 
 ### Cross-Project Benefits
@@ -107,14 +135,31 @@ remember({
 When starting a NEW React project:
 
 ```javascript
-recall({ tags: ["user_preference", "react"] })
-// Returns: Arrow function preference, other React preferences
+// Get exact user preferences (text search)
+recall({ 
+    query: "preferences", 
+    search_type: "text",
+    tags: ["user_preference", "react"] 
+})
+// Returns: Arrow function preference, specific coding style choices
 
-recall({ tags: ["lesson_learned", "react"] })
-// Returns: Tailwind concatenation issue, other React learnings
+// Find conceptually related lessons (semantic search)
+recall({ 
+    query: "common React pitfalls", 
+    search_type: "semantic",
+    tags: ["lesson_learned"] 
+})
+// Returns: Tailwind concatenation issue, useEffect cleanup, state management lessons
+// Even if they weren't tagged with "react" specifically!
 
-recall({ query: "setup", tags: ["pattern", "react"] })
-// Returns: Common setup patterns from all React projects
+// Get comprehensive setup knowledge (hybrid search)
+recall({ 
+    query: "project initialization", 
+    search_type: "hybrid",
+    tags: ["pattern"],
+    limit: 10
+})
+// Returns: Setup patterns from all React projects + conceptually similar setup steps
 ```
 
 ### Memory Lifecycle Example
@@ -168,19 +213,66 @@ update_memory({
 - "React Query devtools activated with cmd+shift+Q"
 - "Use npm run test:watch for TDD workflow"
 
+### Phase 2 Features in Action
+
+1. **Upgrading existing memories to semantic search:**
+```javascript
+// After setting up Gemini API, generate embeddings for existing memories
+generate_embeddings_for_existing({ batch_size: 10 })
+// => Processes memories in batches, generates embeddings for semantic search
+```
+
+2. **Smart discovery through semantic search:**
+```javascript
+// User: "I'm having trouble with component re-renders"
+recall({ 
+    query: "performance optimization", 
+    search_type: "semantic"
+})
+// => Finds: React.memo patterns, useCallback lessons, memoization strategies
+// Even if previous memories used different terminology!
+```
+
+3. **Hybrid search for comprehensive results:**
+```javascript
+// Working on authentication
+recall({ 
+    query: "login security", 
+    search_type: "hybrid",
+    limit: 8  
+})
+// => Text matches: "login", "security", "auth" 
+// => Semantic matches: JWT handling, password validation, session management
+// => Combined with RRF algorithm for best ranking
+```
+
 ### Smart Integration Features
 
 1. **Memory-aware CLAUDE.md suggestions:**
    - After accumulating several project patterns, suggest CLAUDE.md updates
    - Flag conflicts between memories and CLAUDE.md
+   - Use semantic search to find related patterns across projects
 
-2. **Context-sensitive recall:**
-   - Working on auth? Auto-recall auth-related memories
-   - In a test file? Recall testing patterns
-   - Error occurs? Search for similar error solutions
+2. **Context-sensitive recall with semantic understanding:**
+   - Working on auth? Semantic search finds authentication, security, login patterns
+   - In a test file? Finds testing, validation, assertion patterns
+   - Error occurs? Semantic search discovers similar error solutions and debugging approaches
 
-3. **Memory inheritance:**
-   - New React project? Inherit applicable React memories
-   - But NOT project-specific ones from other projects
+3. **Memory inheritance with intelligent filtering:**
+   - New React project? Semantic search identifies applicable React patterns
+   - Excludes project-specific memories through tag filtering
+   - Discovers conceptually similar patterns from other frameworks
 
-This integration creates a dynamic knowledge system that learns and adapts while respecting project-specific rules and user preferences.
+4. **Automatic embedding generation:**
+   - All new memories get embeddings for future semantic search
+   - Background processing can fill in missing embeddings
+   - Graceful fallback to text search if embedding generation fails
+
+### Performance & Scalability Notes
+
+- **Embedding Generation**: ~450ms per memory (batched for efficiency)
+- **Search Performance**: Hybrid search balances accuracy and speed
+- **Memory Efficiency**: Embeddings cached in memory for fast similarity calculations
+- **Gradual Enhancement**: Text search always works, semantic search adds intelligence when available
+
+This integration creates a dynamic, intelligent knowledge system that learns and adapts while respecting project-specific rules and user preferences. The semantic capabilities make knowledge discovery more natural and comprehensive.

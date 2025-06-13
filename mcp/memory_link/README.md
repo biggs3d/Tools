@@ -1,171 +1,335 @@
-# `memory_link`: Development Plan
+# Memory Link MCP Server
 
-A phased development plan for creating a focused, persistent memory MCP server.
+A persistent, semantic memory system for AI agents that enables learning and knowledge retention across sessions.
 
-## 1. Vision & Core Goals
+## Overview
 
-The primary vision is to distill the powerful but complex concepts from the ./references/ `McpMemoryServer` draft into a practical,
-self-contained, and immediately useful MCP tool. This server will act as a persistent, queryable memory store for an AI
-agent, enabling it to learn and retain information across sessions.
+Memory Link provides intelligent memory storage and retrieval capabilities through the Model Context Protocol (MCP). It combines traditional text search with advanced semantic search using Google's Gemini embeddings to help AI agents remember and recall information effectively.
 
-Our development will be guided by these core principles:
+## Features
 
-* **Focused & Pragmatic:** Start with a simple, robust core. Each phase should deliver a tangible, usable improvement.
-* **Leverage Existing Work:** Make full use of the excellent, modular `../../packages/` libraries already designed:
-  `@mcp/database-services` for storage and `@mcp/llm-package` for intelligence.
-* **Phased & Iterative:** Build in manageable stages, allowing for thorough testing and refinement at each step before adding
-  more complexity.
+### ✅ Phase 1: Core Memory Operations
+- **Persistent Storage**: Store memories with content, importance scores (0-10), and tags
+- **Flexible Search**: Find memories using text-based keyword search
+- **Memory Management**: Create, update, delete, and list memories
+- **Multiple Storage Backends**: JSON files, SQLite, MongoDB support via `@mcp/database-services`
 
-## 2. High-Level Architecture
+### ✅ Phase 2: Semantic Intelligence  
+- **Vector Embeddings**: Automatic embedding generation using Google Gemini API
+- **Semantic Search**: Find conceptually similar memories, not just keyword matches
+- **Hybrid Search**: Combines text and semantic search using Reciprocal Rank Fusion
+- **Smart Backfilling**: Tool to generate embeddings for existing memories
 
-The `memory_link` server will be a self-contained MCP application that integrates with your existing packages.
+### 🚧 Phase 3: Advanced Memory Management (In Development)
+- **Memory Consolidation**: Merge similar memories into higher-level concepts
+- **Memory Linking**: Create knowledge graphs connecting related memories
+- **Background Processing**: Automatic maintenance and optimization
 
-```mermaid
-graph TD
-    subgraph "AI Agent (e.g., Claude)"
-        A[Agent]
-    end
+## Installation & Setup
 
-    subgraph "MCP"
-        M(MCP Protocol)
-    end
+### Prerequisites
+- Node.js 18+
+- Google Gemini API key (for semantic search features)
 
-    subgraph "memory_link Server"
-        ML[memory_link] --> MS[MemoryService]
-        MS --> DB[DatabaseService]
-    end
-
-    subgraph "Storage (from @mcp/database-services)"
-        DB --> DBP[JsonFileProvider / SQLiteProvider]
-    end
-
-    subgraph "External Services (Optional)"
-        MS --> LLM["llm-package / gemini_bridge"]
-    end
-
-    A -- MCP Tools --> M
-    M -- JSON - RPC --> ML
+### Install Dependencies
+```bash
+cd /path/to/memory_link
+npm install
 ```
 
-## 3. Development Phases
+### Configuration
+Create a `.env` file with your configuration:
+```env
+# Required for semantic search (Phase 2 features)
+GEMINI_API_KEY=your_gemini_api_key_here
 
-### Phase 1: The Core Memory Service (Foundation)
+# Database configuration (defaults to JSON file storage)  
+DATABASE_TYPE=json-file
+DATABASE_PATH=./data
 
-**Goal:** Establish a simple, robust, document-based memory store. This phase focuses on creating, retrieving, updating,
-and deleting memories.
+# Optional: Embedding configuration
+EMBEDDING_MODEL=text-embedding-004
+EMBEDDING_BATCH_SIZE=10
+SIMILARITY_THRESHOLD=0.7
+```
 
-#### Data Model
+### Build the Server
+```bash
+npm run build
+```
 
-A single, flexible `MemoryRecord` will be the core data structure.
-
-```typescript
-export interface MemoryRecord {
-    /** A unique UUID for the memory. */
-    id: string;
-    /** The core text content of the memory. */
-    content: string;
-    /** A 0-10 score of the memory's importance. */
-    importance: number;
-    /** An array of strings for categorization and filtering. */
-    tags: string[];
-    /** Vector embedding for semantic search (added in Phase 2). */
-    embedding?: number[];
-    /** ISO timestamp of when the memory was created. */
-    createdAt: string;
-    /** ISO timestamp of the last time the memory was accessed. */
-    lastAccessed: string;
-    /** A simple counter for how many times the memory has been accessed. */
-    accessCount: number;
+### Add to Claude Code
+Add to your `.mcp.json` configuration:
+```json
+{
+  "mcpServers": {
+    "memory-link": {
+      "command": "node",
+      "args": ["/path/to/memory_link/index.js"],
+      "cwd": "/path/to/memory_link",
+      "env": {
+        "GEMINI_API_KEY": "your_api_key_here"
+      }
+    }
+  }
 }
 ```
 
-#### MCP Tools (V1)
+## Available Tools
 
-* `remember(content: string, importance: number, tags: string[])`: Creates and stores a new `MemoryRecord`.
-* `recall(query: string, tags?: string[], limit?: number)`: Performs a simple keyword-based search on memory `content`
-  and `tags`.
-* `get_memory(id: string)`: Retrieves a single memory by its unique ID.
-* `list_memories(tags?: string[], limit?: number, sortBy?: 'createdAt'|'lastAccessed'|'importance')`: Lists memories
-  with filtering and sorting.
-* `update_memory(id: string, content?: string, importance?: number, tags?: string[])`: Modifies an existing memory.
-* `forget(id: string)`: Deletes a memory by its ID.
+### Core Memory Operations
 
----
+#### `remember`
+Store new information as a memory.
+```javascript
+// Basic usage
+remember({
+  content: "Claude Code supports MCP servers for extending functionality",
+  importance: 8,
+  tags: ["claude-code", "mcp", "tools"]
+})
 
-### Phase 2: Enhanced Retrieval & Simple Decay
+// High importance lesson learned
+remember({
+  content: "Always use index.js wrapper for MCP servers to handle stdio properly",
+  importance: 9,
+  tags: ["mcp", "architecture", "lesson-learned"]
+})
+```
 
-**Goal:** Make the memory "smarter" by introducing semantic search and a basic mechanism for forgetting less important
-information over time.
+#### `recall`
+Search for relevant memories using text, semantic, or hybrid search.
+```javascript
+// Text search (keyword matching)
+recall({
+  query: "MCP server setup",
+  search_type: "text",
+  limit: 5
+})
 
-#### Key Features
+// Semantic search (conceptual similarity)  
+recall({
+  query: "debugging connection issues",
+  search_type: "semantic",
+  limit: 10
+})
 
-1. **Vector Search Integration:**
-    * **On `remember`:** When a memory is created, use the `llm-package` (or `gemini_bridge`) to generate a vector
-      embedding for the `content` and store it in the `MemoryRecord`.
-    * **On `recall`:** The `recall` tool will first generate an embedding for the search `query`. It will then perform a
-      cosine similarity search against all stored embeddings to find the most semantically relevant memories, returning
-      them ranked by similarity.
+// Hybrid search (best of both - default)
+recall({
+  query: "how to configure tools",
+  search_type: "hybrid",
+  tags: ["configuration"],
+  limit: 5
+})
+```
 
-2. **Simple Importance Decay:**
-    * Implement a periodic background process (e.g., `setInterval`) that runs every time it's accessed.
-    * This process iterates through all memories and applies a decay function to their `importance` score based on
-      `lastAccessed` and `accessCount`.
-    * Memories that fall below a configured importance threshold (e.g., 1.0) are automatically deleted / consolidated.
+#### `get_memory`
+Retrieve a specific memory by ID.
+```javascript
+get_memory({ id: "uuid-of-memory" })
+```
 
-#### MCP Tool Updates (V2)
+#### `list_memories`
+List memories with filtering and sorting.
+```javascript
+// List recent memories
+list_memories({
+  sortBy: "createdAt",
+  limit: 10
+})
 
-* `recall`: Logic is upgraded to use vector search for superior semantic retrieval.
-* `recalculate_importance(id: string)`: A new manual tool to re-run the importance scoring algorithm on a specific
-  memory.
-* `run_decay_cycle()`: A new manual tool to trigger the decay and pruning process on demand.
+// List high-importance memories for a project
+list_memories({
+  tags: ["project:my-app"],
+  sortBy: "importance",
+  limit: 20
+})
+```
 
----
+#### `update_memory`
+Modify existing memories.
+```javascript
+update_memory({
+  id: "memory-uuid",
+  content: "Updated information about MCP setup process",
+  importance: 9,
+  tags: ["mcp", "setup", "updated"]
+})
+```
 
-### Phase 3: Advanced Concepts (Consolidation & Linking)
+#### `forget`
+Delete a memory permanently.
+```javascript
+forget({ id: "memory-uuid" })
+```
 
-**Goal:** Introduce the ability to create higher-level, abstract memories from clusters of related, lower-level
-memories. This mirrors the concept of short-term to long-term memory consolidation.
+### Advanced Tools
 
-#### Key Features
+#### `generate_embeddings_for_existing`
+Generate embeddings for memories that don't have them yet (useful when upgrading from Phase 1 to Phase 2).
+```javascript
+generate_embeddings_for_existing({ batch_size: 10 })
+```
 
-1. **Memory Consolidation:**
-    * A new `consolidate_memories` tool will identify a cluster of related memories (using vector search from Phase 2).
-    * It will send the content of these memories to a powerful LLM (like `gemini-bridge`).
-    * The LLM will be prompted to generate a concise, abstract principle or summary from the provided memories.
-    * This summary is then stored as a *new* `MemoryRecord` with a high importance score and a `consolidated` tag.
+## Search Types Explained
 
-2. **Memory Linking:**
-    * To create a simple knowledge graph, the new consolidated memory will store the IDs of its sources in a metadata
-      field (e.g., `source_ids: ['id1', 'id2']`).
-    * This creates a traceable link from an abstract principle back to the concrete observations that formed it, without
-      the initial overhead of a dedicated graph database.
+### Text Search (`search_type: "text"`)
+- Traditional keyword matching
+- Fast and efficient
+- Best for specific terms and exact phrases
+- Searches memory content and tags
 
-#### MCP Tool Updates (V3)
+### Semantic Search (`search_type: "semantic"`)  
+- AI-powered conceptual understanding
+- Finds memories with similar meaning, not just matching words
+- Requires Gemini API key and embeddings
+- Best for exploring related concepts
 
-* `consolidate_memories(topic: string)`: A new tool that finds related memories on a given topic and attempts to create
-  a new, more abstract summary memory from them.
-* `get_related_memories(id: string)`: A new tool that, given a memory ID, can trace its lineage—finding the source
-  memories it was built from or the consolidated memory it contributed to.
+### Hybrid Search (`search_type: "hybrid"`) - **Recommended**
+- Combines text and semantic search results
+- Uses Reciprocal Rank Fusion (RRF) algorithm
+- Provides both precise matches and conceptual relations
+- Balances speed and intelligence
 
-## 4. Synergy with Other MCP Tools
+## Usage Patterns
 
-This architecture is designed for powerful interoperability between your tools:
+### For Learning & Development
+```javascript
+// Store lessons learned
+remember({
+  content: "When MCP server shows 'Connection closed', check for runtime errors in server startup",
+  importance: 9,
+  tags: ["debugging", "mcp", "lesson-learned"]
+})
 
-* **`browser_debug` -> `memory_link`**: The browser debugger can capture key console errors or user interactions and use
-  `memory_link.remember()` to create a persistent record of the event for the AI to learn from.
-* **`memory_link` -> `gemini_bridge`**: The memory server can offload heavy-duty AI tasks (embedding generation,
-  consolidation, abstraction) to the `gemini_bridge`, keeping its own logic focused on memory management and retrieval.
-    * NOTE: The 'gemini_bridge' cannot be used as a general purpose llm bridge yet, but check out the llm-package for
-    possible usage, or consolidation, or just planning/reference.
+// Recall similar issues
+recall({
+  query: "connection problems",
+  search_type: "semantic",
+  tags: ["debugging"]
+})
+```
 
-## 5. Future Considerations (Beyond Phase 3)
+### For Project Knowledge
+```javascript
+// Store project-specific information
+remember({
+  content: "This React app uses Vite for development, React Router v6, and Tailwind for styling",
+  importance: 7,
+  tags: ["project:my-react-app", "architecture", "tech-stack"]
+})
 
-This plan provides a solid foundation. Once these phases are complete, we can explore the more advanced concepts from
-the original `McpMemoryServer` draft:
+// Find project context
+recall({
+  query: "react app setup",
+  tags: ["project:my-react-app"]
+})
+```
 
-* **Dedicated Knowledge Graph:** Migrating from linked documents to a true graph database (e.g., Neo4j) for complex
-  relationship queries.
-* **Explicit Memory Layers:** Evolving from a single collection with metadata to separate storage for short, medium, and
-  long-term memories if performance requires it.
-* **Advanced Analytics & UI:** Building tools to visualize the memory graph, track importance decay, and analyze
-  learning patterns over time.
+### For User Preferences
+```javascript
+// Remember user preferences
+remember({
+  content: "User prefers concise code comments and TypeScript strict mode enabled",
+  importance: 6,
+  tags: ["user-preference", "coding-style"]
+})
+```
+
+## Performance Notes
+
+- **Embedding Generation**: ~450ms per memory (acceptable for background processing)
+- **Search Performance**: Hybrid search balances speed and accuracy
+- **Storage**: Efficient JSON-based storage with optional SQLite/MongoDB backends
+- **Memory Usage**: Embeddings cached in memory for fast similarity calculations
+
+## Testing
+
+Run the test suite:
+```bash
+# All tests
+npm test
+
+# Smoke test (basic functionality)
+npm run test:smoke
+
+# Integration tests  
+npm run test:integration
+
+# Semantic search tests (requires API key)
+npm run test:semantic
+```
+
+## Architecture
+
+### Components
+- **MCP Server**: Tool registration and protocol handling
+- **Memory Service**: Core business logic and search algorithms  
+- **Database Service**: Abstracted storage layer (`@mcp/database-services`)
+- **Embedding Service**: Google Gemini integration for vector generation
+
+### Data Flow
+1. **Storage**: Memories stored with content, metadata, and optional embeddings
+2. **Search**: Query → embedding generation → similarity calculation → ranking
+3. **Hybrid Fusion**: Text and semantic results combined using RRF algorithm
+
+### File Structure
+```
+memory_link/
+├── index.js              # MCP stdio wrapper (entry point)
+├── src/
+│   ├── server.ts         # MCP server and tool definitions  
+│   ├── memory.service.ts # Core memory logic and search
+│   └── config.ts         # Configuration management
+├── test/                 # Comprehensive test suite
+├── data/                 # Memory storage (created automatically)
+└── docs/                 # Additional documentation
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**"Connection closed" errors:**
+- Ensure using `index.js` as entry point, not `server.js` directly
+- Check server starts without errors: `node index.js`
+- Verify environment variables are properly loaded
+
+**Semantic search not working:**
+- Confirm `GEMINI_API_KEY` is set in `.env` or MCP configuration
+- Run `generate_embeddings_for_existing` for existing memories
+- Check API key permissions and quota
+
+**Poor search results:**
+- Try different `search_type` values (text/semantic/hybrid)
+- Adjust `SIMILARITY_THRESHOLD` in configuration
+- Use more specific tags for filtering
+
+### Debug Mode
+Run server directly to see detailed logs:
+```bash
+cd /path/to/memory_link
+node index.js
+```
+
+## Roadmap
+
+### Phase 3: Advanced Memory Management
+- **Memory Consolidation**: Automatically merge similar memories into higher-level concepts
+- **Memory Linking**: Create knowledge graphs showing relationships between memories  
+- **Background Processing**: Automatic maintenance, embedding generation, and optimization
+- **Advanced Analytics**: Memory usage patterns and importance decay
+
+### Future Enhancements
+- **Visual Memory Browser**: Web interface for exploring memory relationships
+- **Advanced Decay Models**: Sophisticated importance recalculation based on access patterns
+- **Memory Compression**: Efficient storage of large memory collections
+- **Multi-tenant Support**: Separate memory spaces for different projects/users
+
+## Contributing
+
+This is part of a larger MCP server ecosystem. See the main project documentation for contributing guidelines and development patterns.
+
+## License
+
+[Add your license information here]
