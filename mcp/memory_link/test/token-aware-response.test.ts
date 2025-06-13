@@ -8,7 +8,7 @@ import {
     formatTokenAwareResponse,
     cleanup as cleanupTokenizer 
 } from '../src/lib/token-utils.js';
-import type { MemoryRecord, MemorySearchResult } from '@biggs3d/shared-types';
+import type { CleanMemoryRecord, CleanMemorySearchResult } from '@mcp/shared-types';
 import type { MCPResponseConfig } from '../src/config.js';
 
 const testConfig: MCPResponseConfig = {
@@ -69,7 +69,7 @@ describe('Token-aware Response System', () => {
 
     describe('Memory Summary Creation', () => {
         it('should create summary from memory record', () => {
-            const memory: MemoryRecord = {
+            const memory: CleanMemoryRecord = {
                 id: 'test-123',
                 content: 'This is a long memory content that should be truncated in the summary to keep token count low.',
                 importance: 8,
@@ -77,7 +77,7 @@ describe('Token-aware Response System', () => {
                 createdAt: new Date().toISOString(),
                 lastAccessed: new Date().toISOString(),
                 accessCount: 5,
-                relatedMemories: ['related-1', 'related-2']
+                relatedCount: 2
             };
 
             const summary = createMemorySummary(memory);
@@ -89,7 +89,7 @@ describe('Token-aware Response System', () => {
         });
 
         it('should include similarity score when present', () => {
-            const searchResult: MemorySearchResult = {
+            const searchResult: CleanMemorySearchResult = {
                 id: 'test-456',
                 content: 'Memory with similarity',
                 importance: 7,
@@ -106,7 +106,7 @@ describe('Token-aware Response System', () => {
     });
 
     describe('Token-aware Response Building', () => {
-        const createTestMemory = (id: string, importance: number, contentLength: number = 100): MemoryRecord => ({
+        const createTestMemory = (id: string, importance: number, contentLength: number = 100): CleanMemoryRecord => ({
             id,
             content: 'x'.repeat(contentLength),
             importance,
@@ -147,7 +147,7 @@ describe('Token-aware Response System', () => {
         });
 
         it('should prioritize by similarity when available', () => {
-            const searchResults: MemorySearchResult[] = [
+            const searchResults: CleanMemorySearchResult[] = [
                 { ...createTestMemory('low-sim', 7), similarity: 0.6 },
                 { ...createTestMemory('high-sim', 7), similarity: 0.95 },
                 { ...createTestMemory('med-sim', 7), similarity: 0.75 }

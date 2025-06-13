@@ -118,15 +118,14 @@ describe('E2E Semantic Search Test', { timeout: 30000 }, () => {
       }
     });
 
-    const semanticMemories = JSON.parse(semanticResult.content[0].text);
-    expect(semanticMemories.length).toBeGreaterThan(0);
+    const semanticText = semanticResult.content[0].text;
+    expect(semanticText).toContain('Found');
+    expect(semanticText).toContain('memories');
     
-    // Should find animal-related content
-    const animalContent = semanticMemories.filter(m => 
-      m.content.includes('Dogs') || m.content.includes('Cats')
-    );
-    expect(animalContent.length).toBeGreaterThan(0);
-    console.log(`Found ${animalContent.length} animal-related memories via semantic search`);
+    // Should find animal-related content in the formatted response
+    const hasAnimalContent = semanticText.includes('Dogs') || semanticText.includes('Cats');
+    expect(hasAnimalContent).toBe(true);
+    console.log('Found animal-related memories via semantic search in formatted response');
 
     // Step 3: Test hybrid search combining text and semantic
     console.log('Testing hybrid search...');
@@ -140,15 +139,14 @@ describe('E2E Semantic Search Test', { timeout: 30000 }, () => {
       }
     });
 
-    const hybridMemories = JSON.parse(hybridResult.content[0].text);
-    expect(hybridMemories.length).toBeGreaterThan(0);
+    const hybridText = hybridResult.content[0].text;
+    expect(hybridText).toContain('Found');
+    expect(hybridText).toContain('memories');
     
-    // Should find JavaScript content
-    const programmingContent = hybridMemories.filter(m => 
-      m.content.includes('JavaScript') || m.content.includes('programming')
-    );
-    expect(programmingContent.length).toBeGreaterThan(0);
-    console.log(`Found ${programmingContent.length} programming-related memories via hybrid search`);
+    // Should find JavaScript content in the formatted response
+    const hasProgrammingContent = hybridText.includes('JavaScript') || hybridText.includes('programming');
+    expect(hasProgrammingContent).toBe(true);
+    console.log('Found programming-related memories via hybrid search in formatted response');
 
     // Step 4: Test text-only search for comparison
     console.log('Testing text-only search...');
@@ -162,10 +160,11 @@ describe('E2E Semantic Search Test', { timeout: 30000 }, () => {
       }
     });
 
-    const textMemories = JSON.parse(textResult.content[0].text);
-    expect(textMemories.length).toBeGreaterThan(0);
-    expect(textMemories.some(m => m.content.includes('faithful'))).toBe(true);
-    console.log(`Found ${textMemories.length} memories with exact text match`);
+    const textText = textResult.content[0].text;
+    expect(textText).toContain('Found');
+    expect(textText).toContain('memories');
+    expect(textText.includes('faithful')).toBe(true);
+    console.log('Found memories with exact text match in formatted response');
 
     // Step 5: Clean up - delete all created memories
     console.log('Cleaning up test memories...');
@@ -191,8 +190,8 @@ describe('E2E Semantic Search Test', { timeout: 30000 }, () => {
       }
     });
 
-    const remainingMemories = JSON.parse(cleanupCheck.content[0].text);
-    expect(remainingMemories.length).toBe(0);
+    const cleanupText = cleanupCheck.content[0].text;
+    expect(cleanupText).toContain('Found 0 memories');
     console.log('✅ All test memories successfully cleaned up');
   });
 });

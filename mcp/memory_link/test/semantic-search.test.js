@@ -116,14 +116,12 @@ describe('Semantic Search Integration Tests', () => {
         }
       });
 
-      const memories = JSON.parse(result.content[0].text);
-      expect(memories.length).toBeGreaterThan(0);
+      const responseText = result.content[0].text;
+      expect(responseText).toContain('Found');
+      expect(responseText).toContain('memories');
       
       // Should find animal-related content even if it doesn't contain "pets"
-      const animalContent = memories.filter(m => 
-        m.content.includes('Dogs')
-      );
-      expect(animalContent.length).toBeGreaterThan(0);
+      expect(responseText.includes('Dogs')).toBe(true);
     });
 
     it('should find programming-related content semantically', { timeout: 30000 }, async () => {
@@ -137,15 +135,13 @@ describe('Semantic Search Integration Tests', () => {
         }
       });
 
-      const memories = JSON.parse(result.content[0].text);
-      expect(memories.length).toBeGreaterThan(0);
+      const responseText = result.content[0].text;
+      expect(responseText).toContain('Found');
+      expect(responseText).toContain('memories');
       
       // Should find programming languages
-      const programmingContent = memories.filter(m => 
-        m.content.includes('JavaScript') || 
-        m.content.includes('TypeScript')
-      );
-      expect(programmingContent.length).toBeGreaterThan(0);
+      const hasProgrammingContent = responseText.includes('JavaScript') || responseText.includes('TypeScript');
+      expect(hasProgrammingContent).toBe(true);
     });
 
     it('should show difference between text and semantic search', { timeout: 30000 }, async () => {
@@ -169,16 +165,14 @@ describe('Semantic Search Integration Tests', () => {
         }
       });
 
-      const textMemories = JSON.parse(textResult.content[0].text);
-      const semanticMemories = JSON.parse(semanticResult.content[0].text);
+      const textResponse = textResult.content[0].text;
+      const semanticResponse = semanticResult.content[0].text;
 
       // Text search should find exact match
-      expect(textMemories.some(m => m.content.includes('faithful'))).toBe(true);
+      expect(textResponse.includes('faithful')).toBe(true);
       
       // Semantic search should find related concepts
-      expect(semanticMemories.some(m => 
-        m.content.includes('Dogs')
-      )).toBe(true);
+      expect(semanticResponse.includes('Dogs')).toBe(true);
     });
 
     it('should demonstrate hybrid search combining both approaches', { timeout: 30000 }, async () => {
@@ -191,17 +185,13 @@ describe('Semantic Search Integration Tests', () => {
         }
       });
 
-      const memories = JSON.parse(hybridResult.content[0].text);
-      expect(memories.length).toBeGreaterThan(0);
+      const hybridResponse = hybridResult.content[0].text;
+      expect(hybridResponse).toContain('Found');
+      expect(hybridResponse).toContain('memories');
       
       // Should find both exact matches and semantically related content
-      const hasExactMatch = memories.some(m => 
-        m.content.includes('programming language')
-      );
-      const hasSemanticMatch = memories.some(m => 
-        m.content.includes('JavaScript') || 
-        m.content.includes('TypeScript')
-      );
+      const hasExactMatch = hybridResponse.includes('programming language');
+      const hasSemanticMatch = hybridResponse.includes('JavaScript') || hybridResponse.includes('TypeScript');
       
       expect(hasExactMatch || hasSemanticMatch).toBe(true);
     });
