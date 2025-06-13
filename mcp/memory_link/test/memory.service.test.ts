@@ -306,7 +306,7 @@ describe('MemoryService', () => {
       const memory = await memoryService.remember('Test access count', 5, ['test']);
       const initialVersion = memory.version;
       
-      const retrieved = await memoryService.getMemory(memory.id);
+      const retrieved = await memoryService.getFullMemory(memory.id);
       
       expect(retrieved).not.toBeNull();
       expect(retrieved!.accessCount).toBe(memory.accessCount + 1);
@@ -367,8 +367,8 @@ describe('MemoryService', () => {
       const success = await memoryService.linkMemories(memory1.id, memory2.id);
       expect(success).toBe(true);
       
-      const updated1 = await memoryService.getMemory(memory1.id);
-      const updated2 = await memoryService.getMemory(memory2.id);
+      const updated1 = await memoryService.getFullMemory(memory1.id);
+      const updated2 = await memoryService.getFullMemory(memory2.id);
       
       expect(updated1!.relatedMemories).toContain(memory2.id);
       expect(updated2!.relatedMemories).toContain(memory1.id);
@@ -382,8 +382,8 @@ describe('MemoryService', () => {
       const success = await memoryService.unlinkMemories(memory1.id, memory2.id);
       expect(success).toBe(true);
       
-      const updated1 = await memoryService.getMemory(memory1.id);
-      const updated2 = await memoryService.getMemory(memory2.id);
+      const updated1 = await memoryService.getFullMemory(memory1.id);
+      const updated2 = await memoryService.getFullMemory(memory2.id);
       
       expect(updated1!.relatedMemories || []).not.toContain(memory2.id);
       expect(updated2!.relatedMemories || []).not.toContain(memory1.id);

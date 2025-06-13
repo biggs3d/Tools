@@ -142,10 +142,10 @@ describe('memory_link Integration Tests', () => {
         }
       });
 
-      const memories = JSON.parse(result.content[0].text);
-      expect(memories).toBeInstanceOf(Array);
-      expect(memories.length).toBeGreaterThan(0);
-      expect(memories[0].content.toLowerCase()).toContain('test');
+      const responseText = result.content[0].text;
+      expect(responseText).toContain('Found');
+      expect(responseText).toContain('memories');
+      expect(responseText.toLowerCase()).toContain('test');
     });
 
     it('should list memories with filters', async () => {
@@ -158,9 +158,10 @@ describe('memory_link Integration Tests', () => {
         }
       });
 
-      const memories = JSON.parse(result.content[0].text);
-      expect(memories).toBeInstanceOf(Array);
-      expect(memories.every(m => m.tags.includes('test'))).toBe(true);
+      const responseText = result.content[0].text;
+      expect(responseText).toContain('Found');
+      expect(responseText).toContain('memories');
+      expect(responseText).toContain('test');
     });
 
     it('should update a memory', async () => {

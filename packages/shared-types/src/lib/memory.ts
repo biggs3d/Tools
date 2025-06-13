@@ -104,4 +104,59 @@ export interface MemoryRecord {
     lastAccessed: string;
     /** A simple counter for how many times the memory has been accessed. */
     accessCount: number;
+    
+    // Phase 3: Consolidation and linking features
+    /** IDs of memories this was consolidated from (Phase 3). */
+    consolidatedFrom?: string[];
+    /** IDs of higher-level memories this contributed to (Phase 3). */
+    consolidatedInto?: string[];
+    /** Related memory IDs for knowledge graph connections (Phase 3). */
+    relatedMemories?: string[];
+    /** Indicates this memory is a consolidated summary of other memories (Phase 3). */
+    isConsolidated?: boolean;
+    /** Status for tracking consolidation operations (Phase 4: Data Integrity). */
+    consolidationStatus?: 'pending' | 'completed' | 'failed';
+    /** Version for optimistic locking and atomic updates (Phase 4: Data Integrity). */
+    version?: number;
+}
+
+/**
+ * Memory record with similarity score for search results (Phase 4)
+ */
+export interface MemorySearchResult extends MemoryRecord {
+    /** Similarity score (0-1) when returned from vector search operations. */
+    similarity?: number;
+}
+
+/**
+ * Clean memory record for user-facing responses (Phase 5: Token Optimization)
+ * Excludes large embedding vectors and internal metadata to prevent token bloat
+ */
+export interface CleanMemoryRecord {
+    /** A unique UUID for the memory. */
+    id: string;
+    /** The core text content of the memory. */
+    content: string;
+    /** A 0-10 score of the memory's importance. */
+    importance: number;
+    /** An array of strings for categorization and filtering. */
+    tags: string[];
+    /** ISO timestamp of when the memory was created. */
+    createdAt: string;
+    /** ISO timestamp of the last time the memory was accessed. */
+    lastAccessed: string;
+    /** A simple counter for how many times the memory has been accessed. */
+    accessCount: number;
+    /** Indicates this memory is a consolidated summary of other memories. */
+    isConsolidated?: boolean;
+    /** Number of related memories in knowledge graph. */
+    relatedCount?: number;
+}
+
+/**
+ * Clean memory search result with similarity score (Phase 5: Token Optimization)
+ */
+export interface CleanMemorySearchResult extends CleanMemoryRecord {
+    /** Similarity score (0-1) when returned from vector search operations. */
+    similarity?: number;
 }

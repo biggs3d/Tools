@@ -182,6 +182,59 @@ export class MemoryService {
     }
 
     /**
+     * Get full memory record for internal use (testing, consolidation, etc.)
+     * Phase 5: Internal method to access full memory data when needed
+     */
+    async getFullMemory(id: string): Promise<MemoryRecord | null> {
+        const memory = await this.memoryRepository.getById(id);
+
+        if (memory) {
+            // Phase 4: Atomic access count increment using optimistic locking
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    // Get the latest version of the memory
+                    const latestMemory = await this.memoryRepository.getById(id);
+                    if (!latestMemory) {
+                        return null; // Memory was deleted
+                    }
+                    
+                    const currentVersion = latestMemory.version || 0;
+                    const updates = {
+                        lastAccessed: new Date().toISOString(),
+                        accessCount: latestMemory.accessCount + 1,
+                        version: currentVersion + 1,
+                    };
+                    
+                    // Attempt to update with version check
+                    const updated = await this.updateMemoryWithVersionCheck(id, updates, currentVersion);
+                    if (updated) {
+                        return updated;
+                    }
+                    
+                    // If update failed due to version conflict, retry
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        // Small random delay to reduce contention
+                        await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
+                    }
+                    
+                } catch (error) {
+                    console.error(`Error updating access count for memory ${id}, attempt ${retryCount + 1}:`, error);
+                    retryCount++;
+                }
+            }
+            
+            // If all retries failed, return the original memory without updating access count
+            console.warn(`Failed to update access count for memory ${id} after ${maxRetries} attempts`);
+            return memory;
+        }
+        return null;
+    }
+
+    /**
      * Update memory with optimistic locking using version check (Phase 4: Data Integrity)
      */
     private async updateMemoryWithVersionCheck(
@@ -479,8 +532,8 @@ export class MemoryService {
                 consolidationStatus: 'completed',
             });
 
-            // Return the updated consolidated memory
-            return await this.getMemory(consolidatedId) || consolidatedMemory;
+            // Return the updated consolidated memory (full record for internal use)
+            return await this.memoryRepository.getById(consolidatedId) || consolidatedMemory;
             
         } catch (error) {
             // If we created a consolidated memory but failed later, mark it as failed
