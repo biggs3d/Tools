@@ -8,6 +8,30 @@ implementations in this repository.
 This repository contains multiple MCP server implementations for various AI services and utilities. Each implementation
 follows the MCP standard for tool integration with Claude and other AI assistants.
 
+## Memory System Integration
+
+**IMPORTANT**: At the start of each conversation, proactively check for relevant memories using the memory_link MCP server:
+
+1. **On Project Entry**: When working in any MCP server directory, immediately run:
+   - `mcp__memory-link__recall` with `tags=["project:<server_name>"]` to load project-specific knowledge
+   - Review any high-importance memories (8-10) for critical context
+
+2. **Before Major Tasks**: Search for relevant patterns and solutions:
+   - Use `mcp__memory-link__recall` with relevant keywords
+   - Check for `tags=["solution", "pattern", "lesson_learned"]`
+
+3. **Memory Usage Guidelines**:
+   - CLAUDE.md = Static, version-controlled project rules
+   - Memory system = Dynamic knowledge, user preferences, evolving patterns
+   - Always check both for complete context
+
+Example startup sequence:
+```bash
+# When entering /mcp/gemini_bridge/
+mcp__memory-link__recall query="gemini_bridge" tags=["project:gemini_bridge"]
+mcp__memory-link__list_memories tags=["user_preference"] limit=5
+```
+
 ## Repository Structure
 
 - `/gemini_bridge/` - MCP server for bridging Claude Code to Gemini's large context window

@@ -22,6 +22,10 @@ export const CONFIG = {
 
     // Models - flexible configuration
     DEFAULT_MODEL: process.env.DEFAULT_MODEL || "gemini-2.0-flash-exp",
+    
+    // Embeddings configuration
+    EMBEDDING_MODEL: process.env.EMBEDDING_MODEL || "text-embedding-004",
+    EMBEDDING_BATCH_SIZE: parseInt(process.env.EMBEDDING_BATCH_SIZE) || 10,
     ALLOWED_MODELS: process.env.ALLOWED_MODELS?.split(',').map(m => m.trim()) || [
         "gemini-2.0-flash-exp",
         "gemini-1.5-flash",
@@ -705,6 +709,57 @@ class GeminiBridgeMCP {
                         };
                     }
                     throw error;
+                }
+            }
+        );
+
+        // Embeddings tool for semantic search
+        this.server.tool(
+            "generate_embeddings",
+            "Generate embeddings for text using Google's latest embeddings model(s)",
+            {
+                texts: z.array(z.string()).describe("Array of texts to embed"),
+                model: z.string().optional().default(CONFIG.EMBEDDING_MODEL).describe(`Embedding model to use (default: ${CONFIG.EMBEDDING_MODEL})`),
+                task_type: z.enum(['RETRIEVAL_QUERY', 'RETRIEVAL_DOCUMENT', 'SEMANTIC_SIMILARITY', 'CLUSTERING', 'CLASSIFICATION']).optional().default('RETRIEVAL_DOCUMENT').describe("Task type for embedding optimization"),
+                dimensionality: z.number().optional().describe("Output dimensionality (optional, model default is optimal)"),
+                title: z.string().optional().describe("Optional title for document embedding context")
+            },
+            async ({ texts, model, task_type, dimensionality, title }) => {
+                try {
+                    // Use the generative-ai SDK for embeddings
+                    const embeddingModel = genAI.getGenerativeModel({ model });
+
+                    // The SDK handles batching internally with embedContents
+                    const result = await embeddingModel.embedContents({
+                        contents: texts.map(text => ({
+                            parts: [{ text }],
+                            role: 'user' // Role is required but less critical for embeddings
+                        })),
+                        taskType: task_type,
+                        title: title,
+                        outputDimensionality: dimensionality
+                    });
+
+                    const embeddings = result.embeddings.map(e => e.values);
+
+                    return {
+                        content: [{
+                            type: 'text',
+                            // Return a JSON string of the array of embeddings
+                            text: JSON.stringify(embeddings)
+                        }]
+                    };
+                } catch (error) {
+                    console.error('Error in generate_embeddings tool:', error);
+                    const smartError = createSmartError(error, { model, textCount: texts.length });
+                    return {
+                        content: [{
+                            type: "text",
+                            text: `❌ **Embedding Error:** ${smartError.message}\n\n` +
+                                  `**Suggestions:**\n${smartError.suggestions.map(s => `- ${s}`).join('\n')}`
+                        }],
+                        isError: true
+                    };
                 }
             }
         );

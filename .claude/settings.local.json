@@ -33,7 +33,8 @@
       "mcp__memory-link__get_memory",
       "mcp__memory-link__forget",
       "mcp__gemini-bridge__send_to_gemini",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(rg:*)"
     ],
     "deny": []
   },

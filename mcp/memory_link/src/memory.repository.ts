@@ -99,28 +99,150 @@ export class MemoryRepository {
 
     /**
      * Find memories based on flexible query criteria
-     * Phase 1: Implements text search with in-memory filtering/sorting
-     * Phase 2: Will add vector search and database-level optimizations
+     * Phase 2: Implements text, vector, and hybrid search
+     * 
+     * PERFORMANCE NOTE: This implementation loads all memories into memory
+     * and performs search operations in-memory. For datasets >5-10K memories,
+     * this will become slow and memory-intensive. For production use, replace
+     * with a proper vector database (Pinecone, Weaviate, PostgreSQL+pgvector).
      */
     async find(query: MemoryQuery): Promise<MemoryRecord[]> {
         const provider = this.ensureProvider();
         
-        // Phase 1: Fetch all memories and filter in-memory
-        // TODO Phase 2: Optimize with database-level queries for supported providers
+        // Fetch all memories (Phase 2 MVP limitation)
         const allMemories = await provider.query<MemoryRecord>(MEMORIES_COLLECTION, {});
 
-        let results = allMemories;
+        let results: MemoryRecord[];
 
-        // Apply filters
-        results = this.applyFilters(results, query);
+        // Handle different search strategies
+        switch (query.searchStrategy) {
+            case 'text':
+                // Traditional text-based search
+                results = this.applyFilters(allMemories, query);
+                results = this.applySorting(results, query);
+                break;
 
-        // Apply sorting
-        results = this.applySorting(results, query);
+            case 'vector':
+                // Pure semantic search using embeddings
+                if (!query.vectorQuery) {
+                    throw new Error('Vector query is required for vector search strategy');
+                }
+                results = this.applyVectorSearch(allMemories, query.vectorQuery);
+                // Apply other filters (tags, importance, etc.) but skip text filter
+                const vectorOnlyQuery = { ...query, textQuery: undefined };
+                results = this.applyFilters(results, vectorOnlyQuery);
+                break;
+
+            case 'hybrid':
+                // Combine text and vector search using RRF
+                if (!query.vectorQuery) {
+                    throw new Error('Vector query is required for hybrid search strategy');
+                }
+                
+                // Get text search results
+                const textQuery = { ...query, vectorQuery: undefined, searchStrategy: 'text' as const };
+                let textResults = this.applyFilters(allMemories, textQuery);
+                textResults = this.applySorting(textResults, textQuery);
+
+                // Get vector search results
+                const vectorQuery = { ...query, textQuery: undefined };
+                let vectorResults = this.applyVectorSearch(allMemories, query.vectorQuery);
+                vectorResults = this.applyFilters(vectorResults, vectorQuery);
+
+                // Combine using RRF
+                results = this.combineSearchResults(textResults, vectorResults);
+                break;
+
+            default:
+                // Fallback to text search
+                results = this.applyFilters(allMemories, query);
+                results = this.applySorting(results, query);
+                break;
+        }
 
         // Apply pagination
         results = this.applyPagination(results, query);
 
         return results;
+    }
+
+    /**
+     * Calculate cosine similarity between two vectors
+     * Returns a value between -1 and 1, where 1 means identical vectors
+     */
+    private calculateCosineSimilarity(a: number[], b: number[]): number {
+        if (a.length !== b.length) {
+            throw new Error(`Vector dimensions don't match: ${a.length} vs ${b.length}`);
+        }
+
+        let dotProduct = 0;
+        let normA = 0;
+        let normB = 0;
+
+        for (let i = 0; i < a.length; i++) {
+            dotProduct += a[i] * b[i];
+            normA += a[i] * a[i];
+            normB += b[i] * b[i];
+        }
+
+        normA = Math.sqrt(normA);
+        normB = Math.sqrt(normB);
+
+        if (normA === 0 || normB === 0) {
+            return 0; // Handle zero vectors
+        }
+
+        return dotProduct / (normA * normB);
+    }
+
+    /**
+     * Apply vector search to memories
+     * NOTE: This is an in-memory implementation for Phase 2 MVP
+     * For production use with >5-10K memories, this should be replaced
+     * with a proper vector database (e.g., Pinecone, Weaviate, PostgreSQL with pgvector)
+     */
+    private applyVectorSearch(memories: MemoryRecord[], queryEmbedding: number[]): MemoryRecord[] {
+        return memories
+            .filter(memory => memory.embedding) // Only memories with embeddings
+            .map(memory => ({
+                ...memory,
+                similarity: this.calculateCosineSimilarity(queryEmbedding, memory.embedding!)
+            }))
+            .sort((a, b) => (b as any).similarity - (a as any).similarity); // Sort by similarity descending
+    }
+
+    /**
+     * Implement Reciprocal Rank Fusion (RRF) for combining text and vector search results
+     * RRF is a parameter-free method for combining ranked lists from different search methods
+     */
+    private combineSearchResults(textResults: MemoryRecord[], vectorResults: MemoryRecord[], k: number = 60): MemoryRecord[] {
+        const rrrScores = new Map<string, { memory: MemoryRecord; score: number }>();
+
+        // Process text search results
+        textResults.forEach((memory, index) => {
+            const rank = index + 1;
+            const score = 1 / (k + rank);
+            rrrScores.set(memory.id, { memory, score });
+        });
+
+        // Process vector search results and combine scores
+        vectorResults.forEach((memory, index) => {
+            const rank = index + 1;
+            const score = 1 / (k + rank);
+            
+            if (rrrScores.has(memory.id)) {
+                // Combine scores for memories that appear in both results
+                rrrScores.get(memory.id)!.score += score;
+            } else {
+                // Add new memory from vector search
+                rrrScores.set(memory.id, { memory, score });
+            }
+        });
+
+        // Sort by combined RRF score and return memories
+        return Array.from(rrrScores.values())
+            .sort((a, b) => b.score - a.score)
+            .map(item => item.memory);
     }
 
     /**

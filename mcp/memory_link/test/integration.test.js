@@ -52,7 +52,11 @@ describe('memory_link Integration Tests', () => {
     serverProcess = spawn('node', [serverPath], {
       cwd: resolve(__dirname, '..'),
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, DATABASE_TYPE: 'in-memory' }
+      env: { 
+        ...process.env, 
+        DATABASE_TYPE: 'in-memory',
+        GEMINI_API_KEY: 'test-api-key-for-integration-tests'
+      }
     });
 
     // Wait for server to start

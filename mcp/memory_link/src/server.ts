@@ -8,8 +8,8 @@ import { getAppConfig } from './config.js';
 async function main(): Promise<void> {
     console.error('Starting memory_link MCP Server...');
 
-    const { dbConfig } = getAppConfig();
-    const memoryService = new MemoryService(dbConfig);
+    const { dbConfig, embeddingConfig } = getAppConfig();
+    const memoryService = new MemoryService(dbConfig, embeddingConfig);
     await memoryService.initialize();
 
     const server = new McpServer({
@@ -56,13 +56,18 @@ async function main(): Promise<void> {
 
     server.tool(
         'recall',
-        `Retrieves relevant memories to inform current work.
+        `Retrieves relevant memories to inform current work using text, semantic, or hybrid search.
     
     ALWAYS USE THIS:
     - At the start of any task: Check for relevant context and past learnings
     - Before making design decisions: Look for established patterns
     - When encountering errors: Search for previous solutions
     - When working in a project: Filter by project tag
+    
+    SEARCH STRATEGIES:
+    - 'text': Traditional keyword matching (fastest, good for specific terms)
+    - 'semantic': AI-powered understanding (best for concepts and meaning)
+    - 'hybrid': Combines both approaches using RRF (recommended for best results)
     
     EFFECTIVE QUERIES:
     - Use project tags: tags=["project:myapp"]
@@ -75,10 +80,11 @@ async function main(): Promise<void> {
             query: z.string().describe('The search query to find relevant memories.'),
             tags: z.array(z.string()).optional().describe('Filter memories by tags.'),
             limit: z.number().optional().default(10).describe('Maximum number of memories to return.'),
+            search_type: z.enum(['text', 'semantic', 'hybrid']).optional().default('hybrid').describe('Search strategy: text (keywords), semantic (AI understanding), or hybrid (best of both)')
         },
-        async ({ query, tags, limit }) => {
+        async ({ query, tags, limit, search_type }) => {
             try {
-                const records = await memoryService.recall(query, tags, limit);
+                const records = await memoryService.recall(query, tags, limit, search_type);
                 return { content: [{ type: 'text', text: JSON.stringify(records, null, 2) }] };
             } catch (error) {
                 console.error('Error in recall tool:', error);
@@ -216,9 +222,80 @@ async function main(): Promise<void> {
         }
     );
 
+    server.tool(
+        'generate_embeddings_for_existing',
+        `Generate embeddings for memories that don't have them yet.
+    
+    USE WHEN:
+    - Upgrading from Phase 1 to Phase 2 (backfilling existing memories)
+    - After importing memories from external sources
+    - When embeddings were skipped due to API errors
+    
+    PROCESS:
+    - Finds all memories without embeddings
+    - Generates embeddings in batches with rate limiting
+    - Updates memories with new embeddings
+    - Provides progress feedback and error reporting
+    
+    NOTE: This process respects API rate limits with delays between batches.`,
+        {
+            batch_size: z.number().optional().default(10).describe('Number of memories to process in each batch (default: 10)')
+        },
+        async ({ batch_size }) => {
+            try {
+                const result = await memoryService.generateEmbeddingsForExisting(batch_size);
+                
+                let statusText = `✅ **Embedding Generation Complete**\n\n` +
+                    `📊 **Results:**\n` +
+                    `- Processed: ${result.processed} memories\n` +
+                    `- Updated: ${result.updated} memories\n` +
+                    `- Errors: ${result.errors.length}\n`;
+
+                if (result.errors.length > 0) {
+                    statusText += `\n❌ **Errors encountered:**\n` +
+                        result.errors.slice(0, 5).map(err => `- ${err}`).join('\n');
+                    
+                    if (result.errors.length > 5) {
+                        statusText += `\n... and ${result.errors.length - 5} more errors`;
+                    }
+                }
+
+                if (result.updated === 0) {
+                    statusText += `\n🎉 All memories already have embeddings!`;
+                } else {
+                    statusText += `\n🚀 Semantic search is now available for ${result.updated} additional memories.`;
+                }
+
+                return { 
+                    content: [{ type: 'text', text: statusText }],
+                    isError: result.errors.length > 0
+                };
+            } catch (error) {
+                console.error('Error in generate_embeddings_for_existing tool:', error);
+                return {
+                    content: [{ type: 'text', text: `Failed to generate embeddings: ${error instanceof Error ? error.message : 'Unknown error'}` }],
+                    isError: true
+                };
+            }
+        }
+    );
+
     const transport = new StdioServerTransport();
     await server.connect(transport);
     console.error('memory_link MCP Server started and connected.');
+
+    // Handle graceful shutdown
+    process.on('SIGINT', async () => {
+        console.error('Received SIGINT, shutting down gracefully...');
+        await memoryService.dispose();
+        process.exit(0);
+    });
+
+    process.on('SIGTERM', async () => {
+        console.error('Received SIGTERM, shutting down gracefully...');
+        await memoryService.dispose();
+        process.exit(0);
+    });
 }
 
 main().catch(error => {

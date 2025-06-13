@@ -1,19 +1,42 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MemoryService } from '../src/memory.service.js';
 import { createDatabaseService, DatabaseType } from '@mcp/database-services';
 import type { MemoryRecord } from '@mcp/shared-types';
+
+// Mock the Google Generative AI to avoid requiring API keys in tests
+vi.mock('@google/generative-ai', () => ({
+  GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
+    getGenerativeModel: vi.fn().mockReturnValue({
+      embedContent: vi.fn().mockResolvedValue({
+        embedding: {
+          values: Array.from({ length: 768 }, () => Math.random() * 2 - 1)
+        }
+      })
+    })
+  }))
+}));
 
 describe('MemoryService', () => {
   let memoryService: MemoryService;
 
   beforeEach(async () => {
+    // Mock the environment variable
+    process.env.GEMINI_API_KEY = 'test-api-key';
+    
     // Use in-memory database for testing
     const dbConfig = {
       type: DatabaseType.InMemory,
       providerConfig: {}
     };
 
-    memoryService = new MemoryService(dbConfig);
+    // Mock embedding config
+    const embeddingConfig = {
+      model: 'text-embedding-004',
+      batchSize: 10,
+      similarityThreshold: 0.7
+    };
+
+    memoryService = new MemoryService(dbConfig, embeddingConfig);
     await memoryService.initialize();
   });
 
@@ -82,7 +105,7 @@ describe('MemoryService', () => {
     });
 
     it('should return empty array for no matches', async () => {
-      const results = await memoryService.recall('nonexistent');
+      const results = await memoryService.recall('nonexistent', undefined, 10, 'text');
       
       expect(results).toHaveLength(0);
     });

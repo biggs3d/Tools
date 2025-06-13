@@ -3,7 +3,13 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export function getAppConfig(): { dbConfig: IDatabaseConfig } {
+export interface EmbeddingConfig {
+    model: string;
+    batchSize: number;
+    similarityThreshold: number;
+}
+
+export function getAppConfig(): { dbConfig: IDatabaseConfig; embeddingConfig: EmbeddingConfig } {
     const dbConfig = loadDatabaseConfig();
 
     // Set default to json-file if not specified
@@ -18,7 +24,14 @@ export function getAppConfig(): { dbConfig: IDatabaseConfig } {
         };
     }
 
+    const embeddingConfig: EmbeddingConfig = {
+        model: process.env.EMBEDDING_MODEL || 'text-embedding-004',
+        batchSize: parseInt(process.env.EMBEDDING_BATCH_SIZE || '10'),
+        similarityThreshold: parseFloat(process.env.SIMILARITY_THRESHOLD || '0.7')
+    };
+
     return {
         dbConfig,
+        embeddingConfig,
     };
 }
