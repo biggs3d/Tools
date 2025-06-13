@@ -34,7 +34,9 @@
       "mcp__memory-link__forget",
       "mcp__gemini-bridge__send_to_gemini",
       "Bash(true)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(npm test:*)",
+      "mcp__memory-link__get_background_status"
     ],
     "deny": []
   },

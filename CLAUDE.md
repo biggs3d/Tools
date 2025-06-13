@@ -160,6 +160,7 @@ Each MCP server should include:
   - Smoke test - Quick verification of core functionality
   - Integration test - Real-world scenarios with test pages/data
   - MCP protocol test - Direct JSON-RPC communication testing
+- **Ensure all unit tests and integration/E2E tests are written and pass before marking something as tested.**
 
 ### Development Tips
 
@@ -300,3 +301,8 @@ When adding a new MCP server:
 - Ensure `.env` files are properly configured with required API keys
 - Use `import 'dotenv/config';` at the top of server files for automatic loading
 - Verify environment loading with smoke tests before troubleshooting MCP connections
+
+### Additional Memories
+
+- **Use the gemini_bridge MCP tool for major design review, and for solution review feedback. Critically examine its feedback for compatibility and get user input if there's major changes recommended.**
+- **Always ensure all tests pass, don't assume anything until the root cause is found and confirmed with User**
