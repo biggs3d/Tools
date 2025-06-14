@@ -36,13 +36,15 @@
       "Bash(true)",
       "Bash(rg:*)",
       "Bash(npm test:*)",
-      "mcp__memory-link__get_background_status"
+      "mcp__memory-link__get_background_status",
+      "Bash(npm rebuild:*)"
     ],
     "deny": []
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "gemini-bridge",
-    "browser-debug"
+    "browser-debug",
+    "memory-link"
   ]
 }

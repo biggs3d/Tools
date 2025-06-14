@@ -10,9 +10,6 @@ dist/
 .env.local
 .env.*.local
 
-# Data directory (for json-file database)
-data/
-
 # Test coverage
 coverage/
 .nyc_output/

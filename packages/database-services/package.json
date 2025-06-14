@@ -13,7 +13,6 @@
     }
   },
   "author": "Steve Biggs",
-  "license": "ISC",
   "repository": {
     "type": "git"
   },
@@ -26,6 +25,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "simple-git": "^3.28.0",
     "uuid": "*"
   },
   "devDependencies": {
@@ -38,14 +38,9 @@
     "vitest": "*"
   },
   "peerDependencies": {
-    "lodash": "^4.17.21",
-    "mongodb": "^6.16.0",
-    "simple-git": "^3.28.0"
+    "mongodb": "^6.16.0"
   },
   "peerDependenciesMeta": {
-    "lodash": {
-      "optional": true
-    },
     "mongodb": {
       "optional": true
     },

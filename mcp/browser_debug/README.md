@@ -66,22 +66,13 @@ claude mcp add browser-debug -s user -- node /path/to/browser_debug/index.js
 # Or in project .mcp.json (Windows paths)
 {
   "mcpServers": {
-    "browser-debug": {
-      "command": "node",
-      "args": ["D:\\Tools\\mcp\\browser_debug\\index.js"],
-      "cwd": "D:\\Tools\\mcp\\browser_debug"
-    }
-  }
-}
-
-# For WSL users (using WSL paths)
-{
-  "mcpServers": {
-    "browser-debug": {
-      "command": "node",
-      "args": ["/mnt/d/Tools/mcp/browser_debug/index.js"],
-      "cwd": "/mnt/d/Tools/mcp/browser_debug"
-    }
+        "browser-debug": {
+            "command": "node",
+            "args": [
+                "/mnt/d/Tools/mcp/browser_debug/index.js"
+            ],
+            "cwd": "/mnt/d/Tools/mcp/browser_debug"
+        },
   }
 }
 ```

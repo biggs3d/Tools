@@ -32,26 +32,41 @@ Memory Link provides intelligent memory storage and retrieval capabilities throu
 - Google Gemini API key (for semantic search features)
 
 ### Install Dependencies
+
+#### WSL/Linux Users - Important Build Steps
+
+When using WSL or Linux, native modules (like sqlite3) must be rebuilt for your platform:
+
 ```bash
-cd /path/to/memory_link
+# First, rebuild the database services package
+cd /mnt/d/Tools/packages/database-services
 npm install
+npm rebuild sqlite3  # Critical: rebuilds native bindings for Linux
+npm run build
+
+# Build other required packages
+cd ../llm-package
+npm install
+npm run build
+
+cd ../shared-types
+npm install
+npm run build
 ```
+
+#### All Users - Install Memory Link
+
+```bash
+cd /mnt/d/Tools/mcp/memory_link  # or your path
+npm install
+npm run build
+```
+
+> **Note**: If you see "invalid ELF header" errors when starting the server, run `npm rebuild sqlite3` in the database-services package directory.
 
 ### Configuration
-Create a `.env` file with your configuration:
-```env
-# Required for semantic search (Phase 2 features)
-GEMINI_API_KEY=your_gemini_api_key_here
+Create a `.env` file with your gemini api key and configuration (easiest: copy the `.env.example` with defaults then modify):
 
-# Database configuration (defaults to JSON file storage)  
-DATABASE_TYPE=json-file
-DATABASE_PATH=./data
-
-# Optional: Embedding configuration
-EMBEDDING_MODEL=text-embedding-004
-EMBEDDING_BATCH_SIZE=10
-SIMILARITY_THRESHOLD=0.7
-```
 
 ### Build the Server
 ```bash
@@ -62,16 +77,15 @@ npm run build
 Add to your `.mcp.json` configuration:
 ```json
 {
-  "mcpServers": {
-    "memory-link": {
-      "command": "node",
-      "args": ["/path/to/memory_link/index.js"],
-      "cwd": "/path/to/memory_link",
-      "env": {
-        "GEMINI_API_KEY": "your_api_key_here"
-      }
+    "mcpServers": {
+        "memory-link": {
+            "command": "node",
+            "args": [
+                "/mnt/d/Tools/mcp/memory_link/index.js"
+            ],
+            "cwd": "/mnt/d/Tools/mcp/memory_link"
+        }
     }
-  }
 }
 ```
 
@@ -238,7 +252,7 @@ remember({
 
 ## Performance Notes
 
-- **Embedding Generation**: ~450ms per memory (acceptable for background processing)
+- **Embedding Generation**: ~450ms (X - outdated) per memory (acceptable for background processing)
 - **Search Performance**: Hybrid search balances speed and accuracy
 - **Storage**: Efficient JSON-based storage with optional SQLite/MongoDB backends
 - **Memory Usage**: Embeddings cached in memory for fast similarity calculations
@@ -294,6 +308,17 @@ memory_link/
 - Ensure using `index.js` as entry point, not `server.js` directly
 - Check server starts without errors: `node index.js`
 - Verify environment variables are properly loaded
+
+**WSL/Linux "invalid ELF header" errors:**
+- This occurs when native modules were built for Windows but running on Linux
+- Solution: Rebuild native dependencies
+  ```bash
+  cd /mnt/d/Tools/packages/database-services
+  npm rebuild sqlite3
+  cd /mnt/d/Tools/mcp/memory_link
+  npm rebuild
+  ```
+- Ensure you're using the Linux version of Node.js, not Windows version through WSL
 
 **Semantic search not working:**
 - Confirm `GEMINI_API_KEY` is set in `.env` or MCP configuration
