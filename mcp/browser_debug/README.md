@@ -22,7 +22,7 @@ npm install
 For WSL or Linux environments, you'll need Chrome dependencies:
 
 ```bash
-# Install Chrome dependencies for headless operation
+# Install Chrome dependencies for headless operation (not needed on Mac, skip to puppeteer)
 sudo apt-get update
 sudo apt-get install -y \
     libnss3 \
