@@ -37,7 +37,8 @@
       "Bash(rg:*)",
       "Bash(npm test:*)",
       "mcp__memory-link__get_background_status",
-      "Bash(npm rebuild:*)"
+      "Bash(npm rebuild:*)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": []
   },

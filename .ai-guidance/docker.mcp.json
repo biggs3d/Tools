@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "gemini-bridge": {
+            "command": "node",
+            "args": [
+                "/workspaces/mcp/gemini_bridge/index.js"
+            ],
+            "cwd": "/workspaces/mcp/gemini_bridge"
+        }
+    }
+}

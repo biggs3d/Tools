@@ -1,0 +1,25 @@
+{
+    "mcpServers": {
+        "gemini-bridge": {
+            "command": "node",
+            "args": [
+                "/mnt/d/Tools/mcp/gemini_bridge/index.js"
+            ],
+            "cwd": "/mnt/d/Tools/mcp/gemini_bridge"
+        },
+        "browser-debug": {
+            "command": "node",
+            "args": [
+                "/mnt/d/Tools/mcp/browser_debug/index.js"
+            ],
+            "cwd": "/mnt/d/Tools/mcp/browser_debug"
+        },
+        "memory-link": {
+            "command": "node",
+            "args": [
+                "/mnt/d/Tools/mcp/memory_link/index.js"
+            ],
+            "cwd": "/mnt/d/Tools/mcp/memory_link"
+        }
+    }
+}

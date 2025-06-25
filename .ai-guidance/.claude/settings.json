@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      
+      "Bash(git:*)",
+      
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      
+      "Bash(du:*)",
+      "Bash(wc:*)",
+      
+      "Bash(vitest:*)",
+      "Bash(eslint:*)"
+    ],
+    "deny": [
+      "Bash(rm:-rf *)",
+      "Bash(chmod:777 *)"
+    ]
+  }
+}
