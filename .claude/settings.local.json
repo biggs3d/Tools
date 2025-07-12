@@ -38,7 +38,11 @@
       "Bash(npm test:*)",
       "mcp__memory-link__get_background_status",
       "Bash(npm rebuild:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:docs.x.ai)",
+      "mcp__grok-bridge__get_system_info",
+      "mcp__grok-bridge__send_to_grok",
+      "mcp__grok-bridge__analyze_code_patterns"
     ],
     "deny": []
   },
