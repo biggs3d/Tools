@@ -31,7 +31,7 @@ async function smokeTest() {
   console.log('='.repeat(30));
   
   try {
-    const { CONFIG } = await import('../index.js');
+    const { CONFIG } = await import('../server.js');
     console.log('✅ Configuration loaded successfully');
     console.log(`   - Max file size: ${Math.round(CONFIG.MAX_FILE_SIZE / 1024 / 1024)}MB`);
     console.log(`   - Max tokens: ${CONFIG.MAX_TOTAL_TOKENS.toLocaleString()}`);
@@ -57,7 +57,7 @@ async function smokeTest() {
       createSmartError,
       estimateTokensForFiles,
       fetchAvailableModels
-    } = await import('../index.js');
+    } = await import('../server.js');
     
     console.log('✅ All functions imported successfully');
     console.log('   - normalizePath, classifyError, optimizeContext');
@@ -86,7 +86,7 @@ async function smokeTest() {
   console.log('='.repeat(30));
   
   try {
-    const { isBinaryFile } = await import('../index.js');
+    const { isBinaryFile } = await import('../server.js');
     
     // Test with this script (should be text)
     const isThisBinary = await isBinaryFile(import.meta.url.replace('file://', ''));
@@ -107,7 +107,7 @@ async function smokeTest() {
     console.log('='.repeat(30));
     
     try {
-      const { fetchAvailableModels } = await import('../index.js');
+      const { fetchAvailableModels } = await import('../server.js');
       const models = await fetchAvailableModels(process.env.GEMINI_API_KEY);
       
       if (models && models.length > 0) {

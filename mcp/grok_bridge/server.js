@@ -21,16 +21,8 @@ export const CONFIG = {
     MAX_TOTAL_TOKENS: parseInt(process.env.MAX_TOTAL_TOKENS) || 120000, // Conservative limit for Grok (~128k context)
 
     // Models - Grok model configuration
-    DEFAULT_MODEL: process.env.DEFAULT_MODEL || "grok-4-latest",
-    ALLOWED_MODELS: process.env.ALLOWED_MODELS?.split(',').map(m => m.trim()) || [
-        "grok-4-latest",
-        "grok-4",
-        "grok-4-heavy",
-        "grok-4-code",
-        "grok-3",
-        "grok-2",
-        "grok-1"
-    ],
+    DEFAULT_MODEL: process.env.DEFAULT_MODEL,
+    ALLOWED_MODELS: process.env.ALLOWED_MODELS?.split(',').map(m => m.trim()),
 
     // Token estimation (Grok uses similar tokenization)
     CHARS_PER_TOKEN: parseFloat(process.env.CHARS_PER_TOKEN) || 4, // Approximation: 1 token ≈ 4 chars
@@ -397,7 +389,7 @@ class GrokBridgeMCP {
             "send_to_grok",
             "Send files and context to Grok for analysis with large context window",
             {
-                files: z.array(z.string()).describe("Array of file paths to include"),
+                files: z.array(z.string()).optional().default([]).describe("Array of file paths to include"),
                 prompt: z.string().describe("The question or task for Grok to perform"),
                 model: z.string().optional()
                     .describe(`Grok model to use (default: ${CONFIG.DEFAULT_MODEL}). Can be any grok-* model.`),
@@ -406,7 +398,7 @@ class GrokBridgeMCP {
                 enable_iterative: z.boolean().optional().describe("Enable iterative refinement for better results (default: from env config)")
             },
             async ({
-                       files,
+                       files = [],
                        prompt,
                        model = CONFIG.DEFAULT_MODEL,
                        project_context,
@@ -437,7 +429,8 @@ class GrokBridgeMCP {
                     // Collect and process files
                     const fileContents = await this.collectFiles(normalizedFiles);
 
-                    if (fileContents.length === 0) {
+                    // If no files provided, that's okay - we can still send just the prompt
+                    if (files.length > 0 && fileContents.length === 0) {
                         return {
                             content: [{
                                 type: "text",
@@ -513,11 +506,11 @@ class GrokBridgeMCP {
             "estimate_context_size",
             "Estimate token count for files before sending to Grok",
             {
-                files: z.array(z.string()).describe("Array of file paths to analyze"),
+                files: z.array(z.string()).optional().default([]).describe("Array of file paths to analyze"),
                 include_project_context: z.boolean().optional().describe("Include space for project context in estimate"),
                 show_estimation_details: z.boolean().optional().describe("Show token estimation calculation details")
             },
-            async ({files, include_project_context = false, show_estimation_details = false}) => {
+            async ({files = [], include_project_context = false, show_estimation_details = false}) => {
                 try {
                     // Normalize file paths
                     const normalizedFiles = files.map(f => normalizePath(f));
@@ -642,11 +635,11 @@ class GrokBridgeMCP {
                     "dependencies",
                     "code_quality"
                 ]).describe("Type of pattern analysis to perform"),
-                files: z.array(z.string()).describe("Files to analyze for patterns"),
+                files: z.array(z.string()).optional().default([]).describe("Files to analyze for patterns"),
                 specific_focus: z.string().optional().describe("Specific aspect to focus on"),
                 model: z.string().optional().describe("Override the default model for this analysis")
             },
-            async ({pattern_type, files, specific_focus, model}) => {
+            async ({pattern_type, files = [], specific_focus, model}) => {
                 const prompts = {
                     architecture: "Analyze the architectural patterns, design decisions, and overall code organization. Identify strengths, weaknesses, and improvement opportunities.",
                     security: "Perform a security audit looking for vulnerabilities, insecure practices, exposed secrets, injection risks, and authentication/authorization issues.",
@@ -669,11 +662,20 @@ class GrokBridgeMCP {
                     // Collect and process files
                     const fileContents = await this.collectFiles(normalizedFiles);
                     
-                    if (fileContents.length === 0) {
+                    if (files.length > 0 && fileContents.length === 0) {
                         return {
                             content: [{
                                 type: "text",
                                 text: "❌ No valid files found to analyze. Please check the file paths."
+                            }]
+                        };
+                    }
+                    
+                    if (fileContents.length === 0) {
+                        return {
+                            content: [{
+                                type: "text",
+                                text: "❌ No files provided for pattern analysis. Please provide file paths to analyze."
                             }]
                         };
                     }

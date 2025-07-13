@@ -42,7 +42,8 @@
       "WebFetch(domain:docs.x.ai)",
       "mcp__grok-bridge__get_system_info",
       "mcp__grok-bridge__send_to_grok",
-      "mcp__grok-bridge__analyze_code_patterns"
+      "mcp__grok-bridge__analyze_code_patterns",
+      "WebFetch(domain:x.ai)"
     ],
     "deny": []
   },

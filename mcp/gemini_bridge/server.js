@@ -393,7 +393,7 @@ class GeminiBridgeMCP {
             "send_to_gemini",
             "Send files and context to Gemini for analysis with large context window (up to 2M tokens)",
             {
-                files: z.array(z.string()).describe("Array of file paths to include"),
+                files: z.array(z.string()).optional().default([]).describe("Array of file paths to include"),
                 prompt: z.string().describe("The question or task for Gemini to perform"),
                 model: z.string().optional()
                     .describe(`Gemini model to use (default: ${CONFIG.DEFAULT_MODEL}). Can be any gemini-* model.`),
@@ -402,7 +402,7 @@ class GeminiBridgeMCP {
                 enable_iterative: z.boolean().optional().describe("Enable iterative refinement for better results (default: from env config)")
             },
             async ({
-                       files,
+                       files = [],
                        prompt,
                        model = CONFIG.DEFAULT_MODEL,
                        project_context,
@@ -433,7 +433,8 @@ class GeminiBridgeMCP {
                     // Collect and process files
                     const fileContents = await this.collectFiles(normalizedFiles);
 
-                    if (fileContents.length === 0) {
+                    // If no files provided, that's okay - we can still send just the prompt
+                    if (files.length > 0 && fileContents.length === 0) {
                         return {
                             content: [{
                                 type: "text",
@@ -509,11 +510,11 @@ class GeminiBridgeMCP {
             "estimate_context_size",
             "Estimate token count for files before sending to Gemini",
             {
-                files: z.array(z.string()).describe("Array of file paths to analyze"),
+                files: z.array(z.string()).optional().default([]).describe("Array of file paths to analyze"),
                 include_project_context: z.boolean().optional().describe("Include space for project context in estimate"),
                 show_estimation_details: z.boolean().optional().describe("Show token estimation calculation details")
             },
-            async ({files, include_project_context = false, show_estimation_details = false}) => {
+            async ({files = [], include_project_context = false, show_estimation_details = false}) => {
                 try {
                     // Normalize file paths
                     const normalizedFiles = files.map(f => normalizePath(f));
@@ -638,11 +639,11 @@ class GeminiBridgeMCP {
                     "dependencies",
                     "code_quality"
                 ]).describe("Type of pattern analysis to perform"),
-                files: z.array(z.string()).describe("Files to analyze for patterns"),
+                files: z.array(z.string()).optional().default([]).describe("Files to analyze for patterns"),
                 specific_focus: z.string().optional().describe("Specific aspect to focus on"),
                 model: z.string().optional().describe("Override the default model for this analysis")
             },
-            async ({pattern_type, files, specific_focus, model}) => {
+            async ({pattern_type, files = [], specific_focus, model}) => {
                 const prompts = {
                     architecture: "Analyze the architectural patterns, design decisions, and overall code organization. Identify strengths, weaknesses, and improvement opportunities.",
                     security: "Perform a security audit looking for vulnerabilities, insecure practices, exposed secrets, injection risks, and authentication/authorization issues.",
@@ -657,6 +658,16 @@ class GeminiBridgeMCP {
 
                 // Use a more powerful model for pattern analysis if not specified
                 const analysisModel = model || process.env.PATTERN_ANALYSIS_MODEL || "gemini-1.5-pro";
+
+                // Check if files were provided
+                if (files.length === 0) {
+                    return {
+                        content: [{
+                            type: "text",
+                            text: "❌ No files provided for pattern analysis. Please provide file paths to analyze."
+                        }]
+                    };
+                }
 
                 // Normalize file paths and prepare for analysis
                 const normalizedFiles = files.map(f => normalizePath(f));

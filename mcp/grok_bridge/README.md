@@ -7,7 +7,7 @@ A Model Context Protocol (MCP) server that bridges Claude Code to xAI's Grok mod
 - **Large Context Windows**: Send up to 900k tokens to Grok for comprehensive code analysis
 - **Smart File Discovery**: Automatically find and filter relevant files in your project
 - **Cross-Platform Path Support**: Works seamlessly on Windows, macOS, and Linux (including WSL)
-- **Model Flexibility**: Support for all Grok models including `grok-4-latest`, `grok-4`, and specialized variants
+- **Model Flexibility**: Support for all Grok models including `grok-2-1212`, `grok-2-vision-1212`, and other variants
 - **Auto-Optimization**: Automatically reduces context size when needed while preserving important files
 - **Smart Error Recovery**: Contextual error messages with actionable suggestions
 - **Token Estimation**: Preview estimated token usage before sending requests
@@ -43,7 +43,7 @@ cp .env.example .env
 XAI_API_KEY=your_api_key_here
 
 # Optional: Customize other settings
-DEFAULT_MODEL=grok-4-latest
+DEFAULT_MODEL=grok-2-1212
 MAX_TOTAL_TOKENS=900000
 ```
 
@@ -95,7 +95,7 @@ Send files and context to Grok for analysis.
 **Parameters:**
 - `files` (required): Array of file paths to analyze
 - `prompt` (required): The question or task for Grok
-- `model` (optional): Grok model to use (default: `grok-4-latest`)
+- `model` (optional): Grok model to use (default: `grok-2-1212`)
 - `project_context` (optional): Additional project background
 - `include_line_numbers` (optional): Include line numbers in file content (default: true)
 - `enable_iterative` (optional): Enable iterative refinement (default: from config)
@@ -105,7 +105,7 @@ Send files and context to Grok for analysis.
 {
   "files": ["src/main.js", "src/utils.js"],
   "prompt": "Analyze the code structure and suggest improvements",
-  "model": "grok-4-latest"
+  "model": "grok-2-1212"
 }
 ```
 
@@ -142,11 +142,12 @@ Get comprehensive system information and diagnostics.
 
 ## Available Models
 
-- **grok-4-latest** (default): Latest Grok 4 model with cutting-edge capabilities
-- **grok-4**: Standard Grok 4 model
-- **grok-4-heavy**: Multi-agent version with enhanced reasoning
-- **grok-4-code**: Specialized variant optimized for code analysis
-- **grok-3**: Previous generation model
+- **grok-2-1212** (default): Latest Grok 2 model with improved accuracy and multilingual support
+- **grok-2-vision-1212**: Grok 2 with vision capabilities for image analysis
+- **grok-beta**: Beta version of Grok
+- **grok-2**: Base Grok 2 model
+- **grok-2-mini**: Smaller, faster Grok 2 variant
+- **grok-vision-beta**: Beta version with vision support
 - **grok-2**: Earlier generation model
 
 ## Configuration
@@ -156,7 +157,7 @@ Get comprehensive system information and diagnostics.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `XAI_API_KEY` | - | **Required**: Your xAI API key |
-| `DEFAULT_MODEL` | `grok-4-latest` | Default model to use |
+| `DEFAULT_MODEL` | `grok-2-1212` | Default model to use |
 | `MAX_TOTAL_TOKENS` | `900000` | Maximum context size |
 | `GROK_API_BASE_URL` | `https://api.x.ai/v1` | API base URL |
 | `GROK_TEMPERATURE` | `0.1` | Generation temperature |
@@ -208,7 +209,7 @@ analyze_code_patterns(
 analyze_code_patterns(
   pattern_type="performance",
   files=["src/database.js", "src/cache.js"],
-  model="grok-4-heavy"
+  model="grok-2"
 )
 ```
 
@@ -241,8 +242,9 @@ Use `estimate_context_size` to preview costs before sending requests.
 
 #### Model not available
 - Use `get_system_info` to see available models
-- Check if the model name is correct (e.g., `grok-4-latest`)
+- Check if the model name is correct (e.g., `grok-2-1212`, `grok-2-vision-1212`)
 - Verify your API key has access to the requested model
+- Run `node test-models.js` to test which models are available with your API key
 
 ### Getting Help
 
