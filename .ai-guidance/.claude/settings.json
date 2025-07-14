@@ -5,7 +5,10 @@
       "Bash(ls:*)",
       "Bash(npx tsc:*)",
       "Bash(grep:*)",
+      "Bash(rg:*)"
       "Bash(find:*)",
+      "Bash(touch:*)",
+      "Bash(sed:*)",
       
       "Bash(npm:*)",
       "Bash(npx:*)",
@@ -24,7 +27,12 @@
       "Bash(wc:*)",
       
       "Bash(vitest:*)",
-      "Bash(eslint:*)"
+      "Bash(eslint:*)",
+      "Bash(npm test)",
+	  
+      "mcp__gemini-bridge__get_system_info",
+      "mcp__gemini-bridge__send_to_gemini",
+      "mcp__gemini-bridge__find_relevant_files",
     ],
     "deny": [
       "Bash(rm:-rf *)",
