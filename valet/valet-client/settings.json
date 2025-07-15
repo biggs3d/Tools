@@ -1,0 +1,49 @@
+{
+  "version": "0.1.0",
+  "embeddings": {
+    "similarity_threshold": 0.75,
+    "similarity_threshold_min": 0.5,
+    "similarity_threshold_max": 0.9,
+    "max_results": 10,
+    "model": "text-embedding-004"
+  },
+  "daily_routine": {
+    "morning_briefing": true,
+    "evening_summary": true,
+    "auto_archive": false
+  },
+  "language_integration": {
+    "spanish-dominican": {
+      "enabled": true,
+      "level": "beginner",
+      "frequency": "occasional"
+    }
+  },
+  "file_paths": {
+    "days_directory": "./days",
+    "tools_directory": "./tools",
+    "archive_directory": "./archive"
+  },
+  "tools": {
+    "git_monitoring": {
+      "enabled": true,
+      "repos": [
+        "/path/to/repo1",
+        "/path/to/repo2"
+      ],
+      "check_frequency": "daily",
+      "include_in_briefing": true,
+      "last_check_timestamp": null,
+      "max_commits_per_repo": 200,
+      "max_output_chars": 50000,
+      "use_summarization": true,
+      "summarization_threshold": 15000,
+      "prioritize_merges": true
+    }
+  },
+  "preferences": {
+    "timezone": "America/Chicago",
+    "date_format": "YYYY-MM-DD",
+    "verbose_errors": true
+  }
+}

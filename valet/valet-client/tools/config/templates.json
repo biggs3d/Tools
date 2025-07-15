@@ -1,0 +1,14 @@
+{
+  "daily_planner": {
+    "filename_format": "YYYY-MM-DD-planner.md",
+    "template": "# YYYY-MM-DD Planner\n\n## Tasks Being Worked On Today\n- [ ] \n\n## Data Stash\n(note: not any personal data, just technical, general work or home tasks or project-related information)\n- \n- keywords: [auto-generated from content for search/embedding metadata]\n\n## Ongoing Summary\n- Summary of the day\n- Lessons Learned\n- Solutions to Problems\n\n---\n*Last updated: [timestamp]*"
+  },
+  "daily_journal": {
+    "filename_format": "YYYY-MM-DD-journal.md", 
+    "template": "# YYYY-MM-DD Journal\n\n## Reflections, Thoughts, and Notes\n- \n\n## Personal Reminders\n- Check in on what's being done today working towards long-term goals\n\n## Ongoing Summary\n- How the day went\n- How the user seems to be doing\n- Reflections on the day\n- Thoughts on life and touching base on long-term goals\n- Personal notes and thoughts\n\n---\n*Last updated: [timestamp]*"
+  },
+  "placeholders": {
+    "date_format": "YYYY-MM-DD",
+    "timestamp_format": "YYYY-MM-DD HH:mm:ss"
+  }
+}

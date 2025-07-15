@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npx -p typescript tsc:*)",
+      "Bash(npx nx lint:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run lint)",
+      "Bash(curl:*)",
+      "Bash(npx nx run-many:*)",
+      "Bash(npx nx build:*)",
+      "Bash(npm view:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(npm run generate-barrels:*)",
+      "Bash(npm install)",
+      "Bash(npm run generate-model:*)",
+      "Bash(for pkg in phoenix.model phoenix.api phoenix.core phoenix.components.shared phoenix.components phoenix.registration)",
+      "Bash(do echo \"=== $pkg ===\")",
+      "Bash([ -d \"$pkg/dist\" ])",
+      "Bash(done)",
+      "Bash(npx nx show:*)",
+      "Bash(npm ls:*)",
+      "Bash(git lfs:*)",
+      "mcp__grok-bridge__send_to_grok"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "gemini-bridge"
+  ]
+}
