@@ -7,6 +7,17 @@
 Agent-first architecture with a focus on modularity and extensibility. VALET is built around the concept of an agent
 working in a digital space using built-in tools and plugins, as well as custom scripts and commands.
 
+## Development vs. Operational Context
+
+**This is a development environment for building VALET.**
+
+- **Development context:** Claude Code is helping design and build the VALET system
+- **Operational context:** When deployed, user runs `claude` from `/valet-client/` folder
+- **Role separation:** Development CLAUDE.md vs. operational valet-client/CLAUDE.md
+- **File structure:** Development files at root, operational files in valet-client/
+
+**Claude Code will act as VALET when run from the valet-client directory.**
+
 ## Key Components
 
 ### Agent Core
@@ -277,6 +288,7 @@ and long-term goals. This file is used to track changes, reflect on achievements
 - `.md` files explain when to use, what it does, and error handling
 - Agent references both script functionality and usage guidance
 - Scripts can use Gemini MCP for intelligent summarization of large outputs
+- All tools follow consistent patterns for security, configuration, and output
 
 **Gemini Integration Benefits:**
 - Massive context window (2M tokens) allows comprehensive data gathering
@@ -284,3 +296,33 @@ and long-term goals. This file is used to track changes, reflect on achievements
 - Context-aware summaries better than simple truncation
 - Tools can process much more data before needing to summarize
 - **Security:** Only metadata sent to Gemini, never file contents
+
+## Future Tool Ideas
+
+### High Priority
+- **weather-briefing.mjs** - Weather context for daily planning (free APIs available)
+- **news-digest.mjs** - Curated news summary for specific topics/sources
+- **calendar-integration.mjs** - Check upcoming meetings, deadlines from calendar APIs
+- **learning-progress.md** - Track progress on courses, tutorials, skill development
+
+### Medium Priority
+- **email-summary.mjs** - Summarize important emails since last check (with privacy controls)
+- **energy-tracking.md** - Personal energy levels and productivity patterns
+- **habit-tracker.md** - Simple habit tracking integration for personal goals
+
+### Low Priority / Ideas
+- **package-updates.mjs** - Check for dependency updates across projects
+- **documentation-sync.md** - Remind to update docs when code changes
+
+### Integration Ideas
+- **time-tracking.mjs** - Integration with time tracking tools
+- **focus-mode.md** - Distraction blocking during deep work sessions
+
+### Notes on Future Tools
+- All tools follow security-first design (metadata only, no sensitive work content)
+- Tools can use Gemini MCP for intelligent summarization when needed
+- Each tool includes both script implementation and usage guidance
+- Settings organized under `tools.tool_name` in settings.json
+- Timestamp tracking for incremental updates where applicable
+- **Project deadlines** tracked naturally through daily summaries and embeddings
+- **External integrations** will come from future MCP tools, not built-in scripts

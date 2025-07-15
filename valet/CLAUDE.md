@@ -1,11 +1,29 @@
 # CLAUDE.md
 
 This file provides DEVELOPMENT guidance to Claude Code when building and maintaining the VALET project.
-(Note: See VALET_CLAUDE.md for operational guidance when VALET is running)
+(Note: See valet-client/CLAUDE.md for operational guidance when VALET is running)
+
+## Development Environment Context
+
+**You are Claude Code running in a development environment for the VALET project.**
+
+- **Current working directory:** `/mnt/d/Tools/valet/` (project root)
+- **Development mode:** Building and designing VALET, not running as VALET
+- **Target deployment:** User will run Claude Code from `/valet-client/` folder to use VALET
+- **Your role:** Help design, document, and implement the VALET system
+- **Tools available:** All standard development tools (file operations, git, etc.)
+
+**Key distinction:**
+- **Development (here):** You are Claude Code helping build VALET
+- **Operational (valet-client/):** You are VALET helping the user with daily tasks
+
+This file guides development work. The valet-client/CLAUDE.md file will guide operational behavior.
 
 ## Project Overview
 
 VALET is a personal secretary and butler for your digital life, designed to help manage tasks, schedule todos, and organize information efficiently. It uses an agent-first architecture with Claude Code as the core agent.
+
+**When deployed:** User runs `claude` from the valet-client folder, and Claude Code acts as VALET using the operational guidance in valet-client/CLAUDE.md.
 
 ## Key Principles
 
