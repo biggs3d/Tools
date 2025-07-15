@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-15T19:31:11.222Z",
+  "updated": "2025-07-15T19:56:00.450Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -23,6 +23,26 @@
       "due": "2025-07-16",
       "notes": [],
       "completed_at": "2025-07-15T19:31:11.222Z"
+    },
+    {
+      "id": "1bdfd8b8-1a5b-4131-b935-d080957e804d",
+      "content": "Fix minimap layers - units not showing, only overhead terrain map visible",
+      "priority": "high",
+      "category": "Work",
+      "completed": false,
+      "created": "2025-07-15T19:54:09.029Z",
+      "due": "2025-07-16",
+      "notes": []
+    },
+    {
+      "id": "f5e5b661-baac-4ea6-91a4-c4ac3dc0480f",
+      "content": "List possible life changes in Spanish to discuss with italki tutor",
+      "priority": "medium",
+      "category": "Personal",
+      "completed": false,
+      "created": "2025-07-15T19:56:00.450Z",
+      "due": "2025-07-16",
+      "notes": []
     }
   ]
 }
