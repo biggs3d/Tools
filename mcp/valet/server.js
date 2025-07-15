@@ -29,7 +29,7 @@ class ValetMcpServer {
     // valet_get_daily_context - Get current day's context
     this.server.tool(
       'valet_get_daily_context',
-      'Retrieve current daily context without loading entire files',
+      'Get daily context including tasks, progress, and todos. Use when user greets you, asks about their day, or when starting work. Helps maintain continuity across conversations.',
       {
         date: z.string().optional().describe('Date to retrieve (YYYY-MM-DD), defaults to today'),
         sections: z.array(z.string()).optional().describe('Specific sections to include'),
@@ -65,7 +65,7 @@ class ValetMcpServer {
     // valet_update_daily - Update specific sections of daily files
     this.server.tool(
       'valet_update_daily',
-      'Update specific sections of daily files without full overwrites',
+      'Update daily planner or journal with new information. Use when user completes tasks, shares progress, or mentions accomplishments. Helps track daily activities and maintain records.',
       {
         date: z.string().optional().describe('Date to update, defaults to today'),
         fileType: z.enum(['planner', 'journal']).describe('Type of file to update'),
@@ -105,7 +105,7 @@ class ValetMcpServer {
     // valet_new_day - Start a new day
     this.server.tool(
       'valet_new_day',
-      'Start a new day, creating files and processing previous day\'s data',
+      'Initialize a new day with fresh planner and journal files. Use when user starts their day, mentions it\'s a new day, or when daily context shows today doesn\'t exist yet.',
       {
         skipEmbeddings: z.boolean().optional().default(false).describe('Skip embedding generation for speed'),
         date: z.string().optional().describe('Override date (YYYY-MM-DD), defaults to today')
@@ -139,7 +139,7 @@ class ValetMcpServer {
     // valet_todo_operations - Manage global todo list
     this.server.tool(
       'valet_todo_operations',
-      'Manage global todo list with granular operations',
+      'Add, complete, update, or remove todos from the global task list. Use when user mentions new tasks, completes work, or wants to modify their todo list.',
       {
         action: z.enum(['add', 'complete', 'update', 'remove', 'move']).describe('Action to perform'),
         task: z.object({
@@ -184,7 +184,7 @@ class ValetMcpServer {
     // valet_todo_view - Get filtered view of todos
     this.server.tool(
       'valet_todo_view',
-      'Get filtered view of todos without full file load',
+      'View and filter the todo list by priority, category, or due date. Use when user asks about their tasks, wants to see what\'s pending, or needs to review their workload.',
       {
         filter: z.object({
           categories: z.array(z.string()).optional().describe('Filter by categories'),

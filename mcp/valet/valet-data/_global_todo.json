@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-15T19:26:38.311Z",
+  "updated": "2025-07-15T19:31:11.222Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -12,6 +12,17 @@
       "due": "2025-07-20",
       "notes": [],
       "completed_at": "2025-07-15T19:26:38.311Z"
+    },
+    {
+      "id": "3987603f-6271-4cab-97ca-44f7489ec5a7",
+      "content": "Test MCP server direct integration",
+      "priority": "high",
+      "category": "Development",
+      "completed": true,
+      "created": "2025-07-15T19:31:01.964Z",
+      "due": "2025-07-16",
+      "notes": [],
+      "completed_at": "2025-07-15T19:31:11.222Z"
     }
   ]
 }

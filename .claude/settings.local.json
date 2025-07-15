@@ -43,7 +43,11 @@
       "mcp__grok-bridge__get_system_info",
       "mcp__grok-bridge__send_to_grok",
       "mcp__grok-bridge__analyze_code_patterns",
-      "WebFetch(domain:x.ai)"
+      "WebFetch(domain:x.ai)",
+      "mcp__valet__valet_get_daily_context",
+      "mcp__valet__valet_todo_operations",
+      "mcp__valet__valet_todo_view",
+      "mcp__valet__valet_update_daily"
     ],
     "deny": []
   },

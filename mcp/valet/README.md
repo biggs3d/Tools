@@ -1,6 +1,12 @@
 # VALET MCP Server
 
-A Model Context Protocol (MCP) server that provides personal digital assistant capabilities for managing daily tasks, planning, and journaling.
+> A Model Context Protocol (MCP) server that provides personal digital assistant capabilities for managing daily tasks, planning, and journaling.
+
+When you include this MCP server in any repo, Claude Code will proactively use     
+these tools based on conversational context, making it feel more like a
+personal assistant that naturally tracks your work and maintains continuity        
+across sessions.
+
 
 ## Features
 
@@ -276,12 +282,11 @@ echo '{"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}' | node 
 │   ├── tools/
 │   │   ├── daily-ops.js        # Daily file operations
 │   │   └── todo-manager.js     # Todo management
-│   └── utils/                  # Utility modules (future)
 ├── test/
 │   └── smoke-test.js          # Basic functionality tests
 └── Design Documentation:
     ├── MCP_DESIGN.md          # Complete architecture specification
-    └── CLAUDE_MCP.md          # Development guidance
+    └── CLAUDE_DEV.md          # Development guidance
 ```
 
 ## Troubleshooting

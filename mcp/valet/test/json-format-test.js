@@ -103,8 +103,8 @@ async function testJsonFormat() {
     
     const todoView = await todoManager.getView({ format: 'structured' });
     console.log(`✅ Todo view retrieved`);
-    console.log(`   Total tasks: ${todoView.result.count}`);
-    console.log(`   Categories: ${todoView.result.categories.join(', ')}`);
+    console.log(`   Total tasks: ${todoView.count}`);
+    console.log(`   Categories: ${todoView.categories.join(', ')}`);
     
     // Clean up - remove test task
     await todoManager.removeTask(newTask.id);

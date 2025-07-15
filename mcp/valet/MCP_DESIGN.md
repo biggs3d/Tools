@@ -269,10 +269,6 @@ Get VALET system status and statistics.
 │   │   ├── search-engine.js     # Search and embeddings
 │   │   ├── git-monitor.js       # Git repository monitoring
 │   │   └── context-builder.js   # Smart context loading
-│   ├── utils/
-│   │   ├── sanitizer.js         # Security sanitization
-│   │   ├── differ.js            # Content diff management
-│   │   └── cache.js             # Response caching
 │   └── embeddings/
 │       ├── generator.js          # Embedding generation
 │       ├── faiss-index.js        # FAISS operations
