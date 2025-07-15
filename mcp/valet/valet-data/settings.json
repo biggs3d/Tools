@@ -1,10 +1,22 @@
 {
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "user": {
+    "name": "User",
+    "timezone": "America/Chicago"
+  },
+  "mcp": {
+    "cache_ttl": 300,
+    "max_response_size": 50000,
+    "enable_compression": true,
+    "audit_log": true,
+    "rate_limits": {
+      "requests_per_minute": 60,
+      "embeddings_per_hour": 100
+    }
+  },
   "embeddings": {
+    "enabled": true,
     "similarity_threshold": 0.75,
-    "similarity_threshold_min": 0.5,
-    "similarity_threshold_max": 0.9,
-    "max_results": 10,
     "model": "text-embedding-004"
   },
   "daily_routine": {
@@ -21,18 +33,14 @@
   },
   "file_paths": {
     "days_directory": "./days",
-    "tools_directory": "./tools",
     "archive_directory": "./archive"
   },
   "tools": {
     "git_monitoring": {
-      "enabled": true,
-      "repos": [
-        "/path/to/repo1",
-        "/path/to/repo2"
-      ],
+      "enabled": false,
+      "repos": [],
       "check_frequency": "daily",
-      "include_in_briefing": true,
+      "include_in_briefing": false,
       "last_check_timestamp": null,
       "max_commits_per_repo": 200,
       "max_output_chars": 50000,

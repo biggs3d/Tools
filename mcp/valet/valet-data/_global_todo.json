@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "updated": "2025-07-15T19:26:38.311Z",
+  "tasks": [
+    {
+      "id": "793affc0-1a08-4123-abac-557f8b607981",
+      "content": "Test JSON format todo",
+      "priority": "high",
+      "category": "Testing",
+      "completed": true,
+      "created": "2025-07-15T19:26:38.300Z",
+      "due": "2025-07-20",
+      "notes": [],
+      "completed_at": "2025-07-15T19:26:38.311Z"
+    }
+  ]
+}

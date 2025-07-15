@@ -27,6 +27,13 @@
                 "/mnt/d/Tools/mcp/grok_bridge/index.js"
             ],
             "cwd": "/mnt/d/Tools/mcp/grok_bridge"
+        },
+        "valet": {
+            "command": "node",
+            "args": [
+                "/mnt/d/Tools/mcp/valet/index.js"
+            ],
+            "cwd": "/mnt/d/Tools/mcp/valet"
         }
     }
 }

@@ -302,6 +302,23 @@ When adding a new MCP server:
 - Use `import 'dotenv/config';` at the top of server files for automatic loading
 - Verify environment loading with smoke tests before troubleshooting MCP connections
 
+## Response Protocol
+
+**IMPORTANT**: Include a "Thoughts" section at the end of responses when:
+- Designing new features or components
+- Making architectural decisions
+- Implementing complex logic
+- Troubleshooting unclear issues
+
+Under "Thoughts", include relevant questions about:
+- Areas of uncertainty or low confidence
+- Potential oversimplifications
+- Assumptions that need validation
+- Information that would change the approach
+
+This helps maintain transparency and guides productive discussions.
+
+
 ### Additional Memories
 
 - **Use the gemini_bridge MCP tool for major design review, and for solution review feedback. Critically examine its feedback for compatibility and get user input if there's major changes recommended.**

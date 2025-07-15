@@ -1,0 +1,27 @@
+{
+  "name": "valet-mcp-server",
+  "version": "1.0.0",
+  "description": "VALET MCP server for personal digital assistant capabilities",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "test": "node test/smoke-test.js"
+  },
+  "keywords": [
+    "mcp",
+    "valet",
+    "assistant",
+    "todo",
+    "planner"
+  ],
+  "author": "VALET Project",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "dotenv": "^16.4.5",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {}
+}
