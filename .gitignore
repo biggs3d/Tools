@@ -20,12 +20,26 @@ Thumbs.db
 *.temp
 
 # Build outputs
-dist/
-build/
-out/
-target/
-bin/
-obj/
+**/dist/
+**/build/
+**/out/
+**/target/
+**/bin/
+**/obj/**/
 
 # Dependencies
-node_modules/
+**/node_modules/
+
+# Sensitive files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# MCP development files
+**/mcp/**/logs/
+**/mcp/**/coverage/
+**/mcp/**/test-results/
+**/mcp/**/.nyc_output/
+**/mcp/**/package-lock.json
+**/mcp/**/yarn.lock
+**/mcp/**/pnpm-lock.yaml

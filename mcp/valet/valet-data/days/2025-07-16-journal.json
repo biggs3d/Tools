@@ -1,0 +1,19 @@
+{
+  "date": "2025-07-16",
+  "type": "journal",
+  "sections": {
+    "reflections": "",
+    "personal_reminders": "",
+    "ongoing_summary": "Working on minimap layers bug fix - units not showing, only overhead terrain map visible. Goal to finish before 9:30am UI Devs standup. Multiple standups today: UI Devs + 2 other projects (M/W/F schedule).\n\nMinimap fix took longer than expected - missed 9:30am deadline due to complexity in Web Framework package.\n\nHad good lunch at diner with Erin - AI discussions as usual! Minimap project: pushed working files, remaining issues left for coworkers to handle. Not spending 2 days on what takes them 2 minutes this time.\n\n\n\nMinimap bug resolved! Josiah identified it was just a tag on an additional map layer for stationary objects. Working on adding Cloudflare R2 storage as a package option for valet MCP server and other future servers to support multi-machine workflows.",
+    "data_stash": "Minimap rotation issue: Josiah and Anthony identified problem is in Web Framework package, buried a couple levels down. Not a surface-level fix.\n\n\n\nFriday presentation prep: Brief intro on prompt engineering for Agents (Claude Code showcase)\n- 5 literature strategies: Metacognitive prompting, Meta chain of thought, Confidence elicitation & self-consistency checks, Automated skill discovery & exemplar-based reflection, Self-reflection & error prediction prompts\n- Will showcase CLAUDE.md and settings.json structure\n- Need to review coworker's full optimization list\n\n\n\nClaude Code demo ideas for 10-min presentation:\n1. Live CLAUDE.md editing - Show how project-specific instructions immediately change Claude's behavior\n2. MCP server integration - Quick demo of valet or memory-link servers in action\n3. Settings.json customization - Show permission controls and tool configurations\n4. Prompt engineering strategies - Live example of confidence elicitation or metacognitive prompting\n5. Demonstrate literature strategies while showing technical implementation\n\n5 Literature Strategies to showcase:\n1. Metacognitive prompting\n2. Meta chain of thought\n3. Confidence elicitation and self-consistency checks\n4. Automated skill discovery and exemplar-based reflection\n5. Self-reflection and error prediction prompts"
+  },
+  "metadata": {
+    "keywords": [
+      "journal",
+      "personal",
+      "2025-07-16"
+    ],
+    "created": "2025-07-16T12:35:24.007Z",
+    "updated": "2025-07-16T20:03:26.268Z"
+  }
+}

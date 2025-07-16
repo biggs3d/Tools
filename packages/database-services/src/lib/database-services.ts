@@ -31,6 +31,7 @@ import { SQLiteProvider, SQLiteColumnDefinition, SQLiteIndexDefinition, SQLiteSc
 import { MongoDBProvider } from './providers/mongodb.provider.js';
 import { IndexedDBProvider, MigrationHandler } from './providers/indexeddb.provider.js';
 import { GitSyncProvider, SyncError, MergeConflictError } from './providers/git-sync.provider.js';
+import { CloudflareR2Provider, CloudflareR2ProviderConfig } from './providers/cloudflare-r2.provider.js';
 import { 
     LogLevel, 
     logDebug, 
@@ -104,6 +105,9 @@ export {
     
     GitSyncProvider,
     type GitSyncProviderConfig,
+    
+    CloudflareR2Provider,
+    type CloudflareR2ProviderConfig,
     
     // Logging
     LogLevel,

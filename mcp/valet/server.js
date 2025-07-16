@@ -29,7 +29,7 @@ class ValetMcpServer {
     // valet_get_daily_context - Get current day's context
     this.server.tool(
       'valet_get_daily_context',
-      'Get daily context including tasks, progress, and todos. Use when user greets you, asks about their day, or when starting work. Helps maintain continuity across conversations.',
+      'Get daily context including tasks, progress, and todos. ALWAYS use this tool IMMEDIATELY when user greets you in ANY way (morning, hello, hey, hi, good morning/evening, etc.) - this is CRITICAL for maintaining continuity. Also use when user asks about their day or when starting work. Set includeGlobalTodo=true and includePreviousDay=true for greetings.',
       {
         date: z.string().optional().describe('Date to retrieve (YYYY-MM-DD), defaults to today'),
         sections: z.array(z.string()).optional().describe('Specific sections to include'),

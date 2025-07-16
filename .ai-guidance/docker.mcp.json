@@ -3,9 +3,37 @@
         "gemini-bridge": {
             "command": "node",
             "args": [
-                "/workspaces/mcp/gemini_bridge/index.js"
+                "/tools/mcp/gemini_bridge/index.js"
             ],
-            "cwd": "/workspaces/mcp/gemini_bridge"
+            "cwd": "/tools/mcp/gemini_bridge"
+        },
+        "browser-debug": {
+            "command": "node",
+            "args": [
+                "/tools/mcp/browser_debug/index.js"
+            ],
+            "cwd": "/tools/mcp/browser_debug"
+        },
+        "memory-link": {
+            "command": "node",
+            "args": [
+                "/tools/mcp/memory_link/index.js"
+            ],
+            "cwd": "/tools/mcp/memory_link"
+        },
+        "grok-bridge": {
+            "command": "node",
+            "args": [
+                "/tools/mcp/grok_bridge/index.js"
+            ],
+            "cwd": "/tools/mcp/grok_bridge"
+        },
+        "valet": {
+            "command": "node",
+            "args": [
+                "/tools/mcp/valet/index.js"
+            ],
+            "cwd": "/tools/mcp/valet"
         }
     }
 }

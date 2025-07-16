@@ -47,7 +47,8 @@
       "mcp__valet__valet_get_daily_context",
       "mcp__valet__valet_todo_operations",
       "mcp__valet__valet_todo_view",
-      "mcp__valet__valet_update_daily"
+      "mcp__valet__valet_update_daily",
+      "mcp__valet__valet_new_day"
     ],
     "deny": []
   },

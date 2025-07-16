@@ -11,6 +11,7 @@ export enum DatabaseType {
     SQLite = 'sqlite',
     MongoDB = 'mongodb',
     IndexedDB = 'indexeddb',
+    CloudflareR2 = 'cloudflare-r2',
     GitSync = 'git-sync'
 }
 

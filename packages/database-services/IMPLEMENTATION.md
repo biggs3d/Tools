@@ -11,7 +11,8 @@ The package now includes these database providers:
 3. **SQLiteProvider**: File-based SQL database support
 4. **MongoDBProvider**: Document database support
 5. **IndexedDBProvider**: Browser-based storage support
-6. **GitSyncProvider**: Git versioning wrapper for file-based providers
+6. **CloudflareR2Provider**: Cloudflare R2 object storage support
+7. **GitSyncProvider**: Git versioning wrapper for file-based providers
 
 All providers implement the `IDatabaseProvider` interface and support the standard CRUD operations.
 
@@ -122,7 +123,100 @@ describe('IndexedDBProvider Browser Tests', () => {
 });
 ```
 
-### 4. GitSyncProvider Integration Testing
+### 4. CloudflareR2Provider Integration Testing
+
+```typescript
+// Example CloudflareR2Provider E2E test setup
+describe('CloudflareR2Provider E2E Tests', () => {
+  let provider: CloudflareR2Provider;
+  let bucketName: string;
+
+  beforeAll(async () => {
+    // Setup test bucket name
+    bucketName = `test-bucket-${Date.now()}`;
+    
+    provider = new CloudflareR2Provider({
+      endpoint: process.env.CLOUDFLARE_R2_ENDPOINT || 'https://your-account.r2.cloudflarestorage.com',
+      accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
+      bucketName: bucketName,
+      region: 'auto' // Cloudflare R2 uses 'auto' region
+    });
+    
+    await provider.connect();
+  });
+
+  afterAll(async () => {
+    // Clean up test objects
+    try {
+      const collections = await provider.listCollections();
+      for (const collection of collections) {
+        const items = await provider.list(collection);
+        for (const item of items) {
+          await provider.delete(collection, item.id);
+        }
+      }
+    } catch (error) {
+      console.warn('Cleanup failed:', error);
+    }
+    
+    await provider.disconnect();
+  });
+
+  // CRUD operation tests with real R2 bucket
+  it('should store and retrieve JSON objects from R2', async () => {
+    const collection = 'test-collection';
+    const testData = { name: 'Test Item', value: 42 };
+    
+    const created = await provider.create(collection, testData);
+    expect(created).toBeDefined();
+    expect(created.id).toBeDefined();
+    
+    const retrieved = await provider.read(collection, created.id);
+    expect(retrieved).toEqual(expect.objectContaining(testData));
+  });
+
+  // Test large object handling
+  it('should handle large JSON objects efficiently', async () => {
+    const collection = 'large-objects';
+    const largeData = {
+      items: Array.from({ length: 1000 }, (_, i) => ({
+        id: i,
+        data: `Large data item ${i}`,
+        metadata: { created: new Date().toISOString() }
+      }))
+    };
+    
+    const created = await provider.create(collection, largeData);
+    const retrieved = await provider.read(collection, created.id);
+    
+    expect(retrieved.items).toHaveLength(1000);
+  });
+
+  // Test collection listing and cleanup
+  it('should list collections and support bulk operations', async () => {
+    const collections = ['collection-1', 'collection-2', 'collection-3'];
+    
+    // Create items in multiple collections
+    for (const collection of collections) {
+      await provider.create(collection, { test: collection });
+    }
+    
+    const listedCollections = await provider.listCollections();
+    expect(listedCollections).toEqual(expect.arrayContaining(collections));
+  });
+
+  // Test error handling for non-existent objects
+  it('should handle missing objects gracefully', async () => {
+    const collection = 'error-test';
+    
+    await expect(provider.read(collection, 'non-existent-id'))
+      .rejects.toThrow('Object not found');
+  });
+});
+```
+
+### 5. GitSyncProvider Integration Testing
 
 ```typescript
 // Example GitSyncProvider E2E test setup

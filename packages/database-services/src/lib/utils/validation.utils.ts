@@ -35,11 +35,10 @@ export function validateCollectionName(collectionName: string): void {
         throw new QueryError('Collection name must be a non-empty string');
     }
     
-    // Optional: Add any additional collection name validation rules
-    // For example, only allowing alphanumeric and underscore characters
-    // if (!/^[a-zA-Z0-9_]+$/.test(collectionName)) {
-    //     throw new QueryError('Collection name can only contain alphanumeric characters and underscores');
-    // }
+    // Disallow slashes and other problematic characters for object store compatibility
+    if (collectionName.includes('/') || collectionName.includes('\\')) {
+        throw new QueryError('Collection name cannot contain slashes');
+    }
 }
 
 /**
@@ -50,6 +49,11 @@ export function validateCollectionName(collectionName: string): void {
 export function validateId(id: string): void {
     if (!id || typeof id !== 'string' || id.trim() === '') {
         throw new QueryError('ID must be a non-empty string');
+    }
+    
+    // Disallow slashes and other problematic characters for object store compatibility
+    if (id.includes('/') || id.includes('\\')) {
+        throw new QueryError('ID cannot contain slashes');
     }
 }
 
