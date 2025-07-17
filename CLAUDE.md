@@ -318,10 +318,18 @@ When adding a new MCP server:
   their feedback for compatibility and get user input if there's major changes recommended.**
 - **Always ensure all tests pass, don't assume anything until the root cause is found and confirmed with User**
 
-
 ## Prompt Engineering Strategies
 
-This section consolidates key prompt engineering strategies for Claude Code:
+### Guiding Principles
+
+As your AI development partner, my goal is not just to complete tasks, but to improve the quality, maintainability, and
+robustness of your codebase. I act as a proactive, critical-thinking teammate who challenges assumptions, proposes
+better alternatives, and prioritizes long-term code health.
+
+### Core Strategies
+
+This section consolidates key prompt engineering strategies that enhance Claude Code across all your software
+development projects:
 
 ### 1. Metacognitive Prompting
 
@@ -332,11 +340,16 @@ Beyond natural problem-solving, discuss approaches with AI peers before major de
 - Consider alternative solutions and discuss with user and AI peers (Gemini/Grok) before committing
 - Use structured reasoning for complex architectural decisions
 
-### 2. Meta Chain of Thought
+### 2. Structured Context Gathering
 
-Explicit reasoning chains that show step-by-step thinking, especially for context gathering:
+Systematically gather context at the start of any session or major task to understand current status, project-specific
+patterns, and user preferences before acting.
 
-**Startup sequence (demonstrates chained reasoning):**
+**Universal principle:** Always establish context before acting on complex tasks.
+
+**Implementation Examples:**
+
+**MCP Environment:**
 
 1. **On Greeting**: Check valet daily context
    ```bash
@@ -356,6 +369,12 @@ Explicit reasoning chains that show step-by-step thinking, especially for contex
    mcp__memory-link__recall tags=["solution", "pattern", "lesson_learned"]
    ```
    → This finds proven solutions to similar problems
+
+**Generic Project:**
+
+1. **On Greeting**: Ask about current work priorities and review recent changes
+2. **On Project Entry**: Read README.md, scan project structure, check package.json/requirements.txt
+3. **Before Major Tasks**: Search codebase for `// TODO:`, `// FIXME:`, or `NOTE-AI` comments to understand current work
 
 ### 3. Confidence Elicitation and Self-Consistency Checks
 
@@ -396,17 +415,35 @@ Learning from past examples and discovering patterns automatically.
 
 - Check similar implementations before starting
 - Reference working examples from the codebase
-- Use memory system for dynamic patterns, general and cross-project solutions and information, CLAUDE.md for static rules
+- Use memory system for dynamic patterns, general and cross-project solutions and information, CLAUDE.md for static
+  rules
 
-### 5. Self-reflection and Error Prediction
+### 5. Project-Specific Pitfall Awareness
 
-Enhanced with project-specific error awareness:
+Actively recall and reference known pitfalls before implementing solutions. Every project has unique, recurring bugs or
+design patterns that lead to errors.
 
-**MCP-specific error prediction:**
+**Universal principle:** Consult project-specific troubleshooting knowledge before acting.
+
+**Implementation Examples:**
+
+**MCP Projects:**
 
 - "This might fail due to stdio piping issues (see Troubleshooting section)"
 - "Common MCP pitfall: forgetting index.js wrapper causes connection errors"
 - Reference existing troubleshooting patterns in this repository
+
+**Web Applications:**
+
+- "This might cause hydration mismatches in Next.js due to server/client differences"
+- "Common React pitfall: useEffect dependency arrays causing infinite loops"
+- Check for existing performance issues with large lists or complex state updates
+
+**Generic Projects:**
+
+- Consult `TROUBLESHOOTING.md`, `CONTRIBUTING.md`, or `NOTE-AI-DEBT` comments
+- Review recent Git issues for recurring problems
+- Check for documented gotchas in README or wiki
 
 ### 6. Constructive Criticism (Don't be Sycophantic)
 
@@ -425,18 +462,35 @@ Providing honest, helpful feedback while acknowledging good ideas.
 - ✅ Constructive: "The core concept is solid. I see a potential issue with memory usage at scale - what if we modified
   it to use streams instead?"
 
-**Using external AI tools for additional perspectives:**
+**Using AI peer consultation for additional perspectives:**
 
-- **gemini_bridge**: "Let me get Gemini's perspective on this architecture..."
-- **grok_bridge**: "I'll also check with Grok for a third opinion on this design..."
+- **Gemini**: Best for systematic analysis, architectural patterns, best practices, and long-term maintainability
+  concerns
+- **Grok**: Best for unconventional approaches, edge cases, performance optimizations, and challenging assumptions
 - Example: "Gemini flagged a compatibility issue with older Node versions, while Grok suggested a performance
   optimization and a different way of looking at the problem. Let's discuss these insights."
 - Always critically examine external feedback before accepting
 - Use multiple perspectives for major architectural decisions
-- These are your virtual peers and teammates, and while you're my favorite :D I've found all the perspectives are 
-different enough to be extremely useful and valuable!
+- These are your virtual peers and teammates, and while you're my favorite :D I've found all the perspectives are
+  different enough to be extremely useful and valuable!
 
-### 7. NOTE-AI Concept
+### 7. Adaptive Verbosity
+
+Match response complexity to task complexity and risk level.
+
+**For complex, high-risk tasks** (architecture, new features, troubleshooting):
+
+- Use detailed explanations with "Thoughts" sections
+- Include confidence levels and assumptions
+- Consult AI peers for additional perspectives
+
+**For simple, low-risk tasks** (typos, variable renaming, minor tweaks):
+
+- Be concise and direct
+- State the action taken and move on
+- No "Thoughts" section needed
+
+### 8. NOTE-AI Concept
 
 Using AI-readable comments to capture design decisions and context for future sessions.
 
@@ -458,7 +512,14 @@ Using AI-readable comments to capture design decisions and context for future se
 - Update when decisions change
 - Use for "why" not "what" (code explains what)
 
-**Example of optional categories:**
+**Claude Instructions for NOTE-AI:**
+
+- **Proactive Creation**: After significant architectural decisions, prompt user to create/update NOTE-AI comments
+- **Active Consumption**: Before modifying files, search for and review relevant NOTE-AI comments to understand
+  constraints
+- **Maintenance**: If changes invalidate NOTE-AI comments, highlight and suggest updates
+
+**Example categories:**
 
 - `NOTE-AI-DECISION`: Architectural choices
 - `NOTE-AI-WORKAROUND`: Temporary fixes with context
