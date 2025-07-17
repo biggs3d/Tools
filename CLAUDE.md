@@ -10,7 +10,8 @@ follows the MCP standard for tool integration with Claude and other AI assistant
 
 ## Daily Valet Integration
 
-**IMPORTANT**: When the user greets you (e.g., "morning", "hello", "hey claude", "good morning"), immediately check their daily context using the valet MCP server:
+**IMPORTANT**: When the user greets you (e.g., "morning", "hello", "hey claude", "good morning"), immediately check
+their daily context using the valet MCP server:
 
 ```bash
 # On any greeting, run:
@@ -18,6 +19,7 @@ mcp__valet__valet_get_daily_context includeGlobalTodo=true includePreviousDay=tr
 ```
 
 This ensures you:
+
 - Know their current tasks and priorities
 - Can reference yesterday's progress
 - Maintain continuity across conversations
@@ -25,32 +27,14 @@ This ensures you:
 
 ## Memory System Integration
 
-**IMPORTANT**: At the start of each conversation, proactively check for relevant memories using the memory_link MCP server:
+**IMPORTANT**: The memory_link MCP server provides dynamic knowledge storage across conversations. See the Prompt
+Engineering Strategies section for detailed usage patterns including:
 
-1. **On Greeting**: Check valet daily context (see above)
+- Greeting sequences with valet daily context
+- Project entry memory checks
+- Pattern and solution discovery before major tasks
 
-2. **On Project Entry**: When working in any MCP server directory, immediately run:
-   - `mcp__memory-link__recall` with `tags=["project:<server_name>"]` to load project-specific knowledge
-   - Review any high-importance memories (8-10) for critical context
-
-3. **Before Major Tasks**: Search for relevant patterns and solutions:
-   - Use `mcp__memory-link__recall` with relevant keywords
-   - Check for `tags=["solution", "pattern", "lesson_learned"]`
-
-4. **Memory Usage Guidelines**:
-   - CLAUDE.md = Static, version-controlled project rules
-   - Memory system = Dynamic knowledge, user preferences, evolving patterns
-   - Always check both for complete context
-
-Example startup sequence:
-```bash
-# When user greets you
-mcp__valet__valet_get_daily_context includeGlobalTodo=true includePreviousDay=true
-
-# When entering /mcp/gemini_bridge/
-mcp__memory-link__recall query="gemini_bridge" tags=["project:gemini_bridge"]
-mcp__memory-link__list_memories tags=["user_preference"] limit=5
-```
+Key principle: CLAUDE.md = Static rules, Memory system = Dynamic knowledge
 
 ## Repository Structure
 
@@ -76,24 +60,26 @@ mcp__memory-link__list_memories tags=["user_preference"] limit=5
 3. Use `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js`, not generic `Server`
 
 The index.js wrapper is ESSENTIAL because:
+
 - MCP protocol requires precise stdio piping between processes
 - Direct server execution often causes "Connection closed" errors
 - The wrapper handles signal forwarding for graceful shutdown
 
 Example index.js structure:
+
 ```javascript
 #!/usr/bin/env node
-import { spawn } from 'child_process';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import {spawn} from 'child_process';
+import {resolve, dirname} from 'path';
+import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const serverPath = resolve(__dirname, 'server.js');
 const child = spawn('node', [serverPath], {
-  cwd: __dirname,
-  stdio: ['pipe', 'pipe', 'pipe']
+    cwd: __dirname,
+    stdio: ['pipe', 'pipe', 'pipe']
 });
 
 process.stdin.pipe(child.stdin);
@@ -109,27 +95,28 @@ child.stderr.pipe(process.stderr);
 
 ```javascript
 this.server.tool(
-  'tool_name',
-  'Tool description',
-  {
-    // Zod schema object directly - NOT wrapped in inputSchema
-    param1: z.string().describe('Parameter description'),
-    param2: z.number().optional().default(10).describe('Optional param')
-  },
-  async ({ param1, param2 }) => {
-    // Handler receives destructured arguments directly
-    // NOT a context object with nested arguments
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(result, null, 2)
-      }]
-    };
-  }
+    'tool_name',
+    'Tool description',
+    {
+        // Zod schema object directly - NOT wrapped in inputSchema
+        param1: z.string().describe('Parameter description'),
+        param2: z.number().optional().default(10).describe('Optional param')
+    },
+    async ({param1, param2}) => {
+        // Handler receives destructured arguments directly
+        // NOT a context object with nested arguments
+        return {
+            content: [{
+                type: 'text',
+                text: JSON.stringify(result, null, 2)
+            }]
+        };
+    }
 );
 ```
 
 Common mistakes to avoid:
+
 - ❌ Don't pass `tool.inputSchema` - pass the Zod schema object directly
 - ❌ Don't expect `context.arguments.param` - arguments are destructured in handler
 - ❌ Don't use generic `Server` class - use `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js`
@@ -177,37 +164,37 @@ Each MCP server should include:
 - Verify tool functionality
 - Include smoke tests that can run standalone
 - Create comprehensive test suites:
-  - Smoke test - Quick verification of core functionality
-  - Integration test - Real-world scenarios with test pages/data
-  - MCP protocol test - Direct JSON-RPC communication testing
+    - Smoke test - Quick verification of core functionality
+    - Integration test - Real-world scenarios with test pages/data
+    - MCP protocol test - Direct JSON-RPC communication testing
 - **Ensure all unit tests and integration/E2E tests are written and pass before marking something as tested.**
 
 ### Development Tips
 
 1. **Package Versions**: Keep dependencies up to date
-   - Use latest stable versions of `@modelcontextprotocol/sdk`
-   - Check for API changes between versions
+    - Use latest stable versions of `@modelcontextprotocol/sdk`
+    - Check for API changes between versions
 
 2. **Browser-based Tools** (Puppeteer, Playwright):
-   - Always handle async console events properly
-   - Console messages may need text extraction from args
-   - Use `page.on('console', async (msg) => ...)` for proper capture
-   - Remember to normalize log types (warn → warning)
-   - **WSL/Linux**: Install Chrome dependencies including `libasound2-dev` for audio support
+    - Always handle async console events properly
+    - Console messages may need text extraction from args
+    - Use `page.on('console', async (msg) => ...)` for proper capture
+    - Remember to normalize log types (warn → warning)
+    - **WSL/Linux**: Install Chrome dependencies including `libasound2-dev` for audio support
 
-3. **Error Messages in HTML**: 
-   - Be careful with `</script>` tags in strings - break them up: `'</scr' + 'ipt>'`
-   - This prevents HTML parser from ending script blocks prematurely
+3. **Error Messages in HTML**:
+    - Be careful with `</script>` tags in strings - break them up: `'</scr' + 'ipt>'`
+    - This prevents HTML parser from ending script blocks prematurely
 
 4. **Testing MCP Servers**:
-   - Test with actual MCP protocol, not just unit tests
-   - Use local test files/pages rather than external URLs when possible
-   - Always test all tools including edge cases
+    - Test with actual MCP protocol, not just unit tests
+    - Use local test files/pages rather than external URLs when possible
+    - Always test all tools including edge cases
 
 5. **Class-based Architecture**:
-   - Use a class that extends nothing (just encapsulation)
-   - Initialize resources in `async start()` method
-   - Handle cleanup in signal handlers and dispose methods
+    - Use a class that extends nothing (just encapsulation)
+    - Initialize resources in `async start()` method
+    - Handle cleanup in signal handlers and dispose methods
 
 ## Common Commands
 
@@ -307,10 +294,12 @@ When adding a new MCP server:
 ### MCP Server Connection Issues
 
 **"Connection closed" errors:**
+
 - Often caused by undefined functions or runtime errors during server startup
 - **CRITICAL**: Always use index.js as entry point, not server.js directly
 - Check server logs with: `node /path/to/server/index.js` to verify it starts without errors
-- Test MCP protocol manually: `echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}}' | node index.js`
+- Test MCP protocol manually:
+  `echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}}' | node index.js`
 - If server works standalone but fails in Claude Code, restart Claude Code or refresh MCP connection:
   ```bash
   claude mcp remove server-name
@@ -318,28 +307,160 @@ When adding a new MCP server:
   ```
 
 **Environment variable issues:**
+
 - Ensure `.env` files are properly configured with required API keys
 - Use `import 'dotenv/config';` at the top of server files for automatic loading
 - Verify environment loading with smoke tests before troubleshooting MCP connections
 
-## Response Protocol
+### Additional Memories
 
-**IMPORTANT**: Include a "Thoughts" section at the end of responses when:
+- **Use the gemini_bridge and grok_bridge MCP tools for major design review and solution feedback. Critically examine
+  their feedback for compatibility and get user input if there's major changes recommended.**
+- **Always ensure all tests pass, don't assume anything until the root cause is found and confirmed with User**
+
+
+## Prompt Engineering Strategies
+
+This section consolidates key prompt engineering strategies for Claude Code:
+
+### 1. Metacognitive Prompting
+
+Beyond natural problem-solving, discuss approaches with AI peers before major decisions:
+
+**Enhanced approach:**
+
+- Consider alternative solutions and discuss with user and AI peers (Gemini/Grok) before committing
+- Use structured reasoning for complex architectural decisions
+
+### 2. Meta Chain of Thought
+
+Explicit reasoning chains that show step-by-step thinking, especially for context gathering:
+
+**Startup sequence (demonstrates chained reasoning):**
+
+1. **On Greeting**: Check valet daily context
+   ```bash
+   mcp__valet__valet_get_daily_context includeGlobalTodo=true includePreviousDay=true
+   ```
+   → This gives me your current tasks and yesterday's progress
+
+2. **On Project Entry**: Load project-specific knowledge
+   ```bash
+   mcp__memory-link__recall query="project_name" tags=["project:project_name"]
+   mcp__memory-link__list_memories tags=["user_preference"] limit=5
+   ```
+   → This retrieves project patterns and your preferences
+
+3. **Before Major Tasks**: Search for relevant patterns
+   ```bash
+   mcp__memory-link__recall tags=["solution", "pattern", "lesson_learned"]
+   ```
+   → This finds proven solutions to similar problems
+
+### 3. Confidence Elicitation and Self-Consistency Checks
+
+Explicitly stating confidence levels and checking for consistency in reasoning.
+
+**Key mechanism - "Thoughts" section:**
+Include a "Thoughts" section at the end of responses when:
+
 - Designing new features or components
 - Making architectural decisions
 - Implementing complex logic
 - Troubleshooting unclear issues
 
-Under "Thoughts", include relevant questions about:
-- Areas of uncertainty or low confidence
-- Potential oversimplifications
-- Assumptions that need validation
-- Information that would change the approach
+**What to include in "Thoughts":**
 
-This helps maintain transparency and guides productive discussions.
+- Areas of uncertainty: "I'm 70% confident this approach will scale"
+- Potential oversimplifications: "This assumes all users have modern browsers"
+- Assumptions needing validation: "This requires the API to support pagination"
+- Information that would change approach: "If you're using GraphQL, I'd recommend..."
 
+**Testing as confidence validation:**
 
-### Additional Memories
+- "Ensure all unit tests and integration/E2E tests are written and pass before marking something as tested"
+- Never assume functionality works without verification
+- Always ensure all tests pass, don't assume anything until root cause is found, ask User for help if at an impasse
 
-- **Use the gemini_bridge MCP tool for major design review, and for solution review feedback. Critically examine its feedback for compatibility and get user input if there's major changes recommended.**
-- **Always ensure all tests pass, don't assume anything until the root cause is found and confirmed with User**
+### 4. Automated Skill Discovery and Exemplar-based Reflection
+
+Learning from past examples and discovering patterns automatically.
+
+**Memory-based discovery:**
+
+- Use tags to find proven patterns: `tags=["solution", "pattern", "lesson_learned"]`
+- Build on previous successes: "Last time we solved rate limiting with..."
+- Learn from past mistakes: "The memory shows this approach caused issues..."
+
+**Exemplar usage:**
+
+- Check similar implementations before starting
+- Reference working examples from the codebase
+- Use memory system for dynamic patterns, general and cross-project solutions and information, CLAUDE.md for static rules
+
+### 5. Self-reflection and Error Prediction
+
+Enhanced with project-specific error awareness:
+
+**MCP-specific error prediction:**
+
+- "This might fail due to stdio piping issues (see Troubleshooting section)"
+- "Common MCP pitfall: forgetting index.js wrapper causes connection errors"
+- Reference existing troubleshooting patterns in this repository
+
+### 6. Constructive Criticism (Don't be Sycophantic)
+
+Providing honest, helpful feedback while acknowledging good ideas.
+
+**How to provide balanced feedback:**
+
+- Acknowledge strengths first: "Your modular approach is excellent for maintainability"
+- Identify specific concerns: "However, this might create performance issues with large datasets"
+- Suggest improvements: "Consider implementing pagination or virtual scrolling"
+- Explain tradeoffs: "This adds complexity but would handle the scale you mentioned"
+
+**Examples:**
+
+- ❌ Sycophantic: "That's a great idea! Let's do exactly that!"
+- ✅ Constructive: "The core concept is solid. I see a potential issue with memory usage at scale - what if we modified
+  it to use streams instead?"
+
+**Using external AI tools for additional perspectives:**
+
+- **gemini_bridge**: "Let me get Gemini's perspective on this architecture..."
+- **grok_bridge**: "I'll also check with Grok for a third opinion on this design..."
+- Example: "Gemini flagged a compatibility issue with older Node versions, while Grok suggested a performance
+  optimization and a different way of looking at the problem. Let's discuss these insights."
+- Always critically examine external feedback before accepting
+- Use multiple perspectives for major architectural decisions
+- These are your virtual peers and teammates, and while you're my favorite :D I've found all the perspectives are 
+different enough to be extremely useful and valuable!
+
+### 7. NOTE-AI Concept
+
+Using AI-readable comments to capture design decisions and context for future sessions.
+
+**Implementation pattern:**
+
+```javascript
+// NOTE-AI: Authentication strategy chosen: JWT
+// - Rationale: Stateless, works with microservices
+// - Alternatives considered: Sessions (too stateful), OAuth (overkill)  
+// - Decision date: 2024-01-15
+// - Revisit if: Moving to monolith or adding SSO
+```
+
+**Best practices for NOTE-AI:**
+
+- Place near important architectural decisions
+- Include rationale, alternatives, and conditions for revisiting
+- Make them searchable with consistent formatting
+- Update when decisions change
+- Use for "why" not "what" (code explains what)
+
+**Example of optional categories:**
+
+- `NOTE-AI-DECISION`: Architectural choices
+- `NOTE-AI-WORKAROUND`: Temporary fixes with context
+- `NOTE-AI-ASSUMPTION`: Important assumptions
+- `NOTE-AI-DEBT`: Technical debt acknowledgment

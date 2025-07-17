@@ -1,0 +1,9 @@
+docker cp D:/Tools faad-hmi_devcontainer-dev-1:/tools
+docker run -p 2222:22 image_name
+ssh -p 2222 root@localhost
+
+
+-----------------------------
+
+# Install Claude Code globally (do NOT use sudo, it messes things up later)
+npm install -g @anthropic-ai/claude-code
