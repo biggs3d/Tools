@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-17T01:05:22.695Z",
+  "updated": "2025-07-17T20:44:08.385Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -40,46 +40,50 @@
       "content": "List possible life changes in Spanish to discuss with italki tutor",
       "priority": "medium",
       "category": "Personal",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-15T19:56:00.450Z",
       "due": "2025-07-16",
-      "notes": []
+      "notes": [],
+      "completed_at": "2025-07-17T20:42:59.750Z"
     },
     {
       "id": "5258f5cf-eeba-4950-af3d-9e23bcb3c109",
       "content": "Prepare brief intro on prompt engineering for Agents (Claude Code showcase)",
       "priority": "high",
       "category": "Work",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-16T19:52:44.614Z",
       "due": "2025-07-18",
       "notes": [
         "Include confidence elicitation",
         "Cover CLAUDE.md and settings.json structure",
-        "Showcase 5 strategies from literature",
-        "Include NOTE-AI concept - AI context comments for capturing design decisions and important context"
+        "Showcase 5 strategies from literature: 1) Metacognitive prompting, 2) Meta chain of thought, 3) Confidence elicitation and self-consistency checks, 4) Automated skill discovery and exemplar-based reflection, 5) Self-reflection and error prediction prompts",
+        "Include NOTE-AI concept - AI context comments for capturing design decisions and important context",
+        "Don't be sycophantic - acknowledge good ideas when they add value, but provide constructive criticism when there are drawbacks. The user might not have thought of all angles, hence teamwork."
       ],
-      "updated_at": "2025-07-17T00:32:09.964Z"
+      "updated_at": "2025-07-17T11:40:20.703Z",
+      "completed_at": "2025-07-17T20:42:55.234Z"
     },
     {
       "id": "8e9caa80-348f-4e2c-b4a5-791b660f37ca",
       "content": "Review coworker's full list of Claude Code optimization strategies",
       "priority": "medium",
       "category": "Work",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-16T19:52:48.467Z",
       "due": "2025-07-18",
       "notes": [
         "To help Claude function even better",
         "Part of Friday presentation prep"
-      ]
+      ],
+      "completed_at": "2025-07-17T20:43:44.304Z"
     },
     {
       "id": "4306b68f-6d67-4967-b130-2e25629b03bc",
       "content": "Figure out demo ideas for Claude Code presentation (10 min slot)",
       "priority": "high",
       "category": "Work",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-16T19:55:20.564Z",
       "due": "2025-07-18",
       "notes": [
@@ -87,7 +91,8 @@
         "Include MCP servers demo",
         "For getting other devs' eyes on it",
         "Erin suggested demoing vs just showing features"
-      ]
+      ],
+      "completed_at": "2025-07-17T20:44:08.385Z"
     },
     {
       "id": "3138613e-c549-48be-809b-9d7540101c09",
