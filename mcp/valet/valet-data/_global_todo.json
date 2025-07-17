@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-16T19:55:20.564Z",
+  "updated": "2025-07-17T00:32:09.964Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -56,8 +56,10 @@
       "notes": [
         "Include confidence elicitation",
         "Cover CLAUDE.md and settings.json structure",
-        "Showcase 5 strategies from literature"
-      ]
+        "Showcase 5 strategies from literature",
+        "Include NOTE-AI concept - AI context comments for capturing design decisions and important context"
+      ],
+      "updated_at": "2025-07-17T00:32:09.964Z"
     },
     {
       "id": "8e9caa80-348f-4e2c-b4a5-791b660f37ca",
