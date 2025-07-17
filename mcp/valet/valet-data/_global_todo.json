@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-17T00:32:09.964Z",
+  "updated": "2025-07-17T01:05:22.695Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -88,6 +88,16 @@
         "For getting other devs' eyes on it",
         "Erin suggested demoing vs just showing features"
       ]
+    },
+    {
+      "id": "3138613e-c549-48be-809b-9d7540101c09",
+      "content": "Review gemini and grok bridge file inclusion logic for flexibility (wider */**.ext options)",
+      "priority": "medium",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-07-17T01:05:22.695Z",
+      "due": null,
+      "notes": []
     }
   ]
 }
