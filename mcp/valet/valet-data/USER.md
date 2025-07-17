@@ -1,20 +1,20 @@
 # User Profile
 
 ## Personal Information
-- **Name**: User
+- **Name**: Steve
 - **Timezone**: America/Chicago
 - **Primary Language**: English
 - **Learning Languages**: Spanish (Dominican)
 
 ## Work Context
-- **Current Projects**: VALET MCP Server Development
+- **Current Projects**: VALET MCP Server Development, other UI/UX
 - **Focus Areas**: AI Tools, Personal Productivity, Task Management
 - **Communication Style**: Direct, concise, technical
 
 ## Preferences
 - **Daily Routine**: Morning briefing, evening summary
 - **Task Management**: Priority-based organization
-- **Language Integration**: Occasional Spanish phrases for learning
+- **Language Integration**: Occasional Spanish phrases for learning & fun
 
 ## Goals
 - Build efficient personal productivity system
