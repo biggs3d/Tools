@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-17T20:44:08.385Z",
+  "updated": "2025-07-23T19:53:02.622Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -99,10 +99,57 @@
       "content": "Review gemini and grok bridge file inclusion logic for flexibility (wider */**.ext options)",
       "priority": "medium",
       "category": "Development",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-17T01:05:22.695Z",
       "due": null,
+      "notes": [],
+      "completed_at": "2025-07-23T19:53:02.621Z"
+    },
+    {
+      "id": "bfa37da2-a7f5-4673-9533-311eb5c3b78c",
+      "content": "Talk to Graham about customer data - what he really wants to see visually in the UI and why",
+      "priority": "medium",
+      "category": "Work",
+      "completed": true,
+      "created": "2025-07-18T20:34:55.015Z",
+      "due": "2025-07-21",
+      "notes": [],
+      "completed_at": "2025-07-23T19:13:32.695Z"
+    },
+    {
+      "id": "9c31ca1a-0167-401c-be8c-10832389581b",
+      "content": "Move GeoMiniMap files over to Phoenix to remove the registration dependency on the project",
+      "priority": "medium",
+      "category": "Development",
+      "completed": true,
+      "created": "2025-07-21T14:07:29.508Z",
+      "due": null,
+      "notes": [],
+      "completed_at": "2025-07-23T19:13:29.999Z"
+    },
+    {
+      "id": "b60bd536-b2eb-4d9c-b573-1c976cc128d8",
+      "content": "Check into redoing map-feature-deselect branch work",
+      "priority": "low",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-07-22T11:45:04.644Z",
+      "due": null,
       "notes": []
+    },
+    {
+      "id": "dfe547b1-9f31-4adc-9d99-3b28572f984c",
+      "content": "Build UI showcase for customer demo by Monday - show 6 months of backend work",
+      "priority": "high",
+      "category": "Work",
+      "completed": false,
+      "created": "2025-07-22T11:50:35.171Z",
+      "due": "2025-07-28",
+      "notes": [
+        "New project with tons of content to display",
+        "Have autonomy and control over implementation",
+        "Good opportunity to iterate on framework context guidance"
+      ]
     }
   ]
 }

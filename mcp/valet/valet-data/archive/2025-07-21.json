@@ -1,0 +1,8 @@
+{
+  "date": "2025-07-21",
+  "archived_at": "2025-07-22T11:50:28.018Z",
+  "files": {
+    "planner": "{\n  \"date\": \"2025-07-21\",\n  \"type\": \"planner\",\n  \"sections\": {\n    \"tasks\": \"\",\n    \"data_stash\": \"\",\n    \"ongoing_summary\": \"\",\n    \"personal_reminders\": \"\"\n  },\n  \"metadata\": {\n    \"keywords\": [\n      \"daily\",\n      \"planner\",\n      \"2025-07-21\"\n    ],\n    \"created\": \"2025-07-21T13:05:54.681Z\",\n    \"updated\": \"2025-07-21T13:05:54.681Z\"\n  }\n}",
+    "journal": "{\n  \"date\": \"2025-07-21\",\n  \"type\": \"journal\",\n  \"sections\": {\n    \"reflections\": \"\",\n    \"personal_reminders\": \"\"\n  },\n  \"metadata\": {\n    \"keywords\": [\n      \"journal\",\n      \"personal\",\n      \"2025-07-21\"\n    ],\n    \"created\": \"2025-07-21T13:05:54.681Z\",\n    \"updated\": \"2025-07-21T13:05:54.681Z\"\n  }\n}"
+  }
+}

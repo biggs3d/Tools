@@ -1,0 +1,19 @@
+{
+  "date": "2025-07-18",
+  "type": "planner",
+  "sections": {
+    "tasks": "- Mass rename packages in repo before coworkers arrive to minimize git conflicts (merging multiple solutions with shared codebases)\n\n✅ Claude Code presentation went well!",
+    "data_stash": "",
+    "ongoing_summary": "",
+    "personal_reminders": ""
+  },
+  "metadata": {
+    "keywords": [
+      "daily",
+      "planner",
+      "2025-07-18"
+    ],
+    "created": "2025-07-18T12:17:46.545Z",
+    "updated": "2025-07-18T20:34:51.558Z"
+  }
+}
