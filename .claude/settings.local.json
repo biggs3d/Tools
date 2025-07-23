@@ -56,6 +56,8 @@
   "enabledMcpjsonServers": [
     "gemini-bridge",
     "browser-debug",
-    "memory-link"
+    "memory-link",
+    "grok-bridge",
+    "valet"
   ]
 }

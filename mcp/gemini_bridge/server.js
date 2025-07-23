@@ -10,6 +10,7 @@ import {readFile, readdir, stat, open} from "fs/promises";
 import {join, extname, relative, resolve, normalize} from "path";
 import {platform} from "os";
 import {z} from "zod";
+import micromatch from "micromatch";
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -317,6 +318,27 @@ export function validatePath(filePath) {
     return filePath;
 }
 
+// Sanitize glob patterns to prevent security issues
+export function sanitizePatterns(patterns) {
+    return patterns.map(pattern => {
+        // Remove leading slashes to prevent absolute path matching
+        let sanitized = pattern.replace(/^[\/\\]+/, '');
+        
+        // Limit pattern length to prevent ReDoS attacks
+        if (sanitized.length > 200) {
+            throw new Error(`Pattern too long: ${sanitized.substring(0, 50)}... (max 200 chars)`);
+        }
+        
+        // Count wildcards to prevent overly complex patterns
+        const wildcardCount = (sanitized.match(/\*/g) || []).length;
+        if (wildcardCount > 10) {
+            throw new Error(`Pattern too complex: ${sanitized} (max 10 wildcards)`);
+        }
+        
+        return sanitized;
+    });
+}
+
 // Path normalization for cross-platform support (WSL <-> Windows)
 export function normalizePath(filePath) {
     if (!filePath) return filePath;
@@ -572,15 +594,20 @@ class GeminiBridgeMCP {
             "Discover relevant files in a directory for analysis (automatically detects text files)",
             {
                 directory: z.string().describe("Directory path to scan"),
-                exclude_patterns: z.array(z.string()).optional().describe("Patterns to exclude (e.g., ['test', 'spec'])"),
+                include_patterns: z.array(z.string()).optional().describe("Glob patterns to include (e.g., ['**/*.js', 'src/**/*.{ts,tsx}'])"),
+                exclude_patterns: z.array(z.string()).optional().describe("Glob patterns to exclude (e.g., ['**/test/**', '**/*.spec.*'])"),
                 max_files: z.number().optional().describe(`Maximum number of files to return (default: ${CONFIG.DEFAULT_MAX_FILES})`)
             },
-            async ({directory, exclude_patterns = [], max_files = CONFIG.DEFAULT_MAX_FILES}) => {
+            async ({directory, include_patterns = [], exclude_patterns = [], max_files = CONFIG.DEFAULT_MAX_FILES}) => {
                 try {
+                    // Sanitize and normalize patterns
+                    const sanitizedIncludes = sanitizePatterns(include_patterns);
+                    const sanitizedExcludes = sanitizePatterns(exclude_patterns);
+                    
                     // Normalize directory path
                     const normalizedDir = normalizePath(directory);
 
-                    const files = await this.findFiles(normalizedDir, exclude_patterns, max_files);
+                    const files = await this.findFiles(normalizedDir, sanitizedIncludes, sanitizedExcludes, max_files);
 
                     if (files.length === 0) {
                         return {
@@ -901,7 +928,7 @@ class GeminiBridgeMCP {
 
                 if (stats.isDirectory()) {
                     // If directory, collect readable files recursively
-                    const dirFiles = await this.findFiles(resolvedPath, [], 1000);
+                    const dirFiles = await this.findFiles(resolvedPath, [], [], 1000);
                     for (const dirFile of dirFiles) {
                         try {
                             const content = await readFile(dirFile.path, 'utf-8');
@@ -959,7 +986,7 @@ class GeminiBridgeMCP {
         return results;
     }
 
-    async findFiles(directory, excludePatterns = [], maxFiles = 100) {
+    async findFiles(directory, includePatterns = [], excludePatterns = [], maxFiles = 100) {
         const results = [];
 
         const scanDir = async (dir, depth = 0) => {
@@ -972,16 +999,29 @@ class GeminiBridgeMCP {
                     if (CONFIG.EXCLUDED_DIRS.includes(entry) || entry.startsWith('.')) continue;
 
                     const fullPath = join(dir, entry);
-                    const relativePath = relative(directory, fullPath);
-
-                    // Check exclude patterns
-                    if (excludePatterns.some(pattern => relativePath.includes(pattern))) continue;
-
+                    const relativePath = relative(directory, fullPath).replace(/\\/g, '/');
+                    
                     const stats = await stat(fullPath);
 
                     if (stats.isDirectory()) {
+                        // For directories, only check exclude patterns to skip entire directory trees
+                        if (excludePatterns.length > 0) {
+                            if (micromatch.any(relativePath, excludePatterns)) continue;
+                        }
                         await scanDir(fullPath, depth + 1);
                     } else if (stats.size <= CONFIG.MAX_FILE_SIZE) {
+                        // For files, check both include and exclude patterns first
+                        
+                        // Check include patterns first (if any specified)
+                        if (includePatterns.length > 0) {
+                            if (!micromatch.any(relativePath, includePatterns)) continue;
+                        }
+
+                        // Check exclude patterns
+                        if (excludePatterns.length > 0) {
+                            if (micromatch.any(relativePath, excludePatterns)) continue;
+                        }
+                        
                         // Check if extension is explicitly excluded
                         const ext = extname(entry).toLowerCase();
                         if (CONFIG.EXCLUDED_EXTENSIONS.includes(ext)) continue;
