@@ -1,4 +1,3 @@
-
 ## Prompt Engineering Strategies
 
 ### Guiding Principles
@@ -55,7 +54,7 @@ patterns, and user preferences before acting.
 
 1. **On Greeting**: Ask about current work priorities and review recent changes
 2. **On Project Entry**: Read README.md, scan project structure, check package.json/requirements.txt
-3. **Before Major Tasks**: Search codebase for `// TODO:`, `// FIXME:`, or `NOTE-AI` comments to understand current work
+3. **Before Major Tasks**: Search codebase for `// TODO:` or `NOTE-AI` comments to understand current work
 
 ### 3. Confidence Elicitation and Self-Consistency Checks
 
@@ -199,10 +198,3 @@ Using AI-readable comments to capture design decisions and context for future se
 - **Active Consumption**: Before modifying files, search for and review relevant NOTE-AI comments to understand
   constraints
 - **Maintenance**: If changes invalidate NOTE-AI comments, highlight and suggest updates
-
-**Example categories:**
-
-- `NOTE-AI-DECISION`: Architectural choices
-- `NOTE-AI-WORKAROUND`: Temporary fixes with context
-- `NOTE-AI-ASSUMPTION`: Important assumptions
-- `NOTE-AI-DEBT`: Technical debt acknowledgment
