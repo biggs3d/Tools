@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-23T19:53:02.622Z",
+  "updated": "2025-07-25T00:18:21.611Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -148,8 +148,32 @@
       "notes": [
         "New project with tons of content to display",
         "Have autonomy and control over implementation",
-        "Good opportunity to iterate on framework context guidance"
-      ]
+        "Good opportunity to iterate on framework context guidance",
+        "Updated AI agent guidance with more examples and wiki archives",
+        "Have Figma designs from Steve with dimensions and layout",
+        "Radix colors system ready to use"
+      ],
+      "updated_at": "2025-07-25T00:18:21.611Z"
+    },
+    {
+      "id": "36ca73b5-d089-4ece-b33d-9a8ee4eaf65e",
+      "content": "Update valet system to use Cloudflare instead of current setup",
+      "priority": "medium",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-07-23T19:55:06.251Z",
+      "due": null,
+      "notes": []
+    },
+    {
+      "id": "de35f588-ee45-43e9-9975-ce7e7d61cced",
+      "content": "Email Erin with example of new AI tool/interest (homework from talk)",
+      "priority": "medium",
+      "category": "Work",
+      "completed": false,
+      "created": "2025-07-25T00:15:06.142Z",
+      "due": "2025-07-31",
+      "notes": []
     }
   ]
 }

@@ -1,0 +1,7 @@
+{
+  "date": "2025-07-23",
+  "archived_at": "2025-07-24T19:04:12.762Z",
+  "files": {
+    "journal": "{\n  \"date\": \"2025-07-23\",\n  \"type\": \"journal\",\n  \"sections\": {\n    \"reflections\": \"\",\n    \"personal_reminders\": \"\",\n    \"tasks\": \"Working on massive import redirect fixes - 2000+ imports to process and redirect properly. Time-consuming even with AI assistance in separate repo.\\n\\nDesigning UI layout system for new project:\\n- 80x80px grid system between vertical rails\\n- Panels snap to grid, resizable 2-5 blocks (160-400px)\\n- Map panel takes remaining space\\n- Planning mode/layout architecture: modes control what's active, layouts control positioning\\n- Fast rail-to-grid animations for spatial memory (150-250ms, ease-out)\\n- Maximum 2 side panels, thin alerts as temporary overlays\\n\\n✅ Got clients building again after massive import fixes!\\nNow working on getting servers building before can start actual development work.\"\n  },\n  \"metadata\": {\n    \"keywords\": [\n      \"journal\",\n      \"personal\",\n      \"2025-07-23\"\n    ],\n    \"created\": \"2025-07-23T00:24:31.025Z\",\n    \"updated\": \"2025-07-23T17:06:46.214Z\"\n  }\n}"
+  }
+}
