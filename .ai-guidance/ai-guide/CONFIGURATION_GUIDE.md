@@ -59,24 +59,24 @@ ViewModels that extend BaseViewModel can override the `configure()` method:
 
 ```typescript
 interface MyComponentConfigSchema extends ISystemConfigurationSchema {
-    enable3D?: boolean;
-    terrainProvider?: {
-        url?: string;
-        requestVertexNormals?: boolean;
-    };
+  enable3D?: boolean;
+  terrainProvider?: {
+    url?: string;
+    requestVertexNormals?: boolean;
+  };
 }
 
 export class MyViewModel extends BaseViewModel {
-    @observable private _enable3D: boolean = true;
-    
-    override configure(config?: MyComponentConfigSchema): void {
-        if (config != null) {
-            if (config.enable3D != null) {
-                this._enable3D = config.enable3D;
-            }
-        }
-        super.configure(config);
+  @observable private _enable3D: boolean = true;
+
+  override configure(config?: MyComponentConfigSchema): void {
+    if (config != null) {
+      if (config.enable3D != null) {
+        this._enable3D = config.enable3D;
+      }
     }
+    super.configure(config);
+  }
 }
 ```
 
@@ -87,11 +87,11 @@ Components can access the startup configuration through the framework services:
 ```typescript
 constructor(services: IFrameworkServices) {
     super(services);
-    
+
     // Access configuration from application service
     const appService = services.getService<IApplicationService>(ServiceTypes.ApplicationService);
     const config = appService?.getStartupConfig();
-    
+
     if (config?.graphicMap) {
         this.configure(config.graphicMap);
     }
@@ -109,17 +109,19 @@ constructor(services: IFrameworkServices) {
 ## Adding New Configuration
 
 1. Define the configuration interface:
+
 ```typescript
 interface MyConfigSchema extends ISystemConfigurationSchema {
-    myOption?: string;
-    myFeature?: {
-        enabled: boolean;
-        value: number;
-    };
+  myOption?: string;
+  myFeature?: {
+    enabled: boolean;
+    value: number;
+  };
 }
 ```
 
 2. Add to startup config files:
+
 ```json
 "myComponent": {
     "myOption": "value",
@@ -131,6 +133,7 @@ interface MyConfigSchema extends ISystemConfigurationSchema {
 ```
 
 3. Implement configuration in your ViewModel:
+
 ```typescript
 override configure(config?: MyConfigSchema): void {
     // Apply configuration
@@ -144,6 +147,7 @@ Scenario files are used to define entities and their properties for simulation a
 ### Scenario File Structure
 
 Each scenario file is an array of event objects. Each event has:
+
 - `type`: The operation type (typically "Add" for adding entities)
 - `time`: When to execute this event (0 for immediate)
 - `data`: The entity data
@@ -210,11 +214,13 @@ Each scenario file is an array of event objects. Each event has:
 Based on the framework's property model system:
 
 1. **ValueProperty** (read-only values): Keep the `value` wrapper
+
    ```json
    "coverage360": { "value": false }
    ```
 
 2. **CommandedProperty** (user-controllable values): Use `actual` and `commanded` directly
+
    ```json
    "latitude": {
      "actual": 32.862645,
@@ -239,9 +245,55 @@ Based on the framework's property model system:
 - Ensure all RangedCommandedProperty types have both `actual` and `commanded` values to avoid runtime binding errors
 - The `className` should match the entity type (e.g., `quicktype.SensorVolume`, `quicktype.Platform`)
 
+## Runtime Configuration vs Startup Configuration
+
+### Startup Configuration
+
+The JSON configuration files described above are loaded at application startup and typically contain:
+
+- Service URLs and endpoints
+- Feature flags and environment settings
+- Initial component states
+- Map layers and data sources
+
+### Runtime Configuration
+
+Some services expose runtime configuration that can be modified during application execution. These are typically UI-related settings that users might want to adjust without restarting the application.
+
+#### Example: Grid Service Runtime Configuration
+
+The Grid Service manages the panel layout system and exposes runtime configuration through a `config` property:
+
+```typescript
+// Access runtime configuration
+const gridService = viewModel.gridService;
+const config = gridService.config;
+
+// Adjust grid behavior at runtime
+config.minColumns = 6;
+config.maxColumns = 20;
+config.defaultPanelMinHeight = 2;
+```
+
+Runtime configurations are:
+
+- Mutable during application execution
+- Often UI/UX related (padding, dimensions, constraints)
+- Accessed through service instances, not JSON files
+- Can be persisted to user preferences if needed
+
+## Best Practices for Runtime Configuration
+
+1. **Use MobX observables** for reactive updates
+2. **Provide reasonable defaults** in the configuration class
+3. **Document configurable values** in the service header
+4. **Expose configuration through a getter** on the service
+5. **Consider persistence** for user-specific preferences
+
 ## Troubleshooting
 
 - Configuration not loading? Check that your component is properly registered
 - Values not updating? Ensure you're calling `makeObservable(this)` for reactive properties
 - Type errors? Verify your configuration schema extends `ISystemConfigurationSchema`
 - Scenario entity errors? Check that all CommandedProperty and RangedCommandedProperty types have both `actual` and `commanded` values
+- Runtime config not reactive? Ensure configuration properties are decorated with `@observable`

@@ -30,7 +30,7 @@ This documentation is organized for quick reference and progressive learning:
 - **[PHOENIX_UI_LIBRARY.md](PHOENIX_UI_LIBRARY.md)** - Component library reference with examples
 - **[THEMING_GUIDE.md](THEMING_GUIDE.md)** - Complete theming system with Radix UI colors
 - **[CSS_GUIDANCE.md](CSS_GUIDANCE.md)** - Styling conventions and utility classes
-- **[CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md)** - How to configure components and services
+- **[CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md)** - How to configure components and services (includes runtime configuration)
 
 ### 📊 **Advanced Topics**
 - **[SAMPLE_DATA_MODEL.md](SAMPLE_DATA_MODEL.md)** - Real data model examples from the codebase
