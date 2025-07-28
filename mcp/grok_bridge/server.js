@@ -1049,7 +1049,7 @@ class GrokBridgeMCP {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(requestBody),
-                signal: AbortSignal.timeout(300000) // 5 minute timeout for chat completions
+                signal: AbortSignal.timeout(600000) // 10 minute timeout for chat completions
             });
 
             if (!response.ok) {
