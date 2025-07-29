@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-25T00:18:21.611Z",
+  "updated": "2025-07-29T19:30:04.536Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -144,16 +144,21 @@
       "category": "Work",
       "completed": false,
       "created": "2025-07-22T11:50:35.171Z",
-      "due": "2025-07-28",
+      "due": "2025-07-31",
       "notes": [
         "New project with tons of content to display",
         "Have autonomy and control over implementation",
         "Good opportunity to iterate on framework context guidance",
         "Updated AI agent guidance with more examples and wiki archives",
         "Have Figma designs from Steve with dimensions and layout",
-        "Radix colors system ready to use"
+        "Radix colors system ready to use",
+        "Extended deadline to Wednesday noon (target 10am for slide prep)",
+        "Designer feedback received - ready for Claude Code implementation",
+        "Grid system proving complex - writing custom panel organization logic",
+        "Plan to have Claude Code review the grid logic implementation",
+        "Basic grid system completed! Ready for saved modes/layouts and map fill panel"
       ],
-      "updated_at": "2025-07-25T00:18:21.611Z"
+      "updated_at": "2025-07-29T19:30:04.536Z"
     },
     {
       "id": "36ca73b5-d089-4ece-b33d-9a8ee4eaf65e",
@@ -174,6 +179,32 @@
       "created": "2025-07-25T00:15:06.142Z",
       "due": "2025-07-31",
       "notes": []
+    },
+    {
+      "id": "ec54bfe7-d837-4ac0-ba84-339edc1501a9",
+      "content": "Implement saved modes and saved layouts for UI grid system",
+      "priority": "high",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-07-29T18:36:12.979Z",
+      "due": null,
+      "notes": [
+        "Allow users to save and restore grid configurations",
+        "Part of UI showcase for customer demo"
+      ]
+    },
+    {
+      "id": "8c1e8b20-a303-448f-8645-2a7ae03b4284",
+      "content": "Create map fill panel for UI grid system",
+      "priority": "high",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-07-29T18:36:17.630Z",
+      "due": null,
+      "notes": [
+        "Panel that expands to fill available space with map content",
+        "Part of UI showcase for customer demo"
+      ]
     }
   ]
 }
