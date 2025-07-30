@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-29T19:30:04.536Z",
+  "updated": "2025-07-30T18:59:00.914Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -142,7 +142,7 @@
       "content": "Build UI showcase for customer demo by Monday - show 6 months of backend work",
       "priority": "high",
       "category": "Work",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-22T11:50:35.171Z",
       "due": "2025-07-31",
       "notes": [
@@ -158,7 +158,8 @@
         "Plan to have Claude Code review the grid logic implementation",
         "Basic grid system completed! Ready for saved modes/layouts and map fill panel"
       ],
-      "updated_at": "2025-07-29T19:30:04.536Z"
+      "updated_at": "2025-07-29T19:30:04.536Z",
+      "completed_at": "2025-07-30T18:52:45.337Z"
     },
     {
       "id": "36ca73b5-d089-4ece-b33d-9a8ee4eaf65e",
@@ -181,30 +182,62 @@
       "notes": []
     },
     {
-      "id": "ec54bfe7-d837-4ac0-ba84-339edc1501a9",
-      "content": "Implement saved modes and saved layouts for UI grid system",
+      "id": "484acab4-6871-4497-88d3-09f41674ee22",
+      "content": "Get Nate's forked repo running or check if MR went through for Eric to fork",
       "priority": "high",
-      "category": "Development",
+      "category": "Work",
       "completed": false,
-      "created": "2025-07-29T18:36:12.979Z",
-      "due": null,
+      "created": "2025-07-30T16:32:36.262Z",
+      "due": "2025-08-02",
       "notes": [
-        "Allow users to save and restore grid configurations",
-        "Part of UI showcase for customer demo"
-      ]
+        "Check merge request status",
+        "If merged, help Eric fork",
+        "If not merged, get Nate's fork running locally",
+        "UPDATE: Waiting on upgrade MR to go through first - can't be done until Friday"
+      ],
+      "updated_at": "2025-07-30T18:50:55.422Z"
     },
     {
-      "id": "8c1e8b20-a303-448f-8645-2a7ae03b4284",
-      "content": "Create map fill panel for UI grid system",
+      "id": "32a4a1e0-00fc-4468-ae2c-c6fa9fb67e53",
+      "content": "Add bi-monthly dependency update reminder to calendar",
+      "priority": "medium",
+      "category": "Work",
+      "completed": true,
+      "created": "2025-07-30T16:32:39.054Z",
+      "due": null,
+      "notes": [
+        "Set recurring every 2 months",
+        "For keeping dependencies up to date"
+      ],
+      "completed_at": "2025-07-30T18:58:53.326Z"
+    },
+    {
+      "id": "4e52757b-310c-45f5-af81-ef89519a3e49",
+      "content": "Sprint Development - UI Grid System Enhancements",
       "priority": "high",
       "category": "Development",
       "completed": false,
-      "created": "2025-07-29T18:36:17.630Z",
-      "due": null,
+      "created": "2025-07-30T18:52:53.543Z",
+      "due": "2025-08-19",
       "notes": [
+        "Implement saved modes and saved layouts for UI grid system",
+        "Create map fill panel for UI grid system",
+        "Allow users to save and restore grid configurations",
         "Panel that expands to fill available space with map content",
-        "Part of UI showcase for customer demo"
-      ]
+        "Track Management Panel (from OGNate)",
+        "Finalize grid management with dual rails"
+      ],
+      "updated_at": "2025-07-30T18:59:00.914Z"
+    },
+    {
+      "id": "288deabc-18c3-48a9-9205-1e9dfb1b5a62",
+      "content": "Simulation Server Adapter",
+      "priority": "high",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-07-30T18:52:59.195Z",
+      "due": "2025-08-19",
+      "notes": []
     }
   ]
 }
