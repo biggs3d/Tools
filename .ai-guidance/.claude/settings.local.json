@@ -21,7 +21,16 @@
       "Bash(done)",
       "Bash(npx nx show:*)",
       "Bash(npm ls:*)",
-      "Bash(git lfs:*)"
+      "Bash(git lfs:*)",
+      "Bash(timeout:*)",
+      "mcp__grok-bridge__get_system_info",
+      "mcp__grok-bridge__send_to_grok",
+      "Bash(./tools/build-helpers/count-build-errors.sh:*)",
+      "Bash(dos2unix:*)",
+      "Bash(./tools/build-helpers/show-build-errors.sh 8)",
+      "Bash(./tools/build-helpers/show-build-errors.sh:*)",
+      "Bash(./tools/build-helpers/count-test-errors.sh:*)",
+      "Bash(./tools/build-helpers/show-test-errors.sh:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

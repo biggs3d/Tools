@@ -184,7 +184,7 @@ class ValetMcpServer {
     // valet_todo_view - Get filtered view of todos
     this.server.tool(
       'valet_todo_view',
-      'View and filter the todo list by priority, category, or due date. Use when user asks about their tasks, wants to see what\'s pending, or needs to review their workload.',
+      'View and filter the todo list by priority, category, or due date. Use when user asks about their tasks, wants to see what\'s pending, or needs to review their workload. When displaying results, use colored emoji indicators: 🔴 High priority, 🟡 Medium priority, 🟢 Low priority.',
       {
         filter: z.object({
           categories: z.array(z.string()).optional().describe('Filter by categories'),

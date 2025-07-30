@@ -143,6 +143,13 @@ await mcp__valet__valet_new_day({
 
 ### Todo Management
 
+**Visual Priority Indicators**: When displaying todos, use colored emoji indicators for priorities:
+- 🔴 High priority
+- 🟡 Medium priority  
+- 🟢 Low priority
+
+This provides quick visual scanning of task importance.
+
 #### `valet_todo_operations`
 Manage global todo list with granular operations.
 
