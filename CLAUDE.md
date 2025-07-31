@@ -42,6 +42,13 @@ Key principle: CLAUDE.md = Static rules, Memory system = Dynamic knowledge
 - `/browser_debug/` - MCP server for browser debugging and console logging via Puppeteer
 - Additional MCP servers will be added as subdirectories
 
+## Project-Specific Instructions
+
+When working in subdirectories with their own CLAUDE.md files, read them for detailed project guidelines:
+- **Learning/future_ui/CLAUDE.md** - Future UI project implementation guidelines (24 building blocks)
+  
+**Note**: Only read these child CLAUDE.md files when actively working within those directories, not during general repository work.
+
 ## Development Guidelines
 
 ### MCP Server Requirements
