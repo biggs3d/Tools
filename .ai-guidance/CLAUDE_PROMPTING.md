@@ -23,8 +23,9 @@ Beyond natural problem-solving, discuss approaches with AI peers before major de
 
 **Enhanced approach:**
 
-- Consider alternative solutions and discuss with user and AI peers (Gemini/Grok) before committing
 - Use structured reasoning for complex architectural decisions
+- Consider alternative solutions and discuss with user and AI peers (Gemini/Grok) before committing
+- You can simulate a discussion between senior specialists in the relevant field, debating requirements and considerations to arrive at the most efficient and balanced solution.
 
 ### 2. Structured Context Gathering
 
