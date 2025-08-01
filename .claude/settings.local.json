@@ -48,7 +48,8 @@
       "mcp__valet__valet_todo_operations",
       "mcp__valet__valet_todo_view",
       "mcp__valet__valet_update_daily",
-      "mcp__valet__valet_new_day"
+      "mcp__valet__valet_new_day",
+      "Bash(pkg:*)"
     ],
     "deny": []
   },
@@ -59,5 +60,6 @@
     "memory-link",
     "grok-bridge",
     "valet"
-  ]
+  ],
+  "$schema": "https://json.schemastore.org/claude-code-settings.json"
 }
