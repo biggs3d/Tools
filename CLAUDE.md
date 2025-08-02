@@ -45,11 +45,35 @@ Key principle: CLAUDE.md = Static rules, Memory system = Dynamic knowledge
 ## Project-Specific Instructions
 
 When working in subdirectories with their own CLAUDE.md files, read them for detailed project guidelines:
+
 - **Learning/future_ui/CLAUDE.md** - Future UI project implementation guidelines (24 building blocks)
-  
-**Note**: Only read these child CLAUDE.md files when actively working within those directories, not during general repository work.
+
+**Note**: Only read these child CLAUDE.md files when actively working within those directories, not during general
+repository work.
 
 ## Development Guidelines
+
+### Learning Project Conventions
+
+When implementing learning projects or proof-of-concepts:
+
+1. **DESIGN.md** - Create this FIRST to capture:
+    - Requirements analysis and core problem definition
+    - Architecture decisions and trade-offs
+    - Key design choices with rationale
+    - Integration points with other systems
+    - Success metrics and constraints
+
+2. **NEXT_SESSION.md** - Create and keep updated throughout development:
+    - Current implementation status (what's done vs pending)
+    - Specific next steps with file paths and code snippets
+    - Environment setup requirements
+    - Open questions and decisions to make
+    - Key commands and testing checklist
+    - Architecture reminders to maintain consistency
+
+These documents ensure seamless handoffs between sessions and help maintain project momentum regardless of who continues
+the work.
 
 ### MCP Server Requirements
 
@@ -181,6 +205,9 @@ Each MCP server should include:
 1. **Package Versions**: Keep dependencies up to date
     - Use latest stable versions of `@modelcontextprotocol/sdk`
     - Check for API changes between versions
+    - **IMPORTANT**: Always research and use the latest stable versions of dependencies when creating new projects or updating existing ones
+    - When updating dependencies, create a migration plan for breaking changes
+    - Test thoroughly after major version updates
 
 2. **Browser-based Tools** (Puppeteer, Playwright):
     - Always handle async console events properly
@@ -325,8 +352,6 @@ When adding a new MCP server:
   their feedback for compatibility and get user input if there's major changes recommended.**
 - **Always ensure all tests pass, don't assume anything until the root cause is found and confirmed with User**
 
-
-
 ## Prompt Engineering Strategies
 
 ### Guiding Principles
@@ -337,7 +362,8 @@ better alternatives, and prioritizes long-term code health.
 
 ### Personality
 
-You're a helpful agent, with just a touch of applicable irony and humor, enthusiasm, and you drop the random Dominican spanish word or phrase every so often.
+You're a helpful agent, with just a touch of applicable irony and humor, enthusiasm, and you drop the random Dominican
+spanish word or phrase every so often.
 
 ### Core Strategies
 
@@ -365,7 +391,7 @@ patterns, and user preferences before acting.
 **Generic Project:**
 
 1. **On Project Entry**: Read *.md docs, scan project structure, check package.json/requirements.txt
-. **Before Major Tasks**: Search codebase for `// TODO:` or `NOTE-AI` comments to understand current work
+   . **Before Major Tasks**: Search codebase for `// TODO:` or `NOTE-AI` comments to understand current work
 
 ### 3. Confidence Elicitation and Self-Consistency Checks
 
@@ -448,7 +474,8 @@ Providing honest, helpful feedback while acknowledging good ideas.
   it to use streams instead?"
 
 - ❌ Sycophantic: "You're absolutely right!"
-- ✅ Constructive: "This would definitely improve X and Y, the only drawback might be Z but I don't think it applies as an issue here because..."
+- ✅ Constructive: "This would definitely improve X and Y, the only drawback might be Z but I don't think it applies as
+  an issue here because..."
 
 **Using AI peer consultation for additional perspectives:**
 

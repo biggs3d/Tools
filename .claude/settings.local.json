@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(npm run health-check:*)",
@@ -49,7 +50,9 @@
       "mcp__valet__valet_todo_view",
       "mcp__valet__valet_update_daily",
       "mcp__valet__valet_new_day",
-      "Bash(pkg:*)"
+      "Bash(pkg:*)",
+      "Bash(NODE_ENV=development npm run test:smoke)",
+      "Bash(NODE_ENV=development npm test)"
     ],
     "deny": []
   },
@@ -60,6 +63,5 @@
     "memory-link",
     "grok-bridge",
     "valet"
-  ],
-  "$schema": "https://json.schemastore.org/claude-code-settings.json"
+  ]
 }
