@@ -3,37 +3,44 @@
         "gemini-bridge": {
             "command": "node",
             "args": [
-                "/mnt/d/Tools/mcp/gemini_bridge/index.js"
+                "/Users/sbiggs/Development/D-Drive/Tools/mcp/gemini_bridge/index.js"
             ],
-            "cwd": "/mnt/d/Tools/mcp/gemini_bridge"
+            "cwd": "/Users/sbiggs/Development/D-Drive/Tools/mcp/gemini_bridge"
         },
         "browser-debug": {
             "command": "node",
             "args": [
-                "/mnt/d/Tools/mcp/browser_debug/index.js"
+                "/Users/sbiggs/Development/D-Drive/Tools/mcp/browser_debug/index.js"
             ],
-            "cwd": "/mnt/d/Tools/mcp/browser_debug"
+            "cwd": "/Users/sbiggs/Development/D-Drive/Tools/mcp/browser_debug"
         },
         "memory-link": {
             "command": "node",
             "args": [
-                "/mnt/d/Tools/mcp/memory_link/index.js"
+                "/Users/sbiggs/Development/D-Drive/Tools/mcp/memory_link/index.js"
             ],
-            "cwd": "/mnt/d/Tools/mcp/memory_link"
+            "cwd": "/Users/sbiggs/Development/D-Drive/Tools/mcp/memory_link"
         },
         "grok-bridge": {
             "command": "node",
             "args": [
-                "/mnt/d/Tools/mcp/grok_bridge/index.js"
+                "/Users/sbiggs/Development/D-Drive/Tools/mcp/grok_bridge/index.js"
             ],
-            "cwd": "/mnt/d/Tools/mcp/grok_bridge"
+            "cwd": "/Users/sbiggs/Development/D-Drive/Tools/mcp/grok_bridge"
         },
         "valet": {
             "command": "node",
             "args": [
-                "/mnt/d/Tools/mcp/valet/index.js"
+                "/Users/sbiggs/Development/D-Drive/Tools/mcp/valet/index.js"
             ],
-            "cwd": "/mnt/d/Tools/mcp/valet"
+            "cwd": "/Users/sbiggs/Development/D-Drive/Tools/mcp/valet"
+        },
+        "openai-bridge": {
+            "command": "node",
+            "args": [
+                "/Users/sbiggs/Development/D-Drive/Tools/mcp/openai_bridge/index.js"
+            ],
+            "cwd": "/Users/sbiggs/Development/D-Drive/Tools/mcp/openai_bridge"
         }
     }
 }

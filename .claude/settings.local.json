@@ -52,7 +52,9 @@
       "mcp__valet__valet_new_day",
       "Bash(pkg:*)",
       "Bash(NODE_ENV=development npm run test:smoke)",
-      "Bash(NODE_ENV=development npm test)"
+      "Bash(NODE_ENV=development npm test)",
+      "mcp__openai-bridge__get_system_info",
+      "mcp__openai-bridge__send_to_openai"
     ],
     "deny": []
   },
@@ -62,6 +64,7 @@
     "browser-debug",
     "memory-link",
     "grok-bridge",
-    "valet"
+    "valet",
+    "openai-bridge"
   ]
 }

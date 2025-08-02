@@ -1,0 +1,58 @@
+{
+  "name": "openai-context-bridge-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for bridging Claude Code to OpenAI's GPT models with large context window (up to 128K tokens)",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "openai-bridge-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test test/unit.test.js && node --test test/integration.test.js",
+    "test:unit": "node --test test/unit.test.js",
+    "test:integration": "node --test test/integration.test.js",
+    "test:watch": "node --test --watch test/",
+    "test:verbose": "node --test --verbose test/",
+    "health-check": "node test/health-check.js",
+    "smoke-test": "node test/smoke-test.js",
+    "create-test-data": "node test/create-test-data.js"
+  },
+  "dependencies": {
+    "openai": "^5.11.0",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "dotenv": "^16.5.0",
+    "micromatch": "^4.0.8",
+    "minimatch": "^10.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude-code",
+    "openai",
+    "gpt",
+    "context-bridge",
+    "ai-tools",
+    "code-analysis"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/biggs3d/Tools"
+  },
+  "files": [
+    "index.js",
+    "server.js",
+    "README.md",
+    "LICENSE"
+  ]
+}
