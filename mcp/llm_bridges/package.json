@@ -1,0 +1,36 @@
+{
+  "name": "llm-bridges-mcp",
+  "version": "1.0.0",
+  "description": "Unified MCP server for multiple LLM providers (Gemini, OpenAI, Grok)",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch server.js",
+    "test": "npm run test:smoke",
+    "test:smoke": "node test/smoke-test.js",
+    "test:integration": "node test/integration-test.js"
+  },
+  "keywords": [
+    "mcp",
+    "llm",
+    "gemini",
+    "openai",
+    "grok",
+    "ai",
+    "bridge"
+  ],
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "dotenv": "^16.4.7",
+    "micromatch": "^4.0.8",
+    "openai": "^4.77.3",
+    "tiktoken": "^1.0.21",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

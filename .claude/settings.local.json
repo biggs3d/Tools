@@ -54,7 +54,10 @@
       "Bash(NODE_ENV=development npm run test:smoke)",
       "Bash(NODE_ENV=development npm test)",
       "mcp__openai-bridge__get_system_info",
-      "mcp__openai-bridge__send_to_openai"
+      "mcp__openai-bridge__send_to_openai",
+      "mcp__llm-bridges__get_system_info",
+      "mcp__llm-bridges__send_to_llm",
+      "mcp__llm-bridges__estimate_context_size"
     ],
     "deny": []
   },
