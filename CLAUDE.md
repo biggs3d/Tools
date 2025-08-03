@@ -40,6 +40,7 @@ Key principle: CLAUDE.md = Static rules, Memory system = Dynamic knowledge
 
 - `/gemini_bridge/` - MCP server for bridging Claude Code to Gemini's large context window
 - `/browser_debug/` - MCP server for browser debugging and console logging via Puppeteer
+- `/llm_bridges/` - Unified MCP server providing access to multiple LLM providers (Gemini, OpenAI, Grok)
 - Additional MCP servers will be added as subdirectories
 
 ## Project-Specific Instructions
@@ -252,6 +253,7 @@ npm test
 # Add as global MCP server (recommended for system-wide access)
 claude mcp add gemini-bridge -s user -- node /mnt/d/Tools/mcp/gemini_bridge/index.js
 claude mcp add browser-debug -s user -- node /mnt/d/Tools/mcp/browser_debug/index.js
+claude mcp add llm-bridges -s user -- node /mnt/d/Tools/mcp/llm_bridges/index.js
 
 # Or configure in project's .mcp.json (Windows paths)
 {
@@ -269,6 +271,13 @@ claude mcp add browser-debug -s user -- node /mnt/d/Tools/mcp/browser_debug/inde
         "D:\\Tools\\mcp\\browser_debug\\index.js"
       ],
       "cwd": "D:\\Tools\\mcp\\browser_debug"
+    },
+    "llm-bridges": {
+      "command": "node",
+      "args": [
+        "D:\\Tools\\mcp\\llm_bridges\\index.js"
+      ],
+      "cwd": "D:\\Tools\\mcp\\llm_bridges"
     }
   }
 }
@@ -289,6 +298,13 @@ claude mcp add browser-debug -s user -- node /mnt/d/Tools/mcp/browser_debug/inde
         "/mnt/d/Tools/mcp/browser_debug/index.js"
       ],
       "cwd": "/mnt/d/Tools/mcp/browser_debug"
+    },
+    "llm-bridges": {
+      "command": "node",
+      "args": [
+        "/mnt/d/Tools/mcp/llm_bridges/index.js"
+      ],
+      "cwd": "/mnt/d/Tools/mcp/llm_bridges"
     }
   }
 }
@@ -348,8 +364,7 @@ When adding a new MCP server:
 
 ### Additional Memories
 
-- **Use the gemini_bridge and grok_bridge MCP tools for major design review and solution feedback. Critically examine
-  their feedback for compatibility and get user input if there's major changes recommended.**
+- **Use the llm_bridges MCP server (via mcp__llm-bridges__send_to_llm) for major design review and solution feedback from multiple AI perspectives. You can query all providers with llm: "all" or specific ones with llm: "gemini", "openai", or "grok". Critically examine their feedback for compatibility and get user input if there's major changes recommended.**
 - **Always ensure all tests pass, don't assume anything until the root cause is found and confirmed with User**
 
 ## Prompt Engineering Strategies
@@ -376,7 +391,8 @@ Beyond natural problem-solving, discuss approaches with AI peers before major de
 
 **Enhanced approach:**
 
-- Consider alternative solutions and discuss with user and AI peers (Gemini/Grok) before committing
+- Consider alternative solutions and discuss with user and AI peers via llm_bridges (Gemini/OpenAI/Grok) before committing
+- Use `mcp__llm-bridges__send_to_llm` with `llm: "all"` for comprehensive peer review
 - Use structured reasoning for complex architectural decisions
 
 ### 2. Structured Context Gathering
@@ -479,10 +495,13 @@ Providing honest, helpful feedback while acknowledging good ideas.
 
 **Using AI peer consultation for additional perspectives:**
 
+- **llm_bridges unified interface**: Use `mcp__llm-bridges__send_to_llm` with `llm: "all"` for comprehensive review
 - **Gemini**: Best for systematic analysis, architectural patterns, best practices, and long-term maintainability
   concerns
+- **OpenAI**: Best for detailed code review, optimization suggestions, and modern development patterns
 - **Grok**: Best for unconventional approaches, edge cases, performance optimizations, and challenging assumptions
-- Example: "Gemini flagged a compatibility issue with older Node versions, while Grok suggested a performance
+- Example usage: `mcp__llm-bridges__send_to_llm` with `llm: "all"` and `prompt: "Review this architecture for scalability and suggest improvements"`
+- Example: "Gemini flagged a compatibility issue with older Node versions, OpenAI suggested refactoring patterns, while Grok offered a performance
   optimization and a different way of looking at the problem. Let's discuss these insights."
 - Always critically examine external feedback before accepting
 - Use multiple perspectives for major architectural decisions
