@@ -192,24 +192,67 @@ Due to current MCP protocol behavior, array parameters (e.g., `["gemini", "grok"
 
 This limitation is being tracked in the MCP SDK repositories and may be resolved in future versions.
 
+## Recent Improvements
+
+Based on comprehensive code reviews:
+
+### Security Enhancements
+- **Path Traversal Protection**: Double validation prevents directory traversal attacks
+- **Symlink Security**: Real path validation prevents symlink escape attacks
+- **Cross-Platform File Handling**: Proper support for Windows, macOS, Linux, and WSL
+- **Resource Limits**: Configurable max files per request (default: 50)
+- **Rate Limiting**: Implemented with Bottleneck library for API throttling
+
+### Code Quality
+- **Constants**: Magic strings/numbers extracted (provider names, token buffer)
+- **Error Handling**: Consolidated error classification logic
+- **Configuration**: Added `MAX_FILES_PER_REQUEST` and rate limiting options
+- **Handle Management**: Proper cleanup in try/finally blocks
+
 ## Architecture
 
 ```
 llm_bridges/
-├── index.js              # MCP stdio wrapper
-├── server.js             # Main MCP server
+├── index.js              # MCP stdio wrapper (required for protocol)
+├── server.js             # Main MCP server setup
 ├── lib/
+│   ├── config.js         # Centralized configuration with constants
 │   ├── providers/        # Provider implementations
-│   │   ├── base.js       # Base provider class
-│   │   ├── gemini.js     # Google Gemini
-│   │   ├── openai.js     # OpenAI
+│   │   ├── base.js       # Abstract base with common logic
+│   │   ├── gemini.js     # Google Gemini (up to 2M tokens)
+│   │   ├── openai.js     # OpenAI (GPT-4, o1, o3 models)
 │   │   └── grok.js       # x.ai Grok
-│   ├── utils/            # Shared utilities
-│   │   ├── file-handler.js    # File operations
-│   │   ├── token-estimator.js # Tiktoken integration
-│   │   └── error-handler.js   # Error formatting
+│   ├── utils/            # Cross-platform utilities
+│   │   ├── file-handler.js    # Secure file operations
+│   │   ├── token-estimator.js # Tiktoken-based counting
+│   │   └── error-handler.js   # Smart error classification
 │   ├── tools/            # MCP tool definitions
-│   │   └── send-to-llm.js     # Main unified tool
-│   └── config.js         # Configuration management
-└── test/                 # Test files
+│   │   └── send-to-llm.js     # Main unified interface
+│   └── config.js         # Environment configuration
+├── test/                 # Test suite
+└── DESIGN.md            # Architecture overview
+
+## Security
+
+### Path Traversal Protection
+- All file paths are resolved to absolute paths and validated against project root
+- Symlinks are resolved to their real paths before validation
+- Case-insensitive comparison on Windows/macOS prevents bypass attempts
+
+### Symlink Handling
+- By default, symlinks are skipped for security (`FOLLOW_SYMLINKS=false`)
+- When enabled, symlink targets are validated to ensure they're within project bounds
+- Real path resolution prevents symlink escape attacks
+
+### Resource Limits
+- Maximum file size: 25MB per file (configurable)
+- Maximum files per request: 50 files (configurable)
+- Binary file detection prevents processing of non-text files
+- Rate limiting prevents API abuse (configurable requests per minute)
+
+### Best Practices
+- Never set `FOLLOW_SYMLINKS=true` unless you trust all symlinks in your project
+- Keep file limits reasonable to prevent memory exhaustion
+- Enable rate limiting in production environments
+- Regularly review excluded directories and extensions
 ```

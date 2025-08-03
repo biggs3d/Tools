@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getAvailableProviders, getProviderConfig, inferProviderFromModel } from '../config.js';
+import { getAvailableProviders, getProviderConfig, inferProviderFromModel, PROVIDERS, ALL_PROVIDERS } from '../config.js';
 import { GeminiProvider } from '../providers/gemini.js';
 import { OpenAIProvider } from '../providers/openai.js';
 import { GrokProvider } from '../providers/grok.js';
@@ -20,13 +20,13 @@ function getProvider(name) {
     let provider;
     
     switch (name) {
-        case 'gemini':
+        case PROVIDERS.GEMINI:
             provider = new GeminiProvider(config);
             break;
-        case 'openai':
+        case PROVIDERS.OPENAI:
             provider = new OpenAIProvider(config);
             break;
-        case 'grok':
+        case PROVIDERS.GROK:
             provider = new GrokProvider(config);
             break;
         default:
@@ -49,7 +49,7 @@ function parseProviders(llm, availableProviders) {
     }
     
     // Handle 'all' keyword
-    if (llm === 'all') {
+    if (llm === ALL_PROVIDERS) {
         return availableProviders.map(name => getProvider(name));
     }
     
@@ -162,7 +162,7 @@ export function createSendToLLMTool() {
                 z.array(z.string())
             ])
                 .optional()
-                .default('all')
+                .default(ALL_PROVIDERS)
                 .describe('LLM provider(s) to use: gemini, openai, grok, all, or a model name'),
             
             prompt: z.string()

@@ -1,5 +1,16 @@
 import 'dotenv/config';
 
+// Provider names constants
+export const PROVIDERS = {
+    GEMINI: 'gemini',
+    OPENAI: 'openai',
+    GROK: 'grok',
+};
+
+// Special values
+export const ALL_PROVIDERS = 'all';
+export const TOKEN_ESTIMATION_RESPONSE_BUFFER = 1000; // Buffer for response tokens in estimation
+
 // Parse comma-separated values with trimming
 function parseList(value) {
     if (!value) return [];
@@ -59,6 +70,7 @@ export const CONFIG = {
     // Shared configuration
     shared: {
         maxFileSize: parseInt(process.env.MAX_FILE_SIZE, 26214400), // 25MB
+        maxFilesPerRequest: parseInt(process.env.MAX_FILES_PER_REQUEST, 50), // Maximum files per request
         charsPerToken: parseFloat(process.env.CHARS_PER_TOKEN, 4),
         tokenEstimationBuffer: parseFloat(process.env.TOKEN_ESTIMATION_BUFFER, 1.2),
         enableParallel: parseBool(process.env.ENABLE_PARALLEL, true),
@@ -72,11 +84,18 @@ export const CONFIG = {
         excludedDirs: parseList(process.env.EXCLUDED_DIRS),
         binaryCheckBytes: parseInt(process.env.BINARY_CHECK_BYTES, 8192),
         maxRecursionDepth: parseInt(process.env.MAX_RECURSION_DEPTH, 10),
+        followSymlinks: parseBool(process.env.FOLLOW_SYMLINKS, false),
     },
     
     // Embeddings
     embeddings: {
         batchSize: parseInt(process.env.EMBEDDING_BATCH_SIZE, 10),
+    },
+    
+    // Rate limiting
+    rateLimiting: {
+        requestsPerMinute: parseInt(process.env.RATE_LIMIT_PER_MINUTE, 0), // 0 = disabled
+        delayMs: parseInt(process.env.RATE_LIMIT_DELAY_MS, 1000),
     }
 };
 

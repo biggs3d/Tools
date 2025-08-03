@@ -1,9 +1,22 @@
+import Bottleneck from 'bottleneck';
+import { classifyError } from '../utils/error-handler.js';
+import { CONFIG } from '../config.js';
+
 export class BaseProvider {
     constructor(name, config) {
         this.name = name;
         this.config = config;
         this.client = null;
         this.initialized = false;
+        this.limiter = null;
+        
+        // Set up rate limiter if configured
+        if (CONFIG.rateLimiting.requestsPerMinute > 0) {
+            this.limiter = new Bottleneck({
+                minTime: 60000 / CONFIG.rateLimiting.requestsPerMinute,
+                maxConcurrent: 1
+            });
+        }
     }
     
     // Initialize the provider (lazy loading)
@@ -39,19 +52,29 @@ export class BaseProvider {
         
         const timeout = this.config.timeoutMin * 60 * 1000; // Convert to milliseconds
         
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeout);
-            
-            const response = await this.executeQuery(prompt, model, options, controller.signal);
-            
-            clearTimeout(timeoutId);
-            return response;
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                throw new Error(`Request timed out after ${this.config.timeoutMin} minutes`);
+        // Apply rate limiting if configured
+        const executeWithTimeout = async () => {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+                
+                const response = await this.executeQuery(prompt, model, options, controller.signal);
+                
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error(`Request timed out after ${this.config.timeoutMin} minutes`);
+                }
+                throw this.formatError(error);
             }
-            throw this.formatError(error);
+        };
+        
+        // Execute with rate limiting if enabled
+        if (this.limiter) {
+            return await this.limiter.schedule(executeWithTimeout);
+        } else {
+            return await executeWithTimeout();
         }
     }
     
@@ -95,31 +118,8 @@ export class BaseProvider {
         const formatted = new Error(`${this.name} error: ${error.message}`);
         formatted.provider = this.name;
         formatted.originalError = error;
-        formatted.type = this.classifyError(error);
+        formatted.type = classifyError(error);
         return formatted;
-    }
-    
-    // Classify error types
-    classifyError(error) {
-        const msg = error.message.toLowerCase();
-        
-        if (msg.includes('api key') || msg.includes('authentication') || msg.includes('unauthorized')) {
-            return 'auth';
-        }
-        if (msg.includes('quota') || msg.includes('rate limit') || msg.includes('usage')) {
-            return 'quota';
-        }
-        if (msg.includes('model') || msg.includes('not found')) {
-            return 'model';
-        }
-        if (msg.includes('network') || msg.includes('fetch') || msg.includes('connection')) {
-            return 'network';
-        }
-        if (msg.includes('timeout')) {
-            return 'timeout';
-        }
-        
-        return 'unknown';
     }
     
     // Check if provider is available

@@ -70,7 +70,7 @@ export function getSuggestionsForError(errorType, context) {
             'Verify the model name is correct',
             'Check if the model is available in your region',
             'Try using the default model instead',
-            'Run the list_models tool to see available options',
+            'Check the allowed models in your .env configuration',
         ],
         network: [
             'Check your internet connection',

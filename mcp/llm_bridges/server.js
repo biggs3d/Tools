@@ -5,7 +5,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { resolve } from 'path';
-import { getAvailableProviders } from './lib/config.js';
+import { getAvailableProviders, TOKEN_ESTIMATION_RESPONSE_BUFFER, PROVIDERS } from './lib/config.js';
 import { createSendToLLMTool } from './lib/tools/send-to-llm.js';
 import { estimateTotalTokens, formatTokenCount } from './lib/utils/token-estimator.js';
 import { collectFiles } from './lib/utils/file-handler.js';
@@ -80,7 +80,7 @@ class LLMBridgesServer {
                     if (availableProviders.length > 0) {
                         response += '### Token Estimation by Provider\n\n';
                         
-                        for (const providerName of ['gemini', 'openai', 'grok']) {
+                        for (const providerName of Object.values(PROVIDERS)) {
                             if (availableProviders.includes(providerName)) {
                                 const config = CONFIG.providers[providerName];
                                 const totalTokens = estimateTotalTokens(
@@ -116,19 +116,19 @@ class LLMBridgesServer {
                         if (fileContents.length > 0) {
                             response += '**Files:**\n';
                             for (const file of fileContents) {
-                                const fileTokens = estimateTotalTokens([file], null, null, primaryProvider, primaryConfig.defaultModel) - 1000; // Remove buffer
+                                const fileTokens = estimateTotalTokens([file], null, null, primaryProvider, primaryConfig.defaultModel) - TOKEN_ESTIMATION_RESPONSE_BUFFER; // Remove buffer
                                 response += `- ${file.path}: ${formatTokenCount(fileTokens)}\n`;
                             }
                             response += '\n';
                         }
                         
                         if (prompt) {
-                            const promptTokens = estimateTotalTokens([], prompt, null, primaryProvider, primaryConfig.defaultModel) - 1000;
+                            const promptTokens = estimateTotalTokens([], prompt, null, primaryProvider, primaryConfig.defaultModel) - TOKEN_ESTIMATION_RESPONSE_BUFFER;
                             response += `**Prompt:** ${formatTokenCount(promptTokens)}\n`;
                         }
                         
                         if (project_context) {
-                            const contextTokens = estimateTotalTokens([], null, project_context, primaryProvider, primaryConfig.defaultModel) - 1000;
+                            const contextTokens = estimateTotalTokens([], null, project_context, primaryProvider, primaryConfig.defaultModel) - TOKEN_ESTIMATION_RESPONSE_BUFFER;
                             response += `**Project context:** ${formatTokenCount(contextTokens)}\n`;
                         }
                         

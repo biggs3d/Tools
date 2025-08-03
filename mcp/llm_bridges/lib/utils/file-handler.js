@@ -1,11 +1,18 @@
-import { readFile, readdir, stat, open } from 'fs/promises';
-import { join, extname, relative, resolve, normalize } from 'path';
+import { readFile, readdir, stat, open, realpath } from 'fs/promises';
+import { join, extname, relative, resolve, normalize, isAbsolute } from 'path';
 import { platform } from 'os';
 import micromatch from 'micromatch';
 import { CONFIG } from '../config.js';
+import { BridgeError } from './error-handler.js';
 
 // Normalize path for cross-platform compatibility
 export function normalizePath(filePath) {
+    // Handle Windows UNC paths first
+    if (platform() === 'win32' && filePath.startsWith('\\\\')) {
+        // UNC path - normalize slashes but preserve format
+        return filePath.replace(/\\/g, '/');
+    }
+    
     // Handle WSL paths
     if (platform() === 'linux' && filePath.match(/^[A-Za-z]:[\\\/]/)) {
         // Convert Windows path to WSL path: C:\path → /mnt/c/path
@@ -20,11 +27,11 @@ export function normalizePath(filePath) {
 
 // Check if file is binary
 export async function isBinaryFile(filePath) {
+    let handle;
     try {
-        const handle = await open(filePath, 'r');
+        handle = await open(filePath, 'r');
         const buffer = Buffer.alloc(CONFIG.fileDiscovery.binaryCheckBytes);
         const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
-        await handle.close();
         
         if (bytesRead === 0) return false;
         
@@ -45,6 +52,8 @@ export async function isBinaryFile(filePath) {
         return nonPrintable / bytesRead > 0.3;
     } catch (error) {
         return true; // Assume binary if we can't read it
+    } finally {
+        if (handle) await handle.close().catch(() => {});
     }
 }
 
@@ -81,6 +90,7 @@ export async function findFiles(patterns, basePath = process.cwd()) {
     return micromatch(allFiles, normalizedPatterns, {
         cwd: normalizedBase,
         absolute: true,
+        nocase: platform() === 'win32' || platform() === 'darwin'
     });
 }
 
@@ -105,7 +115,26 @@ async function collectAllFiles(dirPath, depth = 0) {
                 }
             } else if (entry.isFile()) {
                 if (!shouldExcludeFile(fullPath)) {
-                    files.push(fullPath);
+                    files.push(normalizePath(fullPath));
+                }
+            } else if (entry.isSymbolicLink()) {
+                // Handle symlinks based on configuration
+                if (CONFIG.fileDiscovery.followSymlinks) {
+                    try {
+                        const targetPath = await realpath(fullPath);
+                        const targetStat = await stat(targetPath);
+                        
+                        if (targetStat.isFile() && !shouldExcludeFile(targetPath)) {
+                            files.push(normalizePath(fullPath));
+                        } else if (targetStat.isDirectory() && !shouldExcludeDir(entry.name)) {
+                            const subFiles = await collectAllFiles(fullPath, depth + 1);
+                            files.push(...subFiles);
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to resolve symlink ${fullPath}: ${error.message}`);
+                    }
+                } else {
+                    console.warn(`Skipping symbolic link: ${fullPath}`);
                 }
             }
         }
@@ -118,15 +147,58 @@ async function collectAllFiles(dirPath, depth = 0) {
 
 // Collect file contents with metadata
 export async function collectFiles(filePaths) {
+    // Check file count limit
+    if (filePaths.length > CONFIG.shared.maxFilesPerRequest) {
+        throw new BridgeError(
+            `Too many files: ${filePaths.length} files exceeds limit of ${CONFIG.shared.maxFilesPerRequest}`,
+            'quota',
+            `Please reduce the number of files to ${CONFIG.shared.maxFilesPerRequest} or less`
+        );
+    }
+    
     const files = [];
+    const projectRoot = process.cwd();
     
     for (const filePath of filePaths) {
         try {
             const normalizedPath = normalizePath(filePath);
             const resolvedPath = resolve(normalizedPath);
             
-            // Check file stats
-            const stats = await stat(resolvedPath);
+            // Handle symlinks by resolving to real path
+            const realPath = await realpath(resolvedPath).catch(() => resolvedPath);
+            
+            // Security: Ensure real path is within project root
+            const relativePath = relative(projectRoot, realPath);
+            // If relative path starts with .. it's outside project root
+            // Empty relative path means current directory which is OK
+            if (relativePath.startsWith('..')) {
+                console.warn(`Skipping file outside project directory: ${filePath}`);
+                continue;
+            }
+            
+            // Additional check: ensure real path starts with project root
+            // Handle case-insensitive filesystems on Windows/macOS
+            const normalizedRoot = normalize(projectRoot);
+            const normalizedReal = normalize(realPath);
+            const isWindows = platform() === 'win32';
+            const isMacOS = platform() === 'darwin';
+            
+            if (isWindows || isMacOS) {
+                // Case-insensitive comparison
+                if (!normalizedReal.toLowerCase().startsWith(normalizedRoot.toLowerCase())) {
+                    console.warn(`Skipping file outside project directory: ${filePath}`);
+                    continue;
+                }
+            } else {
+                // Case-sensitive comparison for Linux
+                if (!normalizedReal.startsWith(normalizedRoot)) {
+                    console.warn(`Skipping file outside project directory: ${filePath}`);
+                    continue;
+                }
+            }
+            
+            // Check file stats on the real path
+            const stats = await stat(realPath);
             
             if (!stats.isFile()) {
                 console.warn(`Skipping non-file: ${filePath}`);
@@ -139,13 +211,13 @@ export async function collectFiles(filePaths) {
             }
             
             // Check if binary
-            if (await isBinaryFile(resolvedPath)) {
+            if (await isBinaryFile(realPath)) {
                 console.warn(`Skipping binary file: ${filePath}`);
                 continue;
             }
             
-            // Read file content
-            const content = await readFile(resolvedPath, 'utf-8');
+            // Read file content from real path
+            const content = await readFile(realPath, 'utf-8');
             
             files.push({
                 path: normalizedPath,
