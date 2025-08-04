@@ -244,6 +244,12 @@ llm_bridges/
 - When enabled, symlink targets are validated to ensure they're within project bounds
 - Real path resolution prevents symlink escape attacks
 
+### External File Access
+- By default, external files are allowed (`ALLOW_EXTERNAL_FILES=true`)
+- When set to `false`, files outside the server's working directory are rejected
+- This provides an additional security layer for production environments
+- **Security Note**: Allowing external files means the MCP server can access any file readable by the user. Only enable this in trusted environments.
+
 ### Resource Limits
 - Maximum file size: 25MB per file (configurable)
 - Maximum files per request: 50 files (configurable)

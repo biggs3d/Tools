@@ -171,7 +171,7 @@ export async function collectFiles(filePaths) {
             const relativePath = relative(projectRoot, realPath);
             // If relative path starts with .. it's outside project root
             // Empty relative path means current directory which is OK
-            if (relativePath.startsWith('..')) {
+            if (!CONFIG.shared.allowExternalFiles && relativePath.startsWith('..')) {
                 console.warn(`Skipping file outside project directory: ${filePath}`);
                 continue;
             }
@@ -183,17 +183,19 @@ export async function collectFiles(filePaths) {
             const isWindows = platform() === 'win32';
             const isMacOS = platform() === 'darwin';
             
-            if (isWindows || isMacOS) {
-                // Case-insensitive comparison
-                if (!normalizedReal.toLowerCase().startsWith(normalizedRoot.toLowerCase())) {
-                    console.warn(`Skipping file outside project directory: ${filePath}`);
-                    continue;
-                }
-            } else {
-                // Case-sensitive comparison for Linux
-                if (!normalizedReal.startsWith(normalizedRoot)) {
-                    console.warn(`Skipping file outside project directory: ${filePath}`);
-                    continue;
+            if (!CONFIG.shared.allowExternalFiles) {
+                if (isWindows || isMacOS) {
+                    // Case-insensitive comparison
+                    if (!normalizedReal.toLowerCase().startsWith(normalizedRoot.toLowerCase())) {
+                        console.warn(`Skipping file outside project directory: ${filePath}`);
+                        continue;
+                    }
+                } else {
+                    // Case-sensitive comparison for Linux
+                    if (!normalizedReal.startsWith(normalizedRoot)) {
+                        console.warn(`Skipping file outside project directory: ${filePath}`);
+                        continue;
+                    }
                 }
             }
             

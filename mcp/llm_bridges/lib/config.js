@@ -75,6 +75,7 @@ export const CONFIG = {
         tokenEstimationBuffer: parseFloat(process.env.TOKEN_ESTIMATION_BUFFER, 1.2),
         enableParallel: parseBool(process.env.ENABLE_PARALLEL, true),
         enableIterativeRefinement: parseBool(process.env.ENABLE_ITERATIVE_REFINEMENT, false),
+        allowExternalFiles: parseBool(process.env.ALLOW_EXTERNAL_FILES, true), // Security: Allow files outside project directory
     },
     
     // File discovery
