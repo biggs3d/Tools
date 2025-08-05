@@ -8,20 +8,26 @@
 - Read all the framework documentation in the `./ai-guide` folder
 - Read the scripts available in the base `package.json`
 - At the start always get the folder hierarchy structure of the project
-- Ask me to include any example code/files you need, or try searching online
+- Ask me to include any additional example code/files you need, or try searching online
 
 ### After Each Task
-- Check typescript syntax errors
+- Check syntax errors
 - Check linting
 - Check for build errors
 
-- **IMPORTANT**: Review significant code changes with Gemini (and/or Grok) using `mcp__gemini-bridge__send_to_gemini` tool for:
+- **IMPORTANT**: Review significant code changes with the LLM bridge mcp tools available:
   - Architecture and design patterns validation
   - TypeScript type safety improvements
   - MobX reactive patterns compliance
   - Performance and maintainability considerations
   - Integration with existing framework patterns
   - Always add this peer review to the todo list
+
+- **Improvement Stage**: Introspection at the end; strive for continuous improvement in every session!
+  - What ended up working? What went wrong? What was misunderstood or not known?
+  - How would several different, varied specialists critique this session?
+  - What does the user think?
+  - With you the agent as the target audience, how should their feedback be incorporated into the project's documentation files and CLAUDE.md?
 
 ## Project Architecture
 - React/MobX/TypeScript repository
