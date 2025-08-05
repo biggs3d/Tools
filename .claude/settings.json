@@ -14,8 +14,6 @@
       "Bash(npx:*)",
       "Bash(node:*)",
 
-      "Bash(git:*)",
-
       "Bash(mkdir:*)",
       "Bash(cp:*)",
       "Bash(mv:*)",
