@@ -231,6 +231,123 @@ Each MCP server should include:
     - Initialize resources in `async start()` method
     - Handle cleanup in signal handlers and dispose methods
 
+## Project-Specific Development Guidelines
+
+### Session Ending Protocol
+**IMPORTANT**: Always run the Improvement Stage retrospective when user indicates session is ending:
+
+**WHEN TO TRIGGER**: 
+- When user says "done", "thanks", "that's all", or similar session-ending phrases
+- After completing a major task/feature
+- Before creating a pull request
+- When switching to a different task area
+
+**HOW TO EXECUTE**:
+1. **Proactively announce**: "Let me run through our session improvement checklist..."
+2. **Create a structured retrospective** with these sections:
+   
+   ```markdown
+   ## Session Retrospective
+   
+   ### What Worked Well
+   - [Specific successes and effective approaches]
+   
+   ### What Could Be Improved
+   - [Challenges, misunderstandings, or inefficiencies]
+   
+   ### Knowledge Gaps Discovered
+   - [Missing context, documentation needs, unclear patterns]
+   
+   ### Specialist Perspectives
+   - **Performance Engineer**: [Would they critique any inefficiencies?]
+   - **Security Specialist**: [Any security concerns overlooked?]
+   - **Senior Architect**: [Better architectural patterns available?]
+   - **QA Engineer**: [Adequate test coverage and edge cases?]
+   
+   ### Action Items for Shared Project Markdown Documentation and/or CLAUDE.md
+   - [Specific updates needed based on this session]
+   ```
+
+3. **Ask the user**: "Before we wrap up, do you have any feedback on how I could have been more helpful?"
+
+4. **Persist learnings**:
+   - Suggest NOTE-AI comments for significant discoveries
+   - Propose CLAUDE.md updates for recurring patterns
+   - Create TODO items for unresolved questions
+
+**ENFORCEMENT**: If user ends session without retrospective, remind them: "Should we do a quick retrospective to capture learnings for next time?"
+
+### Standard Verification Workflow
+```bash
+# Run in this order:
+1. Syntax check (automatic via TypeScript)
+2. npm test (or appropriate test command)
+3. npm run lint
+4. npm run build
+```
+
+### Debugging Protocol
+When debugging fails:
+1. **Acknowledge**: "The attempt to fix by [X] didn't work"
+2. **Revert**: Remove ALL changes from failed attempt
+3. **Re-evaluate**: State the problem fresh (use thoughts section)
+4. **New approach**: Try completely different angle
+
+### When Code/Tests Conflict
+**STOP IMMEDIATELY** and ask:
+- "The test expects X but code does Y. Which is correct?"
+- NEVER assume - user is the source of truth
+- If multiple conflicts: list all, get clarification
+- **Debug authority question**: "Should I assume the code has bugs/oversights, or should I be skeptical of the tests having incorrect assumptions?"
+
+### Code Quality Review
+- ✅ Can this logic be reused elsewhere?
+- ✅ Is the file becoming too large or doing too much?
+- ✅ Would a different pattern be simpler?
+- ✅ Will this scale to 10x the current requirements?
+- ✅ Is this easy for future developers to modify?
+- ✅ Could I set myself up better for similar future tasks?
+
+**IMPORTANT**: Review significant code changes with the LLM bridge mcp tools available:
+- Architecture and design patterns validation
+- TypeScript type safety improvements
+- Performance and maintainability considerations
+- Integration with existing framework patterns
+- Always add this peer review to the todo list
+
+### Common Patterns and Gotchas
+
+#### Nullish Coalescing for Numeric Defaults
+- **Always use `??` instead of `||`** when providing default values for numbers
+- Example: `config.minWidth ?? defaultMinWidth` (not `||`)
+- This prevents valid `0` values from being replaced with defaults
+
+#### TypeScript Mock Types
+- Use `ReturnType<typeof vi.fn>` for basic mocks
+- Use `ReturnType<typeof vi.fn<[ArgType], ReturnType>>` for typed mocks
+- Avoid `vi.Mock` as it's not exported as a type
+
+### Building Trust Indicators
+- When uncertain: "I'm 70% confident because..."
+- Show alternatives: "Simple option: X, Complex but powerful: Y"
+- Audit trail: Document WHY not just WHAT
+- Interrupt counter: Track when user corrects course
+
+### Task Complexity Indicators
+- **Simple task** (contains "just..."): Minimal exploration, quick implementation
+- **Complex task**: Deep thoughts, multiple approaches, user confirmation
+- **Debugging**: ALWAYS ask about test vs code authority
+- **New feature**: Read all relevant docs first
+
+### Communication Cues
+- **"just..."** = Simple task, minimal exploration needed
+- **Terse + direct commands** = User frustration indicator - be more direct
+- **Verbose questions** = User wants detailed exploration
+- **Confidence thresholds**:
+  - High confidence (>80%) → Implement and show
+  - Medium (50-80%) → Show approach, ask confirmation
+  - Low (<50%) → Always get sign-off before proceeding
+
 ## Common Commands
 
 ### Development
