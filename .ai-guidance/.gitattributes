@@ -1,0 +1,160 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+# Explicitly declare text files to be normalized
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.txt text eol=lf
+# Declare files that will always have CRLF line endings on checkout
+*.bat text eol=crlf
+*.cmd text eol=crlf
+# Denote all files that are truly binary and should not be modified
+# Audio files
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.flac binary
+# Image files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+# SVG treated as text files by default, but configure for consistent diffs
+*.svg text
+# Font files
+*.eot binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+# Archive files
+*.7z binary
+*.gz binary
+*.jar binary
+*.rar binary
+*.tar binary
+*.zip binary
+# Handle PDF and docs as binary
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+# Git LFS configuration for large media files
+# Audio files
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+*.flac filter=lfs diff=lfs merge=lfs -text
+# Image files (larger formats)
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.ai filter=lfs diff=lfs merge=lfs -text
+*.tif filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+# Keep SVGs as regular text files for diffing
+# SVGs are typically small and text-based, so they don't need LFS
+# Video files
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.webm filter=lfs diff=lfs merge=lfs -text
+# 3D model files (if applicable)
+*.fbx filter=lfs diff=lfs merge=lfs -text
+*.obj filter=lfs diff=lfs merge=lfs -text
+*.glb filter=lfs diff=lfs merge=lfs -text
+*.gltf filter=lfs diff=lfs merge=lfs -text
+# Specific directories (alternative approach)
+# public/assets/sounds/** filter=lfs diff=lfs merge=lfs -text
+# public/assets/images/** filter=lfs diff=lfs merge=lfs -text
+# C++ source files
+*.c text eol=lf
+*.cc text eol=lf
+*.cxx text eol=lf
+*.cpp text eol=lf
+*.c++ text eol=lf
+*.h text eol=lf
+*.hh text eol=lf
+*.hpp text eol=lf
+*.hxx text eol=lf
+*.h++ text eol=lf
+*.inl text eol=lf
+*.ipp text eol=lf
+*.tcc text eol=lf
+*.tpp text eol=lf
+# C++ project files
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+*.make text eol=lf
+Makefile text eol=lf
+makefile text eol=lf
+# Windows-specific C++ files
+*.sln text eol=crlf
+*.vcxproj text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.props text eol=crlf
+*.targets text eol=crlf
+*.rc text eol=crlf
+# Shell scripts (often used in C++ builds)
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+# Config files
+.clang-format text eol=lf
+.clang-tidy text eol=lf
+.editorconfig text eol=lf
+Doxyfile text eol=lf
+*.dox text eol=lf
+# C++ Binary files
+*.o binary
+*.obj binary
+*.a binary
+*.lib binary
+*.so binary
+*.so.* binary
+*.dylib binary
+*.dll binary
+*.exe binary
+*.out binary
+*.app binary
+*.pdb binary
+# Precompiled headers
+*.gch binary
+*.pch binary
+# Static libraries and archives
+*.ar binary
+*.la binary
+# Network capture files (for your networking project)
+*.pcap binary
+*.cap binary
+*.pcapng binary
+# Generated documentation
+*.chm binary
+# Protocol Buffers (if using for networking)
+*.proto text eol=lf
+*.pb binary
+*.pb.cc text eol=lf
+*.pb.h text eol=lf
+# gRPC (if using for networking)
+*.grpc.pb.cc text eol=lf
+*.grpc.pb.h text eol=lf
+# Export files for diff
+*.cpp diff=cpp
+*.hpp diff=cpp
+*.c diff=cpp
+*.h diff=cpp
+images/*.tar.gz filter=lfs diff=lfs merge=lfs -text
+.packages/*.tgz filter=lfs diff=lfs merge=lfs -text

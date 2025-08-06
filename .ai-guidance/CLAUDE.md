@@ -5,6 +5,12 @@
 - **IMPORTANT**: Let me know if you need any missing files/content/context for data objects & types, or arch. background info!
 - **SESSION ENDING PROTOCOL**: Always run the Improvement Stage retrospective when user indicates session is ending (see "After Each Task" section)
 
+### Documentation Hierarchy
+1. **General Coding Standards**: See `CODING_STANDARDS.md` for universal principles
+2. **AI Collaboration**: See `AI_COLLABORATION_GUIDE.md` for AI-human collaboration strategies
+3. **Framework Patterns**: See `./ai-guide/` folder for React/MobX/TypeScript guidance  
+4. **Project-Specific**: This file (CLAUDE.md) for project-unique patterns
+
 ### Before Each Task
 - Read all the framework documentation in the `./ai-guide` folder
 - Read the scripts available in the base `package.json`
@@ -13,8 +19,39 @@
 
 ### After Each Task
 - Check syntax errors
-- Check linting
+- Check linting  
 - Check for build errors
+
+### Standard Verification Workflow
+```bash
+# Run in this order:
+1. Syntax check (automatic via TypeScript)
+2. npm test (or appropriate test command)
+3. npm run lint
+4. npm run build
+```
+
+### Debugging Protocol
+When debugging fails:
+1. **Acknowledge**: "The attempt to fix by [X] didn't work"
+2. **Revert**: Remove ALL changes from failed attempt
+3. **Re-evaluate**: State the problem fresh (use thoughts section)
+4. **New approach**: Try completely different angle
+
+### When Code/Tests Conflict
+**STOP IMMEDIATELY** and ask:
+- "The test expects X but code does Y. Which is correct?"
+- NEVER assume - user is the source of truth
+- If multiple conflicts: list all, get clarification
+- **Debug authority question**: "Should I assume the code has bugs/oversights, or should I be skeptical of the tests having incorrect assumptions?"
+
+- **Code Quality Review**:
+  - ✅ Can this logic be reused elsewhere?
+  - ✅ Is the file becoming too large or doing too much?
+  - ✅ Would a different pattern be simpler?
+  - ✅ Will this scale to 10x the current requirements?
+  - ✅ Is this easy for future developers to modify?
+  - ✅ Could I set myself up better for similar future tasks?
 
 - **IMPORTANT**: Review significant code changes with the LLM bridge mcp tools available:
   - Architecture and design patterns validation
@@ -23,6 +60,12 @@
   - Performance and maintainability considerations
   - Integration with existing framework patterns
   - Always add this peer review to the todo list
+
+- **Continuous Improvement**:
+  - **Refactor opportunities**: Look for patterns that emerged
+  - **Extract utilities**: Move repeated code to shared helpers
+  - **Document decisions**: Use NOTE-AI comments for "why" not "what"
+  - **Update patterns**: If you discovered a better approach, document it
 
 - **Improvement Stage (MANDATORY)**: Session retrospective for continuous improvement
     
@@ -72,6 +115,28 @@
 - View-ViewModel (MVVM) architecture
 - Component-based structure with strong typing
 
+## Project Context
+```typescript
+interface ProjectContext {
+  currentPhase: "prototyping" | "feature-development" | "maintenance" | "refactoring"
+  teamSize: number
+  criticalPaths: string[]  // What absolutely cannot break
+  performanceTargets: Record<string, number>
+  techDebtTolerance: "none" | "tactical" | "strategic"
+  preferredPatterns: string[]  // Links to examples
+}
+
+// Current project state:
+const context: ProjectContext = {
+  currentPhase: "feature-development",
+  teamSize: 1,
+  criticalPaths: [],
+  performanceTargets: {},
+  techDebtTolerance: "tactical",
+  preferredPatterns: ["MVVM", "Composition", "Observable State"]
+}
+```
+
 ## Framework Patterns
 - ViewModels are observable state containers using MobX
 - Views are React components that observe ViewModels
@@ -100,6 +165,15 @@
 - Grid consolidation happens in multiple passes - changes in one function must persist through the entire flow
 - Consider creating test helper functions for common mock objects to ensure consistency
 
+### Perfect Assistant Behaviors
+- **Confirm solutions** before implementation when uncertain
+- **Proactively read** needed documentation without being asked
+- **Use thoughts pattern** consistently for complex decisions
+- **Show alternatives** when multiple valid approaches exist
+
+### Tool Limitations
+- **VSCode limitation**: Unlike JetBrains IDEs, VSCode lacks built-in file history/rewind features. Be extra careful with destructive changes as recovery options are limited.
+
 ### Context Efficiency Scripts
 base directory `./tools/build-helpers`
 
@@ -123,6 +197,29 @@ When creating shell scripts in this WSL environment, ensure they have Unix line 
 ```bash
 sed -i 's/\r$//' ./path/to/script.sh
 ```
+
+## Coding Standards
+
+### Core Development Principles
+
+#### 1. Modular Code Organization
+- **Extract shared logic** into reusable functions
+- **Keep files focused** - single responsibility or orchestration only
+- **File size limits**: If a file exceeds ~300 lines, consider splitting
+- **Example**: Instead of duplicating validation logic, create a shared utility
+
+#### 2. Architecture & Design
+- **Always ask**: "Is there a simpler, more elegant approach?"
+- **SOLID principles**: Apply consistently, especially Single Responsibility
+- **Composition over inheritance**: Use the plugin system and component composition
+- **Scalability check**: "Will this be easy to extend? To modify?"
+
+#### 3. Self-Reflection Questions
+These questions help identify improvement opportunities:
+- How could you set yourself up for better success next time?
+- What patterns emerged that could be extracted?
+- Is there a simpler or more elegant architecture?
+- What would make this easier to modify in the future?
 
 ## Common Patterns and Gotchas
 
@@ -149,3 +246,30 @@ sed -i 's/\r$//' ./path/to/script.sh
 
 
 
+
+
+
+## AI Collaboration Strategies
+
+For comprehensive AI collaboration guidance including metacognitive prompting, confidence elicitation, AI peer consultation, and NOTE-AI patterns, see `AI_COLLABORATION_GUIDE.md`.
+
+### Building Trust Indicators
+- When uncertain: "I'm 70% confident because..."
+- Show alternatives: "Simple option: X, Complex but powerful: Y"
+- Audit trail: Document WHY not just WHAT
+- Interrupt counter: Track when user corrects course
+
+### Task Complexity Indicators
+- **Simple task** (contains "just..."): Minimal exploration, quick implementation
+- **Complex task**: Deep thoughts, multiple approaches, user confirmation
+- **Debugging**: ALWAYS ask about test vs code authority
+- **New feature**: Read all relevant docs first
+
+### Communication Cues
+- **"just..."** = Simple task, minimal exploration needed
+- **Terse + direct commands** = User frustration indicator - be more direct
+- **Verbose questions** = User wants detailed exploration
+- **Confidence thresholds**:
+  - High confidence (>80%) → Implement and show
+  - Medium (50-80%) → Show approach, ask confirmation
+  - Low (<50%) → Always get sign-off before proceeding
