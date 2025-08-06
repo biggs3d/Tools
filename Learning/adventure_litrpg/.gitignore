@@ -1,0 +1,31 @@
+# Active session data (personal games)
+session/state/*.json
+session/narrative/session_log.md
+session/narrative/current_scene.md
+session/world/relationships.json
+session/meta/notes.md
+
+# But keep the structure with .gitkeep files
+!session/**/.gitkeep
+
+# Archives of completed games
+archives/*
+!archives/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

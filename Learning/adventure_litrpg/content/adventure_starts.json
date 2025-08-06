@@ -1,0 +1,113 @@
+{
+  "adventure_starts": {
+    "the_burning_tavern": {
+      "name": "The Burning Tavern",
+      "tone": "urgent_action",
+      "hook": "You wake to smoke and screams. The tavern is ablaze, and someone's trapped upstairs.",
+      "immediate_choice": "Save the trapped person or grab your gear and escape?",
+      "npcs": ["Frightened Innkeeper", "Mysterious Figure in Shadows", "Trapped Noble"],
+      "potential_threads": ["Arson investigation", "Noble's gratitude/enemies", "Hidden treasure in basement"],
+      "opening_text": "The acrid smoke tears at your lungs, pulling you from wine-heavy sleep. Orange light dances on the walls - this isn't dawn. The Silverhill Inn is burning. A woman's scream cuts through the roar of flames from the floor above. Your gear lies scattered across the room, but the window is right there..."
+    },
+    
+    "the_glass_crater": {
+      "name": "The Glass Crater",
+      "tone": "mystery_horror",
+      "hook": "The site of a magical catastrophe has begun glowing again after years of silence.",
+      "immediate_choice": "Investigate the glow or report to authorities first?",
+      "npcs": ["Glass Mage Remnant", "Paranoid Survivor", "Academy Investigator"],
+      "potential_threads": ["Lost magical knowledge", "Catastrophe wasn't accidental", "Something trapped wants out"],
+      "opening_text": "The Ashfall Crater should be dead. Three years ago, the Resonance Cascade turned two hundred mages into glass and scorched magic from the earth. But tonight, purple light pulses from its heart like a slow heartbeat. You stand at the crater's edge, the merchant's letter crumpled in your pocket: '500 gold if you find out what's happening. 1000 if you stop it.'"
+    },
+    
+    "caravan_ambush": {
+      "name": "Caravan Under Attack",
+      "tone": "heroic_action",
+      "hook": "Bandits are attacking a merchant caravan right in front of you.",
+      "immediate_choice": "Help the caravan, join the bandits, or stay hidden?",
+      "npcs": ["Desperate Merchant", "Bandit Leader with a Code", "Hidden Passenger"],
+      "potential_threads": ["Merchant's secret cargo", "Bandit's justified grievance", "Greater threat in the woods"],
+      "opening_text": "The crossbow bolt splits the air where your head was a moment ago. Ahead, a merchant caravan has formed a desperate circle, guards with spears facing outward against twice their number in bandits. But something's off - the bandits are too well-equipped, too organized. The leader shouts: 'We only want the box! Give us the box and no one dies!' The merchant's response is another crossbow bolt."
+    },
+    
+    "the_lottery": {
+      "name": "The Cursed Lottery",
+      "tone": "social_intrigue",
+      "hook": "You've won the village lottery. No one will tell you what you've won.",
+      "immediate_choice": "Accept the 'prize' or try to refuse/escape?",
+      "npcs": ["Nervous Mayor", "Previous 'Winner' (scarred)", "Helpful Child"],
+      "potential_threads": ["Ancient pact with something", "Village's dark secret", "Way to break the cycle"],
+      "opening_text": "The entire village square falls silent as the mayor pulls your name from the ceremonial urn. 'Congratulations,' he says, but his voice cracks. People step away from you like you've contracted plague. An old woman begins to weep. The blacksmith mutters 'Not again' and hurries his children inside. The mayor extends a heavy iron key toward you with shaking hands. 'Your prize awaits in the manor cellar. You have until midnight to... claim it.'"
+    },
+    
+    "awakening_unknown": {
+      "name": "Amnesia in the Dungeon",
+      "tone": "mystery_survival",
+      "hook": "You wake in a dungeon cell with no memory, holding a bloody dagger.",
+      "immediate_choice": "Escape immediately or search for clues about your identity?",
+      "npcs": ["Fellow Prisoner (maybe truthful)", "Sadistic Jailer", "Noble Who Claims to Know You"],
+      "potential_threads": ["Crime you did/didn't commit", "Hidden identity", "Reason for memory loss"],
+      "opening_text": "Pain. That's the first thing. Then the taste of copper in your mouth and the cold stone against your cheek. You push yourself up, head spinning, and freeze. There's a dagger in your hand, its blade dark with blood that isn't yours. The cell door hangs open. A guard lies motionless just outside. And you remember... nothing. Not your name, not this place, not what you've done. But someone's coming - boots on stone, getting closer."
+    }
+  },
+  
+  "scene_templates": {
+    "combat_escalation": {
+      "description": "When combat needs to become more intense",
+      "elements": [
+        "Environmental hazard activates (fire spreads, ceiling collapses)",
+        "Reinforcements arrive (for either side)",
+        "Innocent bystander in danger",
+        "Valuable object at risk of destruction",
+        "Enemy reveals second form/power"
+      ]
+    },
+    
+    "quiet_moment": {
+      "description": "Breather scenes between action",
+      "elements": [
+        "Campfire conversation revealing NPC backstory",
+        "Discovering beautiful hidden location",
+        "Sharing a meal and planning next move",
+        "Tending wounds and reflecting on close calls",
+        "NPC offers to teach skill/share knowledge"
+      ]
+    },
+    
+    "revelation": {
+      "description": "Major plot information revealed",
+      "elements": [
+        "Ally was enemy all along",
+        "Enemy had noble motives",
+        "Two separate threats are connected",
+        "Player's actions caused unintended consequences",
+        "Ancient prophecy/pact involves the player"
+      ]
+    }
+  },
+  
+  "npc_personalities": {
+    "archetypes": {
+      "mysterious_mentor": {
+        "traits": ["Knows more than they say", "Tests before teaching", "Disappears at crucial moments"],
+        "speech_pattern": "Riddles and metaphors, rarely direct answers",
+        "motivation": "Preparing hero for greater threat"
+      },
+      "pragmatic_merchant": {
+        "traits": ["Everything has a price", "Knows everyone's business", "Survives any disaster"],
+        "speech_pattern": "Quick, efficient, always negotiating",
+        "motivation": "Profit, but has lines they won't cross"
+      },
+      "haunted_veteran": {
+        "traits": ["Skilled but reluctant", "Drinks to forget", "Protective of innocents"],
+        "speech_pattern": "Terse, occasional war stories, gallows humor",
+        "motivation": "Redemption for past failures"
+      },
+      "idealistic_youth": {
+        "traits": ["Eager to help", "Naive about danger", "Hidden potential"],
+        "speech_pattern": "Enthusiastic, asks lots of questions",
+        "motivation": "Becoming a hero like in the stories"
+      }
+    }
+  }
+}

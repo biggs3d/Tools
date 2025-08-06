@@ -1,0 +1,491 @@
+#!/usr/bin/env python3
+"""
+Minimal LitRPG Engine - Handles only the mechanical numbers
+Everything else (movement, story, world logic) is handled by Claude's narrative judgment
+"""
+
+import json
+import random
+import sys
+from pathlib import Path
+from datetime import datetime
+from typing import Dict, Any, Optional, List
+
+class LitRPGEngine:
+    def __init__(self, state_file="state/game_state.json"):
+        self.state_file = Path(state_file)
+        self.state_file.parent.mkdir(exist_ok=True)
+        self.state = self.load_state()
+
+    def load_state(self) -> Dict:
+        """Load game state or return empty dict"""
+        if self.state_file.exists():
+            with open(self.state_file, 'r') as f:
+                return json.load(f)
+        return {}
+
+    def save_state(self):
+        """Save current state to file"""
+        with open(self.state_file, 'w') as f:
+            json.dump(self.state, f, indent=2)
+
+    def init_new_game(self, name: str, class_name: str = "warrior") -> Dict:
+        """Create a new character - minimal stats that NEED tracking"""
+
+        # Base stats by class
+        class_configs = {
+            "warrior": {
+                "hp": 120, "mp": 30, "stamina": 100,
+                "strength": 16, "dexterity": 12, "intelligence": 8,
+                "constitution": 14, "wisdom": 10, "charisma": 10
+            },
+            "mage": {
+                "hp": 60, "mp": 120, "stamina": 60,
+                "strength": 8, "dexterity": 12, "intelligence": 16,
+                "constitution": 10, "wisdom": 14, "charisma": 10
+            },
+            "rogue": {
+                "hp": 80, "mp": 50, "stamina": 120,
+                "strength": 10, "dexterity": 16, "intelligence": 12,
+                "constitution": 10, "wisdom": 12, "charisma": 14
+            }
+        }
+
+        config = class_configs.get(class_name.lower(), class_configs["warrior"])
+
+        self.state = {
+            "character": {
+                "name": name,
+                "class": class_name,
+                "level": 1,
+                "xp": 0,
+                "xp_next": 100,
+
+                # Core resources
+                "hp": config["hp"],
+                "hp_max": config["hp"],
+                "mp": config["mp"],
+                "mp_max": config["mp"],
+                "stamina": config["stamina"],
+                "stamina_max": config["stamina"],
+
+                # Attributes
+                "strength": config["strength"],
+                "dexterity": config["dexterity"],
+                "intelligence": config["intelligence"],
+                "constitution": config["constitution"],
+                "wisdom": config["wisdom"],
+                "charisma": config["charisma"],
+
+                # Combat stats
+                "damage_bonus": config["strength"] // 3,
+                "armor": 0,
+                "crit_chance": 0.05,
+                "dodge_chance": config["dexterity"] * 0.01,
+
+                # Inventory tracking (Claude handles descriptions)
+                "gold": 50,
+                "skill_points": 0,
+                "stat_points": 0
+            },
+
+            # Minimal world state - let Claude handle the rest
+            "flags": {},  # For quest states, achievements, etc.
+            "kills": 0,
+            "session_start": datetime.now().isoformat()
+        }
+
+        self.save_state()
+        return {
+            "success": True,
+            "message": f"Created {name} the {class_name}",
+            "initial_stats": self.get_status()
+        }
+
+    def attack(self, weapon_damage: str = "1d6",
+               target_armor: int = 0,
+               is_crit: bool = False,
+               is_sneak: bool = False) -> Dict:
+        """Calculate attack damage - just the numbers"""
+
+        char = self.state["character"]
+
+        # Parse weapon damage (e.g., "2d6+3")
+        if '+' in weapon_damage:
+            dice, bonus = weapon_damage.split('+')
+            bonus = int(bonus)
+        else:
+            dice = weapon_damage
+            bonus = 0
+
+        # Roll dice
+        num_dice, die_size = dice.split('d')
+        num_dice = int(num_dice) if num_dice else 1
+        die_size = int(die_size)
+
+        damage = sum(random.randint(1, die_size) for _ in range(num_dice))
+        damage += bonus + char["damage_bonus"]
+
+        # Check for crit (Claude decides when, we just calculate)
+        if is_crit or random.random() < char["crit_chance"]:
+            damage *= 2
+            is_crit = True
+
+        # Sneak attack bonus (for rogues)
+        if is_sneak and char["class"].lower() == "rogue":
+            damage += char["level"] * 3
+
+        # Apply armor reduction
+        damage = max(1, damage - target_armor)
+
+        # Stamina cost
+        stamina_cost = 5
+        char["stamina"] = max(0, char["stamina"] - stamina_cost)
+
+        self.save_state()
+
+        return {
+            "damage": damage,
+            "critical": is_crit,
+            "stamina_remaining": char["stamina"],
+            "sneak_attack": is_sneak
+        }
+
+    def take_damage(self, amount: int, damage_type: str = "physical") -> Dict:
+        """Character takes damage"""
+        char = self.state["character"]
+
+        # Apply armor to physical damage
+        if damage_type == "physical":
+            amount = max(1, amount - char["armor"])
+
+        char["hp"] = max(0, char["hp"] - amount)
+        self.save_state()
+
+        return {
+            "damage_taken": amount,
+            "hp_remaining": char["hp"],
+            "hp_max": char["hp_max"],
+            "is_alive": char["hp"] > 0,
+            "health_percent": char["hp"] / char["hp_max"]
+        }
+
+    def heal(self, amount: int, resource: str = "hp") -> Dict:
+        """Heal character - can be hp, mp, or stamina"""
+        char = self.state["character"]
+
+        max_key = f"{resource}_max"
+        old_value = char[resource]
+        char[resource] = min(char[resource] + amount, char[max_key])
+        actual_healed = char[resource] - old_value
+
+        self.save_state()
+
+        return {
+            "healed": actual_healed,
+            f"{resource}_current": char[resource],
+            f"{resource}_max": char[max_key],
+            "percent": char[resource] / char[max_key]
+        }
+
+    def cast_spell(self, mp_cost: int, spell_power: str = "1d6") -> Dict:
+        """Cast a spell - handles MP and damage calculation"""
+        char = self.state["character"]
+
+        if char["mp"] < mp_cost:
+            return {"success": False, "reason": "insufficient_mp"}
+
+        char["mp"] -= mp_cost
+
+        # Calculate spell damage (similar to attack but uses INT)
+        if '+' in spell_power:
+            dice, bonus = spell_power.split('+')
+            bonus = int(bonus)
+        else:
+            dice = spell_power
+            bonus = 0
+
+        num_dice, die_size = dice.split('d')
+        damage = sum(random.randint(1, int(die_size)) for _ in range(int(num_dice)))
+        damage += bonus + (char["intelligence"] // 2)
+
+        self.save_state()
+
+        return {
+            "success": True,
+            "damage": damage,
+            "mp_remaining": char["mp"],
+            "mp_cost": mp_cost
+        }
+
+    def gain_xp(self, amount: int) -> Dict:
+        """Award XP and check for level up"""
+        char = self.state["character"]
+        char["xp"] += amount
+
+        level_ups = 0
+        while char["xp"] >= char["xp_next"]:
+            char["xp"] -= char["xp_next"]
+            char["level"] += 1
+            level_ups += 1
+
+            # Level up bonuses
+            char["hp_max"] += 10 + (char["constitution"] // 2)
+            char["mp_max"] += 5 + (char["intelligence"] // 2)
+            char["stamina_max"] += 5 + (char["constitution"] // 4)
+
+            # Restore resources on level up
+            char["hp"] = char["hp_max"]
+            char["mp"] = char["mp_max"]
+            char["stamina"] = char["stamina_max"]
+
+            # Grant points
+            char["skill_points"] += 1
+            char["stat_points"] += 2
+
+            # Next level requirement (exponential curve)
+            char["xp_next"] = int(100 * (1.5 ** (char["level"] - 1)))
+
+        self.save_state()
+
+        return {
+            "xp_gained": amount,
+            "current_xp": char["xp"],
+            "xp_to_next": char["xp_next"],
+            "leveled_up": level_ups > 0,
+            "new_level": char["level"] if level_ups > 0 else None,
+            "skill_points": char["skill_points"],
+            "stat_points": char["stat_points"]
+        }
+
+    def rest(self, rest_type: str = "short") -> Dict:
+        """Rest to recover resources"""
+        char = self.state["character"]
+
+        if rest_type == "short":
+            # Short rest: partial recovery
+            hp_recover = char["hp_max"] // 4
+            mp_recover = char["mp_max"] // 4
+            stamina_recover = char["stamina_max"] // 2
+        else:
+            # Long rest: full recovery
+            hp_recover = char["hp_max"]
+            mp_recover = char["mp_max"]
+            stamina_recover = char["stamina_max"]
+
+        old_hp = char["hp"]
+        old_mp = char["mp"]
+        old_stamina = char["stamina"]
+
+        char["hp"] = min(char["hp_max"], char["hp"] + hp_recover)
+        char["mp"] = min(char["mp_max"], char["mp"] + mp_recover)
+        char["stamina"] = min(char["stamina_max"], char["stamina"] + stamina_recover)
+
+        self.save_state()
+
+        return {
+            "hp_recovered": char["hp"] - old_hp,
+            "mp_recovered": char["mp"] - old_mp,
+            "stamina_recovered": char["stamina"] - old_stamina,
+            "current_hp": char["hp"],
+            "current_mp": char["mp"],
+            "current_stamina": char["stamina"]
+        }
+
+    def modify_gold(self, amount: int) -> Dict:
+        """Add or remove gold"""
+        char = self.state["character"]
+        old_gold = char["gold"]
+        char["gold"] = max(0, char["gold"] + amount)
+
+        self.save_state()
+
+        return {
+            "gold_change": amount,
+            "gold_total": char["gold"],
+            "transaction": "gain" if amount > 0 else "spend"
+        }
+
+    def skill_check(self, attribute: str, difficulty: int = 15) -> Dict:
+        """Roll a skill check - just the math"""
+        char = self.state["character"]
+
+        # Get attribute modifier
+        attr_value = char.get(attribute, 10)
+        modifier = (attr_value - 10) // 2
+
+        # Roll d20
+        roll = random.randint(1, 20)
+        total = roll + modifier
+
+        # Critical success/failure
+        is_crit_success = roll == 20
+        is_crit_fail = roll == 1
+
+        success = total >= difficulty or is_crit_success
+        if is_crit_fail:
+            success = False
+
+        return {
+            "success": success,
+            "roll": roll,
+            "modifier": modifier,
+            "total": total,
+            "difficulty": difficulty,
+            "critical_success": is_crit_success,
+            "critical_failure": is_crit_fail,
+            "margin": total - difficulty
+        }
+
+    def set_flag(self, key: str, value: Any) -> Dict:
+        """Set a story flag - for quest states, achievements, etc."""
+        self.state["flags"][key] = value
+        self.save_state()
+
+        return {
+            "flag_set": key,
+            "value": value
+        }
+
+    def get_flag(self, key: str) -> Any:
+        """Get a story flag"""
+        return self.state["flags"].get(key, None)
+
+    def get_status(self) -> Dict:
+        """Get current character status for display"""
+        char = self.state["character"]
+
+        return {
+            "name": char["name"],
+            "class": char["class"],
+            "level": char["level"],
+            "hp": f"{char['hp']}/{char['hp_max']}",
+            "mp": f"{char['mp']}/{char['mp_max']}",
+            "stamina": f"{char['stamina']}/{char['stamina_max']}",
+            "xp": f"{char['xp']}/{char['xp_next']}",
+            "gold": char["gold"],
+            "health_percent": char["hp"] / char["hp_max"],
+            "mana_percent": char["mp"] / char["mp_max"],
+            "stamina_percent": char["stamina"] / char["stamina_max"]
+        }
+
+    def enemy_attack(self, enemy_damage: str = "1d4") -> Dict:
+        """Quick enemy attack calculation"""
+        # Roll damage
+        if '+' in enemy_damage:
+            dice, bonus = enemy_damage.split('+')
+            bonus = int(bonus)
+        else:
+            dice = enemy_damage
+            bonus = 0
+
+        num_dice, die_size = dice.split('d')
+        damage = sum(random.randint(1, int(die_size)) for _ in range(int(num_dice)))
+        damage += bonus
+
+        # Check if player dodges
+        char = self.state["character"]
+        if random.random() < char["dodge_chance"]:
+            return {
+                "dodged": True,
+                "damage": 0
+            }
+
+        # Apply damage
+        result = self.take_damage(damage)
+        result["dodged"] = False
+
+        return result
+
+
+def main():
+    """Command line interface"""
+    if len(sys.argv) < 2:
+        print("Usage: game_engine.py <command> [args]")
+        sys.exit(1)
+
+    engine = LitRPGEngine()
+    command = sys.argv[1]
+
+    try:
+        if command == "init":
+            # game_engine.py init --name "Marcus" --class "warrior"
+            name = sys.argv[sys.argv.index("--name") + 1] if "--name" in sys.argv else "Hero"
+            char_class = sys.argv[sys.argv.index("--class") + 1] if "--class" in sys.argv else "warrior"
+            result = engine.init_new_game(name, char_class)
+
+        elif command == "attack":
+            # game_engine.py attack --weapon "2d6+3" --armor 2
+            weapon = sys.argv[sys.argv.index("--weapon") + 1] if "--weapon" in sys.argv else "1d6"
+            armor = int(sys.argv[sys.argv.index("--armor") + 1]) if "--armor" in sys.argv else 0
+            result = engine.attack(weapon, armor)
+
+        elif command == "damage":
+            # game_engine.py damage --amount 15
+            amount = int(sys.argv[sys.argv.index("--amount") + 1])
+            result = engine.take_damage(amount)
+
+        elif command == "heal":
+            # game_engine.py heal --amount 20 --type hp
+            amount = int(sys.argv[sys.argv.index("--amount") + 1])
+            resource = sys.argv[sys.argv.index("--type") + 1] if "--type" in sys.argv else "hp"
+            result = engine.heal(amount, resource)
+
+        elif command == "spell":
+            # game_engine.py spell --cost 10 --power "3d6"
+            cost = int(sys.argv[sys.argv.index("--cost") + 1])
+            power = sys.argv[sys.argv.index("--power") + 1] if "--power" in sys.argv else "1d6"
+            result = engine.cast_spell(cost, power)
+
+        elif command == "xp":
+            # game_engine.py xp --amount 50
+            amount = int(sys.argv[sys.argv.index("--amount") + 1])
+            result = engine.gain_xp(amount)
+
+        elif command == "rest":
+            # game_engine.py rest --type long
+            rest_type = sys.argv[sys.argv.index("--type") + 1] if "--type" in sys.argv else "short"
+            result = engine.rest(rest_type)
+
+        elif command == "gold":
+            # game_engine.py gold --amount 100 (positive = gain, negative = spend)
+            amount = int(sys.argv[sys.argv.index("--amount") + 1])
+            result = engine.modify_gold(amount)
+
+        elif command == "check":
+            # game_engine.py check --attribute "dexterity" --dc 15
+            attribute = sys.argv[sys.argv.index("--attribute") + 1]
+            dc = int(sys.argv[sys.argv.index("--dc") + 1]) if "--dc" in sys.argv else 15
+            result = engine.skill_check(attribute, dc)
+
+        elif command == "enemy-attack":
+            # game_engine.py enemy-attack --damage "1d6+2"
+            damage = sys.argv[sys.argv.index("--damage") + 1] if "--damage" in sys.argv else "1d4"
+            result = engine.enemy_attack(damage)
+
+        elif command == "status":
+            result = engine.get_status()
+
+        elif command == "flag":
+            # game_engine.py flag --set "killed_goblin_king" --value true
+            key = sys.argv[sys.argv.index("--set") + 1]
+            value = sys.argv[sys.argv.index("--value") + 1]
+            # Convert string "true"/"false" to boolean
+            if value.lower() == "true":
+                value = True
+            elif value.lower() == "false":
+                value = False
+            result = engine.set_flag(key, value)
+        else:
+            result = {"error": f"Unknown command: {command}"}
+
+        # Output as JSON for Claude to parse
+        print(json.dumps(result, indent=2))
+
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

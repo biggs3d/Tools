@@ -1,0 +1,80 @@
+{
+  "common_enemies": {
+    "goblin": {
+      "hp": "2d6+3",
+      "damage": "1d4+1",
+      "armor": 1,
+      "xp": 25,
+      "description": "Cunning and cowardly, fights dirty, flees when losing"
+    },
+    "bandit": {
+      "hp": "3d8+6",
+      "damage": "1d6+2",
+      "armor": 2,
+      "xp": 50,
+      "description": "Desperate or greedy human, may negotiate or surrender"
+    },
+    "wolf": {
+      "hp": "2d8+4",
+      "damage": "1d6+1",
+      "armor": 1,
+      "xp": 35,
+      "description": "Pack hunter, targets weakest, retreats if alpha falls"
+    },
+    "skeleton": {
+      "hp": "2d6",
+      "damage": "1d6",
+      "armor": 2,
+      "xp": 30,
+      "description": "Mindless, relentless, vulnerable to blunt weapons"
+    }
+  },
+  
+  "elite_enemies": {
+    "corrupted_mage": {
+      "hp": "4d8+8",
+      "damage": "2d6",
+      "armor": 1,
+      "xp": 150,
+      "description": "Former mage twisted by dark magic, unpredictable spells"
+    },
+    "bandit_captain": {
+      "hp": "5d10+15",
+      "damage": "1d8+3",
+      "armor": 3,
+      "xp": 200,
+      "description": "Skilled warrior, tactical fighter, inspires allies"
+    },
+    "dire_wolf": {
+      "hp": "4d10+12",
+      "damage": "2d6+2",
+      "armor": 2,
+      "xp": 175,
+      "description": "Alpha predator, intelligent, may have magical abilities"
+    }
+  },
+  
+  "bosses": {
+    "glass_mage_remnant": {
+      "hp": "6d10+20",
+      "damage": "2d8+3",
+      "armor": 4,
+      "xp": 500,
+      "description": "Crystallized mage, reflects magic, shatters into deadly shards"
+    },
+    "cult_leader": {
+      "hp": "8d8+16",
+      "damage": "2d6+4",
+      "armor": 2,
+      "xp": 600,
+      "description": "Charismatic, summons reinforcements, dark pact powers"
+    },
+    "stone_guardian": {
+      "hp": "10d10+40",
+      "damage": "2d10+5",
+      "armor": 6,
+      "xp": 800,
+      "description": "Ancient construct, slow but devastating, puzzle weakness"
+    }
+  }
+}

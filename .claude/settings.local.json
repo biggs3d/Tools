@@ -57,7 +57,8 @@
       "mcp__openai-bridge__send_to_openai",
       "mcp__llm-bridges__get_system_info",
       "mcp__llm-bridges__send_to_llm",
-      "mcp__llm-bridges__estimate_context_size"
+      "mcp__llm-bridges__estimate_context_size",
+      "Bash(python:*)"
     ],
     "deny": []
   },

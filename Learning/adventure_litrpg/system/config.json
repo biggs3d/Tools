@@ -1,0 +1,141 @@
+{
+  "game_constants": {
+    "base_stamina_cost_attack": 5,
+    "base_stamina_cost_dodge": 3,
+    "base_crit_chance": 0.05,
+    "crit_multiplier": 2.0,
+    "dodge_modifier": 0.01,
+    "sneak_attack_bonus_per_level": 3,
+    "xp_base": 100,
+    "xp_scaling_factor": 1.5,
+    "level_up_hp_base": 10,
+    "level_up_mp_base": 5,
+    "level_up_stamina_base": 5,
+    "rest_short_recovery": 0.25,
+    "rest_long_recovery": 1.0,
+    "death_threshold": -10
+  },
+  
+  "area_scaling": {
+    "tutorial_village": {
+      "level": 1,
+      "description": "Starting area, gentle difficulty",
+      "enemy_modifier": 1.0,
+      "loot_modifier": 1.0,
+      "xp_modifier": 1.0
+    },
+    "darkwood_forest": {
+      "level": 3,
+      "description": "Dense forest with wolves and bandits",
+      "enemy_modifier": 1.5,
+      "loot_modifier": 1.3,
+      "xp_modifier": 1.2
+    },
+    "ashfall_crater": {
+      "level": 5,
+      "description": "Site of magical catastrophe, glass mages",
+      "enemy_modifier": 2.0,
+      "loot_modifier": 1.8,
+      "xp_modifier": 1.5
+    },
+    "ancient_ruins": {
+      "level": 7,
+      "description": "Dangerous ruins with constructs and traps",
+      "enemy_modifier": 2.5,
+      "loot_modifier": 2.2,
+      "xp_modifier": 1.8
+    },
+    "crimson_spire": {
+      "level": 10,
+      "description": "Endgame area, cult stronghold",
+      "enemy_modifier": 3.0,
+      "loot_modifier": 3.0,
+      "xp_modifier": 2.5
+    }
+  },
+  
+  "class_progression": {
+    "warrior": {
+      "hp_per_level": 12,
+      "mp_per_level": 3,
+      "stamina_per_level": 8,
+      "primary_stats": ["strength", "constitution"],
+      "skill_focus": "melee_combat"
+    },
+    "mage": {
+      "hp_per_level": 6,
+      "mp_per_level": 12,
+      "stamina_per_level": 4,
+      "primary_stats": ["intelligence", "wisdom"],
+      "skill_focus": "magic"
+    },
+    "rogue": {
+      "hp_per_level": 8,
+      "mp_per_level": 5,
+      "stamina_per_level": 10,
+      "primary_stats": ["dexterity", "charisma"],
+      "skill_focus": "stealth_precision"
+    }
+  },
+  
+  "status_effects": {
+    "poisoned": {
+      "damage_per_turn": "1d4",
+      "duration_base": 5,
+      "description": "Takes damage each turn"
+    },
+    "burning": {
+      "damage_per_turn": "1d6",
+      "duration_base": 3,
+      "description": "Fire damage over time"
+    },
+    "frozen": {
+      "speed_penalty": 0.5,
+      "duration_base": 2,
+      "description": "Slowed movement and actions"
+    },
+    "blessed": {
+      "bonus_to_rolls": 2,
+      "duration_base": 10,
+      "description": "Divine favor grants bonuses"
+    },
+    "shield_spell": {
+      "armor_bonus": 3,
+      "duration_base": 5,
+      "description": "Magical protection"
+    },
+    "rage": {
+      "damage_bonus": 5,
+      "armor_penalty": 2,
+      "duration_base": 4,
+      "description": "Increased damage but reduced defense"
+    }
+  },
+  
+  "difficulty_presets": {
+    "easy": {
+      "enemy_health_modifier": 0.75,
+      "enemy_damage_modifier": 0.8,
+      "player_xp_modifier": 1.2,
+      "loot_chance_modifier": 1.2
+    },
+    "normal": {
+      "enemy_health_modifier": 1.0,
+      "enemy_damage_modifier": 1.0,
+      "player_xp_modifier": 1.0,
+      "loot_chance_modifier": 1.0
+    },
+    "hard": {
+      "enemy_health_modifier": 1.25,
+      "enemy_damage_modifier": 1.2,
+      "player_xp_modifier": 0.9,
+      "loot_chance_modifier": 0.9
+    },
+    "nightmare": {
+      "enemy_health_modifier": 1.5,
+      "enemy_damage_modifier": 1.5,
+      "player_xp_modifier": 0.75,
+      "loot_chance_modifier": 0.75
+    }
+  }
+}

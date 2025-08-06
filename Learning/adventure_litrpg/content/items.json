@@ -1,0 +1,103 @@
+{
+  "weapons": {
+    "dagger": {
+      "damage": "1d4",
+      "value": 10,
+      "description": "Quick, concealable, tool and weapon"
+    },
+    "shortsword": {
+      "damage": "1d6",
+      "value": 25,
+      "description": "Balanced for speed and damage"
+    },
+    "longsword": {
+      "damage": "1d8",
+      "value": 50,
+      "description": "Versatile warrior's weapon"
+    },
+    "greataxe": {
+      "damage": "1d12",
+      "value": 75,
+      "description": "Devastating but slow"
+    },
+    "shortbow": {
+      "damage": "1d6",
+      "value": 30,
+      "description": "Ranged attacks, requires arrows"
+    },
+    "staff": {
+      "damage": "1d6",
+      "value": 20,
+      "description": "Simple weapon, focuses magic"
+    }
+  },
+  
+  "armor": {
+    "leather": {
+      "armor": 1,
+      "value": 25,
+      "description": "Light, flexible protection"
+    },
+    "chainmail": {
+      "armor": 3,
+      "value": 100,
+      "description": "Good protection, somewhat heavy"
+    },
+    "plate": {
+      "armor": 5,
+      "value": 500,
+      "description": "Excellent protection, heavy and loud"
+    },
+    "robes": {
+      "armor": 0,
+      "value": 15,
+      "description": "No protection but doesn't hinder magic"
+    }
+  },
+  
+  "consumables": {
+    "health_potion": {
+      "heal": "2d4+2",
+      "value": 50,
+      "description": "Restores health, tastes of mint and copper"
+    },
+    "mana_potion": {
+      "restore": "3d6",
+      "value": 75,
+      "description": "Restores magical energy, glows faintly blue"
+    },
+    "stamina_draught": {
+      "restore": "4d6",
+      "value": 40,
+      "description": "Removes fatigue, bitter but effective"
+    },
+    "antidote": {
+      "effect": "cures_poison",
+      "value": 35,
+      "description": "Neutralizes most common poisons"
+    }
+  },
+  
+  "special": {
+    "lockpicks": {
+      "value": 15,
+      "description": "Thieves' tools for bypassing locks"
+    },
+    "rope_50ft": {
+      "value": 10,
+      "description": "Hemp rope, supports 300 pounds"
+    },
+    "torch": {
+      "value": 1,
+      "description": "One hour of light, can ignite flammables"
+    },
+    "spellbook_blank": {
+      "value": 100,
+      "description": "Ready to inscribe new spells"
+    },
+    "holy_symbol": {
+      "value": 25,
+      "description": "Focus for divine magic, varies by deity"
+    }
+  }
+}

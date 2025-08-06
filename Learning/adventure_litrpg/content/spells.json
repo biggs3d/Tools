@@ -1,0 +1,86 @@
+{
+  "basic_spells": {
+    "firebolt": {
+      "mp_cost": 5,
+      "damage": "2d6",
+      "description": "Hurls a mote of fire at a single target"
+    },
+    "heal": {
+      "mp_cost": 8,
+      "healing": "2d4+2",
+      "description": "Knits wounds with golden light"
+    },
+    "shield": {
+      "mp_cost": 10,
+      "effect": "+3 armor for combat",
+      "description": "Shimmering barrier deflects attacks"
+    },
+    "frostbite": {
+      "mp_cost": 4,
+      "damage": "1d6",
+      "effect": "slows enemy",
+      "description": "Numbing cold that hinders movement"
+    }
+  },
+  
+  "intermediate_spells": {
+    "lightning_bolt": {
+      "mp_cost": 15,
+      "damage": "3d8",
+      "description": "Chain of electricity strikes multiple foes"
+    },
+    "invisibility": {
+      "mp_cost": 20,
+      "duration": "1 scene",
+      "description": "Bends light to hide from sight"
+    },
+    "teleport": {
+      "mp_cost": 25,
+      "range": "visible location",
+      "description": "Instantly move through folded space"
+    },
+    "mind_read": {
+      "mp_cost": 15,
+      "effect": "surface thoughts",
+      "description": "Glimpse current thoughts and emotions"
+    }
+  },
+  
+  "advanced_spells": {
+    "meteor": {
+      "mp_cost": 40,
+      "damage": "6d10",
+      "area": "large",
+      "description": "Calls down devastating celestial stone"
+    },
+    "resurrection": {
+      "mp_cost": 50,
+      "effect": "restore_recently_dead",
+      "description": "Pulls soul back from death's edge"
+    },
+    "time_stop": {
+      "mp_cost": 60,
+      "duration": "2 actions",
+      "description": "Freezes time for everyone but caster"
+    }
+  },
+  
+  "ritual_magic": {
+    "scrying": {
+      "mp_cost": 10,
+      "time": "10 minutes",
+      "description": "View distant person or location"
+    },
+    "enchant_weapon": {
+      "mp_cost": 30,
+      "duration": "1 day",
+      "effect": "+1d4 damage",
+      "description": "Weapon glows with magical power"
+    },
+    "speak_with_dead": {
+      "mp_cost": 20,
+      "questions": 3,
+      "description": "Corpse answers three questions"
+    }
+  }
+}
