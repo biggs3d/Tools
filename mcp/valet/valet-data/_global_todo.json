@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-07-30T18:59:00.914Z",
+  "updated": "2025-08-06T15:22:18.627Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -238,6 +238,19 @@
       "created": "2025-07-30T18:52:59.195Z",
       "due": "2025-08-19",
       "notes": []
+    },
+    {
+      "id": "59cc4200-41fb-4944-a458-65ca82e0249d",
+      "content": "Get new button active color from Ken",
+      "priority": "medium",
+      "category": "Work",
+      "completed": false,
+      "created": "2025-08-06T15:22:18.627Z",
+      "due": "2025-08-06",
+      "notes": [
+        "UI design update",
+        "For grid system buttons"
+      ]
     }
   ]
 }
