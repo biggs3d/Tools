@@ -393,6 +393,22 @@ When running sessions, be aware of these resources:
 - **`session/narrative/character_background.md`**: May contain player-provided backstory from quickstart
 - **`content/` directory**: Optional reference content (use as inspiration, not restriction)
 
+## System Architecture Notes (Post-Peer Review)
+
+### Critical Improvements Made (v2)
+1. **Centralized Configuration** (`system/lib/config.py`): Single source of truth for paths and constants
+2. **Singleton Pattern** for Session Logger: Prevents multiple instances losing data
+3. **Auto-save Feature**: Events persist every 10 actions to prevent data loss
+4. **Better Error Handling**: Specific exceptions with informative messages
+5. **Fixed Stat Visualization**: Proper stat mapping and dynamic scaling for high-level characters
+6. **Event Bus Ready**: Architecture prepared for future pub/sub system
+
+### Known Limitations to Address
+- No integration with game_engine.py yet (tools operate independently)
+- Manual sync required between different state files
+- Consider implementing transaction-safe writes for JSON files
+- Physics-based combat still narrative-only (no mechanical support)
+
 ## Final Reminder
 
 Every response should feel like the player is living inside their favorite LitRPG novel. Use the engine for numbers that

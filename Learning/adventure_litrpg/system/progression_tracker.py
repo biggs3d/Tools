@@ -136,20 +136,23 @@ class ProgressionTracker:
             output.append(f"\nCurrent Stats (Level {latest['level']}):")
             
             stats = latest["stats"]
-            stat_bars = {
-                "STR": self.make_bar(stats.get("strength", 10), 20),
-                "DEX": self.make_bar(stats.get("dexterity", 10), 20),
-                "CON": self.make_bar(stats.get("constitution", 10), 20),
-                "INT": self.make_bar(stats.get("intelligence", 10), 20),
-                "WIS": self.make_bar(stats.get("wisdom", 10), 20),
-                "CHA": self.make_bar(stats.get("charisma", 10), 20)
+            
+            # Map display names to stat keys properly
+            stat_mapping = {
+                "STR": "strength",
+                "DEX": "dexterity",
+                "CON": "constitution",
+                "INT": "intelligence",
+                "WIS": "wisdom",
+                "CHA": "charisma"
             }
             
-            for stat, bar in stat_bars.items():
-                value = stats.get(stat.lower() + ("" if stat == "STR" else ""), 10)
-                if stat == "STR":
-                    value = stats.get("strength", 10)
-                output.append(f"  {stat}: {bar} {value}")
+            for display_name, stat_key in stat_mapping.items():
+                value = stats.get(stat_key, 10)
+                # Dynamic max value - scale up if stat exceeds soft cap
+                max_val = max(20, value + 2)
+                bar = self.make_bar(value, max_val)
+                output.append(f"  {display_name}: {bar} {value}")
         
         # Skill summary
         output.append("\nAcquired Skills:")
