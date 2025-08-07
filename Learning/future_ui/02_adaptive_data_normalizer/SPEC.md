@@ -12,6 +12,8 @@ Uses JWT tokens with tenant isolation:
 ```
 Authorization: Bearer <jwt-token>
 X-Tenant-ID: tenant_123
+X-Request-ID: req_abc123  # For tracing
+X-Idempotency-Key: idem_xyz789  # For write operations
 ```
 
 ## Core Endpoints
@@ -53,6 +55,7 @@ Response: 201 Created (for sync mode with small samples)
 {
   "schemaId": "schema_xGh5kL9mN3pQ",
   "sourceId": "github_api",
+  "version": "sha256:a3f5b8c9d2e1",  // Content-addressable ID
   "patterns": {
     "dateFields": ["created_at", "updated_at"],
     "dateFormats": ["ISO8601"],
@@ -60,12 +63,25 @@ Response: 201 Created (for sync mode with small samples)
     "arrays": ["labels", "assignees"],
     "nullable": ["bio", "company", "blog"]
   },
-  "confidence": 0.95,
+  "confidence": {
+    "overall": 0.95,
+    "perField": {  // Field-level confidence
+      "id": 1.0,
+      "name": 0.98,
+      "bio": 0.75
+    }
+  },
   "samplesAnalyzed": 1,
   "generatedTypes": {
     "typescript": "interface GitHubUser { ... }",
     "python": "class GitHubUser(TypedDict): ...",
-    "graphql": "type GitHubUser { ... }"
+    "graphql": "type GitHubUser { ... }",
+    "zod": "const GitHubUserSchema = z.object({ ... })"
+  },
+  "governance": {
+    "state": "DRAFT",
+    "owner": "user_123",
+    "reviewers": []
   }
 }
 ```
@@ -160,7 +176,13 @@ Response: 200 OK
   "transformations": [
     {"field": "name", "to": "displayName", "type": "rename"},
     {"field": "created_at", "to": "createdAt", "type": "date_conversion"}
-  ]
+  ],
+  "performance": {
+    "executionTime": 12,  // milliseconds
+    "transformEngine": "wasm",  // or "rust", "go"
+    "cacheHit": true
+  },
+  "traceId": "trace_abc123"  // For distributed tracing
 }
 ```
 
@@ -446,29 +468,47 @@ Response: 200 OK
 ## Plugin Interface Specification
 
 ```typescript
-// Base normalizer plugin interface
-interface NormalizerPlugin {
-  // Metadata
-  readonly id: string;
-  readonly name: string;
-  readonly version: string;
-  readonly supportedFormats: string[];
+// WASM Plugin Interface (Compiled to WebAssembly)
+interface WASMPlugin {
+  // Metadata (read from manifest)
+  readonly manifest: {
+    id: string;
+    name: string;
+    version: string;
+    signature: string;  // Cryptographic signature
+    capabilities: string[];  // What the plugin can do
+    resourceLimits: {
+      maxMemory: number;  // In pages (64KB each)
+      maxExecutionTime: number;  // Milliseconds
+    };
+  };
   
-  // Pattern Detection
-  detectPatterns(samples: any[]): Promise<DataPattern>;
-  suggestTransformations(source: any, target: SchemaDefinition): TransformRule[];
+  // All methods execute in WASI sandbox
+  // No access to filesystem, network, or system calls
   
-  // Transformation
-  transform(data: any, rules: TransformRule[]): Promise<any>;
-  validate(data: any, schema: SchemaDefinition): ValidationResult;
+  // Pattern Detection (Control Plane Only)
+  detectPatterns?(samples: Uint8Array): Uint8Array;  // Returns encoded DataPattern
   
-  // Type Generation
-  generateTypes(schema: SchemaDefinition, language: string): string;
-  inferSchema(samples: any[]): SchemaDefinition;
+  // Transformation (Data Plane - Hot Path)
+  transform(data: Uint8Array): Uint8Array;  // Fast, compiled transformation
   
-  // Format Conversion
-  canConvert(from: string, to: string): boolean;
-  convert(data: any, from: string, to: string, options?: any): Promise<any>;
+  // Validation (Data Plane)
+  validate?(data: Uint8Array): Uint8Array;  // Returns ValidationResult
+}
+
+// Plugin Registry with verification
+class PluginRegistry {
+  async loadPlugin(pluginId: string): Promise<WASMPlugin> {
+    const plugin = await this.fetchPlugin(pluginId);
+    
+    // Verify signature before loading
+    if (!await this.verifySignature(plugin)) {
+      throw new Error('Invalid plugin signature');
+    }
+    
+    // Compile and instantiate with resource limits
+    return this.instantiateWithLimits(plugin);
+  }
 }
 
 // Date normalizer plugin example
@@ -631,26 +671,56 @@ Common error codes:
 
 ## Performance Requirements
 
-Per CLAUDE.md guidelines:
-- Response time: < 100ms for single document transformation
-- Streaming: Support 10K messages/second
-- Schema learning: < 5 seconds for 1000 samples
+Per CLAUDE.md guidelines and production targets:
+
+### Latency (P95)
+- Single document transformation: < 50ms (WASM compiled)
+- Cached transformation: < 5ms
+- Schema lookup: < 10ms (with local cache)
 - Type generation: < 500ms
-- Query across sources: < 2 seconds for complex queries
+- Simple query: < 100ms
+- Complex federated query: < 2 seconds
+
+### Throughput
+- Single worker: 1K messages/second (Rust/Go)
+- Cluster (10 workers): 10K messages/second
+- Streaming with batching: 50K messages/second
+
+### Resource Usage
+- Memory per worker: < 500MB
+- CPU per 1K msg/sec: < 1 core
+- Cache hit ratio: > 90%
+- Schema compile time: < 100ms
 
 ## Security Considerations
 
 ### Data Privacy
-- PII detection and optional masking
-- Data retention policies (samples stored encrypted)
-- Audit logging for all transformations
-- GDPR compliance for data processing
+- PII detection using regex and ML models
+- Field-level encryption with deterministic option for joins
+- Data retention policies with automatic expiry
+- Audit logging with tamper-proof storage
+- GDPR/CCPA compliance with right-to-forget APIs
 
 ### Access Control
-- Schema-level permissions
-- Transformation audit trail
-- Rate limiting per tenant
-- API key rotation support
+- Schema-level RBAC with OPA policies
+- Transformation audit trail with lineage tracking
+- Rate limiting with token bucket per tenant
+- API key rotation with zero-downtime support
+- mTLS for service-to-service communication
+
+### Plugin Security
+- WASI sandbox with no system access
+- Cryptographic signature verification
+- Resource limits (memory, CPU, execution time)
+- Capability-based security model
+- Plugin allowlist with version pinning
+
+### Expression Security
+- CEL (Common Expression Language) for safe expressions
+- No eval() or dynamic code execution
+- AST validation before execution
+- Timeout and recursion limits
+- Input sanitization and size limits
 
 ## Integration Points
 
@@ -772,17 +842,71 @@ Response: 200 OK
 }
 
 GET /metrics/prometheus
-# Prometheus format metrics
-normalizer_transformations_total{source="github",status="success"} 150000
-normalizer_transformation_duration_seconds{quantile="0.95"} 0.089
-normalizer_schema_cache_hits_total 280000
-normalizer_dlq_messages_total 234
+# Prometheus format metrics with exemplars
+normalizer_transformations_total{source="github",status="success",tenant="t_123"} 150000
+normalizer_transformation_duration_seconds{quantile="0.95",engine="wasm"} 0.045
+normalizer_transformation_duration_seconds{quantile="0.99",engine="wasm"} 0.089
+normalizer_schema_cache_hits_total{cache_tier="local"} 250000
+normalizer_schema_cache_hits_total{cache_tier="redis"} 28000
+normalizer_schema_cache_hits_total{cache_tier="cdn"} 2000
+normalizer_dlq_messages_total{reason="schema_mismatch"} 234
+normalizer_worker_pool_size{state="active"} 8
+normalizer_worker_pool_size{state="idle"} 2
+normalizer_wasm_compilation_duration_seconds{quantile="0.95"} 0.082
+normalizer_plugin_executions_total{plugin="date_normalizer",status="success"} 50000
 ```
 
 ## Migration & Compatibility
 
 ### Version Strategy
-- Semantic versioning for schemas
-- Backward compatible transformations
-- Migration tools for schema updates
+- Content-addressable schema IDs (SHA256)
+- Semantic versioning for API endpoints
+- Backward compatible transformations with versioned rules
+- Blue-green deployments for schema updates
 - Deprecation warnings 30 days in advance
+
+### Schema Evolution
+```http
+POST /schemas/{schemaId}/evolution
+Content-Type: application/json
+
+{
+  "changes": [
+    {"type": "add_field", "field": "department", "optional": true},
+    {"type": "rename_field", "from": "name", "to": "fullName"},
+    {"type": "change_type", "field": "age", "from": "string", "to": "number"}
+  ],
+  "migrationStrategy": "auto",  // or "manual"
+  "backfillData": false
+}
+
+Response: 200 OK
+{
+  "newSchemaId": "schema_newVersion123",
+  "migrationPlan": {
+    "compatible": true,
+    "breakingChanges": [],
+    "migrations": [
+      {"step": 1, "action": "add_optional_field", "field": "department"},
+      {"step": 2, "action": "create_alias", "from": "name", "to": "fullName"}
+    ]
+  },
+  "affectedMappings": ["map_abc", "map_xyz"],
+  "estimatedImpact": {
+    "transformationsAffected": 1250,
+    "consumersToNotify": ["service_a", "service_b"]
+  }
+}
+```
+
+## OpenAPI Specification
+
+Full OpenAPI 3.1 specification available at:
+- Development: `https://api.normalizer.dev/v1/openapi.json`
+- Production: `https://api.normalizer.app/v1/openapi.json`
+
+SDKs auto-generated for:
+- TypeScript/JavaScript (via openapi-typescript)
+- Python (via openapi-python-client)
+- Go (via oapi-codegen)
+- Rust (via openapi-generator)

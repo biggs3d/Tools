@@ -72,41 +72,130 @@ The Adaptive Data Normalizer is a foundational service that learns from API resp
 
 ## Architecture Approach
 
-Following CLAUDE.md guidelines, using **Distributed Specialist** architecture:
+Following CLAUDE.md guidelines, using **Distributed Specialist** architecture with explicit **Control Plane / Data Plane separation** for performance and security:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   API Gateway                            │
-└─────────────┬───────────────────────────┬───────────────┘
-              │                           │
-     ┌────────▼────────┐         ┌───────▼────────┐
-     │  Schema Service │         │Transform Service│
-     │                 │         │                 │
-     │ - Learn         │         │ - Single doc   │
-     │ - Store         │         │ - Streaming    │
-     │ - Version       │         │ - Batch        │
-     └────────┬────────┘         └───────┬────────┘
-              │                           │
-     ┌────────▼────────┐         ┌───────▼────────┐
-     │ Pattern Engine  │◄────────┤  Rule Engine   │
-     │                 │         │                 │
-     │ - ML models     │         │ - Transform    │
-     │ - Detectors     │         │ - Validate     │
-     └────────┬────────┘         └───────┬────────┘
-              │                           │
-     ┌────────▼───────────────────────────▼────────┐
-     │           Distributed Cache (Redis)          │
-     └──────────────────────────────────────────────┘
-              │                           │
-     ┌────────▼────────┐         ┌───────▼────────┐
-     │ Schema Store    │         │  Query Engine  │
-     │ (PostgreSQL)    │         │  (ClickHouse)  │
-     └─────────────────┘         └─────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                    CONTROL PLANE (Node.js/TypeScript)         │
+├──────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐       │
+│  │Schema Service│  │Pattern Engine│  │Schema Registry│       │
+│  │             │  │              │  │               │       │
+│  │- Learn      │  │- ML Models   │  │- Immutable IDs│       │
+│  │- Version    │  │- Offline only│  │- Governance   │       │
+│  │- Governance │  │- Suggestions │  │- Lifecycle    │       │
+│  └──────┬──────┘  └──────┬───────┘  └───────┬───────┘       │
+│         │                 │                  │                │
+│  ┌──────▼─────────────────▼──────────────────▼────────┐      │
+│  │          Control Plane Storage (PostgreSQL)         │      │
+│  └─────────────────────────────────────────────────────┘      │
+└──────────────────────────────────────────────────────────────┘
+                              │
+                    ┌─────────▼──────────┐
+                    │   Schema Cache     │
+                    │  (CDN + Redis +    │
+                    │   Local Process)   │
+                    └─────────┬──────────┘
+                              │
+┌──────────────────────────────────────────────────────────────┐
+│                    DATA PLANE (Rust/Go + WASM)                │
+├──────────────────────────────────────────────────────────────┤
+│  ┌────────────────┐  ┌─────────────────┐  ┌───────────────┐ │
+│  │Transform Workers│  │ WASM Runtime    │  │Stream Processor│ │
+│  │                │  │                 │  │               │ │
+│  │- Rust/Go core  │  │- Compiled rules │  │- Backpressure │ │
+│  │- simdjson      │  │- Sandboxed      │  │- Batching     │ │
+│  │- Zero-copy     │  │- Deterministic  │  │- Kafka/Redis  │ │
+│  └────────┬───────┘  └────────┬────────┘  └───────┬───────┘ │
+│           │                    │                    │         │
+│  ┌────────▼────────────────────▼────────────────────▼──────┐ │
+│  │              Query Federation Engine                     │ │
+│  │         (DataFusion/Arrow or Trino for complex)          │ │
+│  └──────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
 ```
+
+### Control Plane (Node.js/TypeScript)
+- Schema learning and governance
+- ML models for pattern detection (offline only)
+- API management and orchestration
+- Plugin lifecycle management
+- Monitoring and observability
+
+### Data Plane (Rust/Go + WASM)
+- High-performance transformation execution
+- WASM-compiled transformation rules
+- Stream processing with backpressure
+- Query federation and execution
+- Minimal latency, maximum throughput
 
 ## Key Design Decisions
 
-### 1. Plugin Architecture for Formats
+### 1. Compiled Transformation Architecture
+
+**Core Principle**: All transformations compile to WASM for safety and performance.
+
+```typescript
+// Transformation Compiler (Control Plane)
+class TransformationCompiler {
+  async compileToWASM(rules: TransformRule[]): Promise<WASMModule> {
+    // Generate Rust code from rules
+    const rustCode = this.generateRustCode(rules);
+    
+    // Compile to WASM with wasm-pack
+    const wasmModule = await this.compileRust(rustCode, {
+      optimizationLevel: 3,
+      simd: true,
+      bulkMemory: true
+    });
+    
+    // Sign the module for verification
+    const signedModule = await this.signModule(wasmModule);
+    
+    return signedModule;
+  }
+  
+  private generateRustCode(rules: TransformRule[]): string {
+    return `
+      use serde_json::Value;
+      use chrono::DateTime;
+      
+      #[no_mangle]
+      pub extern "C" fn transform(input: &[u8]) -> Vec<u8> {
+        // Fast JSON parsing with simd-json
+        let data: Value = simd_json::from_slice(input).unwrap();
+        
+        // Apply compiled transformation rules
+        ${this.generateTransformCode(rules)}
+        
+        // Serialize result
+        simd_json::to_vec(&result).unwrap()
+      }
+    `;
+  }
+}
+
+// Runtime Executor (Data Plane)
+class WASMTransformExecutor {
+  private runtime: Wasmtime.Engine;
+  private compiledTransforms: Map<string, WASMInstance>;
+  
+  async execute(data: Buffer, transformId: string): Promise<Buffer> {
+    const instance = this.compiledTransforms.get(transformId);
+    if (!instance) {
+      throw new Error('Transform not found or not compiled');
+    }
+    
+    // Execute in sandboxed WASM environment
+    // No access to filesystem, network, or system calls
+    const result = await instance.call('transform', data);
+    
+    return result;
+  }
+}
+```
+
+### 2. Plugin Architecture for Formats
 
 Each data format/pattern is a plugin:
 
@@ -149,9 +238,11 @@ class DateFormatPlugin implements FormatPlugin {
 }
 ```
 
-### 2. Schema Learning Pipeline
+### 3. Schema Learning Pipeline (Control Plane Only)
 
-Multi-stage learning process:
+**Important**: ML and pattern learning run ONLY in the control plane, never in the data path.
+
+Multi-stage learning process with incremental Bayesian updates:
 
 ```typescript
 class SchemaLearner {
@@ -192,100 +283,158 @@ class SchemaLearner {
       tree.addSample(sample);
     }
     
-    return tree.getCommonStructure();
+    // Incremental Bayesian learning for confidence
+    const bayesianEstimator = new BayesianTypeEstimator();
+    const structure = tree.getCommonStructure();
+    
+    // Update confidence with Bayesian inference
+    for (const field of structure.fields) {
+      field.typeProb = bayesianEstimator.updateProbability(
+        field.observedTypes,
+        samples.length
+      );
+      field.nullProb = bayesianEstimator.updateNullability(
+        field.nullCount,
+        samples.length
+      );
+    }
+    
+    return structure;
   }
 }
 ```
 
-### 3. Transformation Engine
+### 4. High-Performance Transformation Engine
 
-Rule-based with ML fallback:
+Compiled transformations with zero ML in hot path:
 
 ```typescript
 class TransformationEngine {
+  private compiledTransforms: Map<string, WASMModule>;
+  private rustWorkerPool: WorkerPool; // Rust workers for CPU-intensive ops
+  
   async transform(
-    data: unknown,
-    sourceSchema: Schema,
-    targetSchema: Schema,
+    data: Buffer,
+    transformId: string,
     options?: TransformOptions
   ): Promise<TransformResult> {
-    // Try direct mapping first
-    const directMapping = this.findDirectMapping(sourceSchema, targetSchema);
-    if (directMapping) {
-      return this.applyMapping(data, directMapping);
+    // Get pre-compiled WASM transformation
+    const wasmModule = this.compiledTransforms.get(transformId);
+    if (!wasmModule) {
+      throw new Error(`Transform ${transformId} not compiled`);
     }
     
-    // Try learned transformations
-    const learnedRules = await this.getLearnedRules(sourceSchema, targetSchema);
-    if (learnedRules.confidence > 0.8) {
-      return this.applyRules(data, learnedRules);
+    // Execute in Rust worker for maximum performance
+    const worker = await this.rustWorkerPool.acquire();
+    try {
+      const result = await worker.execute({
+        module: wasmModule,
+        data,
+        options: {
+          streaming: options?.streaming || false,
+          validateOutput: options?.validate || true
+        }
+      });
+      
+      return {
+        transformed: result.data,
+        metrics: {
+          executionTime: result.duration,
+          bytesProcessed: data.length,
+          throughput: data.length / result.duration
+        }
+      };
+    } finally {
+      this.rustWorkerPool.release(worker);
     }
-    
-    // Fall back to ML-based transformation
-    return this.mlTransform(data, sourceSchema, targetSchema);
   }
   
-  private async mlTransform(
-    data: unknown,
-    source: Schema,
-    target: Schema
-  ): Promise<TransformResult> {
-    // Use embeddings to find semantic similarity
-    const sourceEmbeddings = await this.embed(source);
-    const targetEmbeddings = await this.embed(target);
-    
-    // Generate transformation based on embedding similarity
-    const transformation = await this.generateTransformation(
-      sourceEmbeddings,
-      targetEmbeddings
+  // ML suggestions happen offline in control plane
+  async suggestTransformation(
+    sourceSchema: Schema,
+    targetSchema: Schema
+  ): Promise<TransformSuggestion> {
+    // This runs in control plane only, not in data path
+    const analyzer = new SchemaAnalyzer();
+    const suggestions = await analyzer.findMappings(
+      sourceSchema,
+      targetSchema
     );
     
-    return this.applyTransformation(data, transformation);
-  }
-}
-```
-
-### 4. Unified Query Engine
-
-Cross-source query compilation:
-
-```typescript
-class UnifiedQueryEngine {
-  async query(sql: string, sources: DataSource[]): Promise<QueryResult> {
-    // Parse SQL into AST
-    const ast = this.parseSQL(sql);
-    
-    // Optimize query plan
-    const plan = this.optimizePlan(ast, sources);
-    
-    // Execute in parallel where possible
-    const subResults = await Promise.all(
-      plan.subQueries.map(sq => this.executeSubQuery(sq))
-    );
-    
-    // Merge results
-    return this.mergeResults(subResults, plan.mergeStrategy);
-  }
-  
-  private optimizePlan(ast: AST, sources: DataSource[]): QueryPlan {
-    // Determine which sources can handle which parts
-    const capabilities = sources.map(s => s.getCapabilities());
-    
-    // Push down filters and projections
-    const optimized = this.pushDown(ast, capabilities);
-    
-    // Identify parallelizable operations
-    const parallel = this.findParallelOps(optimized);
-    
+    // Human review required before compilation
     return {
-      subQueries: this.generateSubQueries(optimized, sources),
-      mergeStrategy: this.determineMergeStrategy(parallel)
+      suggestions,
+      requiresReview: true,
+      confidence: suggestions.confidence
     };
   }
 }
 ```
 
-### 5. LLM Optimization
+### 5. Query Federation Engine
+
+Leveraging DataFusion for distributed query execution:
+
+```typescript
+import { DataFusion } from 'datafusion-node';
+import { ArrowTable } from 'apache-arrow';
+
+class QueryFederationEngine {
+  private datafusion: DataFusion;
+  private queryPlanner: QueryPlanner;
+  
+  constructor() {
+    this.datafusion = new DataFusion();
+    this.queryPlanner = new SubstraitPlanner(); // For complex queries
+  }
+  
+  async query(sql: string, sources: DataSource[]): Promise<QueryResult> {
+    // For simple queries, use direct execution
+    if (this.isSimpleQuery(sql)) {
+      return this.executeSimple(sql, sources[0]);
+    }
+    
+    // For complex queries, use DataFusion
+    const ctx = this.datafusion.createContext();
+    
+    // Register data sources as Arrow tables
+    for (const source of sources) {
+      const arrowTable = await this.sourceToArrow(source);
+      ctx.registerTable(source.name, arrowTable);
+    }
+    
+    // Parse and optimize with DataFusion's query planner
+    const logicalPlan = await ctx.sql(sql);
+    const physicalPlan = await ctx.createPhysicalPlan(logicalPlan);
+    
+    // Execute with pushdown optimizations
+    const result = await ctx.execute(physicalPlan);
+    
+    return this.arrowToResult(result);
+  }
+  
+  private async sourceToArrow(source: DataSource): Promise<ArrowTable> {
+    // Convert source data to Arrow columnar format
+    // This enables vectorized operations and zero-copy
+    const schema = await source.getSchema();
+    const data = await source.getData({
+      format: 'arrow',
+      pushdownFilters: this.queryPlanner.getFilters()
+    });
+    
+    return ArrowTable.from(data);
+  }
+  
+  private isSimpleQuery(sql: string): boolean {
+    // Simple SELECT from single source
+    return /^SELECT .+ FROM \w+ WHERE .+$/i.test(sql) &&
+           !sql.includes('JOIN') &&
+           !sql.includes('GROUP BY');
+  }
+}
+```
+
+### 6. LLM Format Optimization
 
 Format data for AI consumption:
 
@@ -480,28 +629,38 @@ class AnomalyDetector {
 ## Development Phases
 
 ### Phase 1: Core Transformation (MVP)
-- Basic JSON transformation
-- Simple pattern detection
-- Manual mapping creation
-- REST API
+- Basic JSON transformation with Rust/Go workers
+- WASM compilation for simple rules
+- Manual mapping creation with validation
+- REST API with OpenAPI spec
+- Two-tier caching (Redis + local)
 
-### Phase 2: Learning Engine
-- ML-based pattern recognition
-- Auto-generate mappings
-- Confidence scoring
-- Type generation (TypeScript, Python)
+### Phase 2: Security & Performance
+- Full WASI plugin sandbox
+- Plugin signing and registry
+- Schema registry with immutable IDs
+- Compiled transformations for all rules
+- Performance benchmarks (10k msg/sec target)
 
-### Phase 3: Streaming & Scale
-- Real-time stream processing
-- Distributed transformation
-- Advanced caching
+### Phase 3: Learning & Governance
+- ML-based pattern recognition (offline only)
+- Schema governance workflows
+- Incremental Bayesian learning
+- Type generation (TypeScript, Python, Zod)
+- Dead letter queue with replay
+
+### Phase 4: Scale & Federation
+- DataFusion query engine integration
+- Stream processing with backpressure
+- Multi-tier caching with CDN
 - GraphQL interface
+- Binary format support (Arrow, Parquet)
 
-### Phase 4: Intelligence Layer
-- Anomaly detection
-- Self-improving transformations
+### Phase 5: Intelligence Layer
+- Anomaly detection with drift alerts
+- LLM-assisted mapping suggestions (human review required)
 - Cost optimization
-- Natural language mapping creation
+- Cross-source query federation
 
 ## Testing Strategy
 
@@ -610,30 +769,78 @@ class InputValidator {
 }
 ```
 
-#### Plugin Sandboxing
+#### Plugin Sandboxing with WASI
 ```typescript
-import { VM } from 'vm2';  // Secure VM for untrusted code
+import { WASI } from '@wasmer/wasi';
+import { lowerI64Imports } from '@wasmer/wasm-transformer';
 
 class PluginSandbox {
-  async executePlugin(pluginCode: string, data: any): Promise<any> {
-    const vm = new VM({
-      timeout: 1000,
-      sandbox: {
-        data,
-        console: {
-          log: (...args) => this.logSecurely(args)
-        }
-        // No access to require, process, __dirname, etc.
+  private wasiEnv: WASI;
+  
+  constructor() {
+    // Initialize WASI with minimal capabilities
+    this.wasiEnv = new WASI({
+      args: [],
+      env: {},
+      bindings: {
+        // Only allow specific, safe bindings
+        ...this.getSafeBindings()
+      },
+      preopens: {} // No filesystem access
+    });
+  }
+  
+  async executePlugin(wasmModule: WebAssembly.Module, data: any): Promise<any> {
+    // Create isolated instance with resource limits
+    const instance = await WebAssembly.instantiate(wasmModule, {
+      wasi_snapshot_preview1: this.wasiEnv.wasiImport,
+      env: {
+        memory: new WebAssembly.Memory({
+          initial: 1, // 64KB pages
+          maximum: 10, // Max 640KB
+          shared: false
+        })
       }
     });
     
-    return vm.run(pluginCode);
+    // Set execution timeout
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Plugin timeout')), 1000)
+    );
+    
+    // Execute with timeout
+    return Promise.race([
+      instance.exports.transform(data),
+      timeoutPromise
+    ]);
   }
   
-  private logSecurely(args: any[]): void {
-    // Redact sensitive data before logging
-    const sanitized = this.redactPII(args);
-    console.log('[Plugin]', ...sanitized);
+  private getSafeBindings() {
+    return {
+      // Whitelist only safe operations
+      log: (msg: string) => this.logSecurely(msg),
+      now: () => Date.now(),
+      random: () => Math.random()
+      // No fs, network, process access
+    };
+  }
+}
+
+// Plugin verification and signing
+class PluginRegistry {
+  private trustedKeys: Set<string>;
+  
+  async verifyAndLoad(pluginPath: string): Promise<WebAssembly.Module> {
+    const pluginData = await fs.readFile(pluginPath);
+    const signature = await fs.readFile(`${pluginPath}.sig`);
+    
+    // Verify signature
+    if (!await this.verifySignature(pluginData, signature)) {
+      throw new Error('Invalid plugin signature');
+    }
+    
+    // Compile with safety checks
+    return WebAssembly.compile(pluginData);
   }
 }
 ```
