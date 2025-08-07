@@ -1,0 +1,91 @@
+{
+  "created": "2025-08-07T15:33:50.901916",
+  "npcs": {
+    "Garrett Ironside": {
+      "disposition": 90,
+      "relationship": "Devoted Ally",
+      "faction": "Merchants",
+      "notes": [
+        "Fought together against Howling Scars",
+        "Ex-Captain, Third Legion",
+        "Planning Scarred Wolves raid together",
+        "Rediscovered his combat spirit through Steve"
+      ],
+      "last_interaction": "Cleared bandit camp together",
+      "history": [
+        {
+          "timestamp": "2025-08-07T15:33:50.902790",
+          "change": 5,
+          "reason": "Successful mission together",
+          "new_disposition": 90
+        }
+      ]
+    },
+    "Kaya": {
+      "disposition": 75,
+      "relationship": "Mysterious Guide",
+      "faction": "Unknown",
+      "notes": [
+        "Golden eyes, appears/disappears at will",
+        "Tutorial guide, knows about the Convergence",
+        "Has memory crystal of Steve's fights",
+        "Seems amused by Steve's speedrun approach",
+        "Spanish phrases suggest cultural connection"
+      ],
+      "last_interaction": "Watched bandit camp clearing",
+      "history": []
+    },
+    "Melody": {
+      "disposition": 60,
+      "relationship": "Fan",
+      "faction": "Civilians",
+      "notes": [
+        "Merchant's daughter",
+        "Got Steve's autograph",
+        "Part of growing fanbase"
+      ],
+      "last_interaction": "Autograph at Threshold Station",
+      "history": []
+    },
+    "Razorback Leader": {
+      "disposition": -100,
+      "relationship": "Deceased Enemy",
+      "faction": "Howling Scars",
+      "notes": [
+        "Level 6 bandit leader",
+        "Killed by Steve and Garrett",
+        "Had intel on Scarred Wolves"
+      ],
+      "last_interaction": "Killed in combat",
+      "history": []
+    }
+  },
+  "factions": {
+    "Merchants Guild": {
+      "standing": 25,
+      "reason": "Eliminated major bandit threat",
+      "updated": "2025-08-07T15:33:50.902380"
+    },
+    "Howling Scars": {
+      "standing": -100,
+      "reason": "Eliminated entire gang",
+      "updated": "2025-08-07T15:33:50.902485"
+    },
+    "Scarred Wolves": {
+      "standing": -10,
+      "reason": "Unknown but will learn soon",
+      "updated": "2025-08-07T15:33:50.902580"
+    },
+    "Ironhold Guard": {
+      "standing": 15,
+      "reason": "Cleared road threats",
+      "updated": "2025-08-07T15:33:50.902674"
+    }
+  },
+  "reputation": {
+    "ironhold": 0,
+    "merchants_guild": 0,
+    "adventurers_hall": 0,
+    "underworld": 0
+  }
+}

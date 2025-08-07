@@ -1,102 +1,109 @@
 # Next Session Guide
 
 ## Quick Continuity Checklist
-- [ ] Read this file first for context
+- [x] Read this file first for context
 - [ ] Check `session/narrative/current_scene.md` for exact position
 - [ ] Review `session/narrative/threads.md` for active plots
 - [ ] Load character state with `python3 system/game_engine.py status`
 - [ ] Check `session/world/relationships.json` for NPC attitudes
 
 ## Last Session Summary
-**Date**: [Session date]  
-**Duration**: [How long played]  
+**Date**: Session 1 - The Speedrun Begins  
+**Duration**: ~1 hour in-world, Level 1→4  
 **Major Events**:
-- [Key event 1]
-- [Key event 2]
-- [Key event 3]
+- Isekai'd from coffee shop to game world via "Convergence"
+- Selected Berserker class, defeated Threshold Beast in record time
+- Eliminated entire Howling Scars bandit gang with Garrett
+- Achieved Level 4 in first hour (world record pace)
 
 ## Current Situation
-**Location**: [Where the character is]  
-**Immediate Context**: [What just happened]  
-**Tension Point**: [Current danger/decision/mystery]
+**Location**: Ironhold City Gates, just arrived with caravan  
+**Immediate Context**: Standing at gates covered in blood, guards nervous but impressed  
+**Tension Point**: Need clothes urgently, bounties to collect, city to explore
 
 ## Character Status
 **Mechanical State**:
-- HP: [current]/[max]
-- MP: [current]/[max]  
-- Stamina: [current]/[max]
-- Notable conditions: [poisoned/blessed/exhausted/etc.]
+- HP: 110/180 (61% - wounded but stable)
+- MP: 30/30  
+- Stamina: 61/130
+- Notable conditions: Clothes destroyed, covered in dried blood
 
 **Inventory Changes**:
-- Gained: [New items]
-- Lost: [Used/lost items]
-- Key items: [Important possessions]
+- Gained: 196 gold, 9 bandit ear pairs, rage elixir, healing supplies
+- Lost: Coffee shop clothes (destroyed)
+- Key items: Greataxe of First Blood, damaged leather armor
 
 ## Active Narrative Threads
 ### Main Quest
-**Thread**: [Primary storyline]  
-**Current Objective**: [What player is trying to do]  
-**Next Step**: [Immediate goal]
+**Thread**: Establishing reputation in new world  
+**Current Objective**: Get paid, equipped, and registered as adventurer  
+**Next Step**: Visit Merchants' Guild for bounties
 
 ### Side Threads
-1. **[Thread Name]**: [Status and next development]
-2. **[Thread Name]**: [Status and next development]
+1. **Scarred Wolves Raid**: Garrett organizing assault on 40+ bandits, wants Steve involved
+2. **Kaya's Mystery**: Golden-eyed guide appears/disappears, recording Steve's exploits
+3. **The Convergence**: Why was Steve pulled into this world?
 
 ### Unresolved Mysteries
-- [Question 1 that needs answering]
-- [Question 2 that needs answering]
+- What is Kaya really? Why is she helping Steve specifically?
+- Are there other isekai'd people like Steve?
+- What caused the "Convergence" that brought him here?
 
 ## NPCs to Remember
 ### Recently Met
-- **[Name]**: [Role] - [Disposition] - [What they want]
+- **Garrett**: Level 4 ex-Captain - Friendly - Wants to raid Scarred Wolves together
+- **Kaya**: Mysterious guide - Helpful/Amused - Has memory crystal of fights
 
 ### Expecting Return
-- **[Name]**: [Why they're waiting] - [What happens if player doesn't return]
+- **Merchants' Guild**: Owes 330g+ in various bounties
+- **Ironhold Guards**: Will spread word of Howling Scars elimination
 
 ### Active Antagonists
-- **[Name/Group]**: [Their current plan] - [Next move]
+- **Scarred Wolves**: Main bandit force - Unaware their subsidiary gang is dead - 40+ members
 
 ## World State Changes
-**Time Passed**: [How much time in-world]  
-**Environmental**: [Weather, season, time of day]  
-**Political/Social**: [Town events, faction movements]  
-**Consequences Pending**: [Results of player actions still rippling]
+**Time Passed**: Morning to near-noon  
+**Environmental**: Clear day, good road conditions  
+**Political/Social**: Roads temporarily safer, bandit threat reduced  
+**Consequences Pending**: Scarred Wolves will learn about Howling Scars elimination
 
 ## DM Notes for Next Session
 ### Prepared Encounters
-- If player goes to [Location]: [What happens]
-- If player pursues [Thread]: [Development ready]
+- If player goes to Merchants' Guild: Big payday, reputation boost, job offers
+- If player goes to equipment shop: Friendly merchant, berserker-appropriate gear available
+- If player goes to inn first: Overhears rumors about their exploits already spreading
 
 ### Potential Complications
-- [Thing that could go wrong]
-- [Twist that could emerge]
+- Other adventurers jealous of rapid advancement
+- Scarred Wolves might send assassins once they learn
+- Noble might try to hire/control the "Immediate"
 
 ### Rewards Ready
-- For completing [Task]: [Reward]
-- Hidden discovery at [Location]: [Secret]
+- For bounty collection: 330g minimum plus reputation
+- Hidden discovery at Adventurers' Hall: Special berserker trainer interested in Steve
 
 ## Opening Options for Next Session
 
 ### Option A: Continue Immediately
-"[Opening line that drops player right back into the action...]"
+"The guard's eyes widen as he recognizes the Razorback tattoos on the ears you're carrying. 'By the gods... you're the one? The whole gatehouse is talking about it - someone said a Level 3 wiped out the Howling Scars!' Behind you, Garrett chuckles..."
 
 ### Option B: Short Time Skip
-"[Opening that advances time slightly, like waking up the next morning...]"
+"You wake in the Drunken Griffin Inn, finally clean, bandaged, and in fresh clothes. The events of yesterday feel like a fever dream - except for the Level 4 tag floating above your head and the 500+ gold in your purse. Garrett knocks on your door..."
 
 ### Option C: Scene Transition
-"[Opening that moves to a new location or situation based on last choice...]"
+"The Merchants' Guild erupts in chaos as you dump nine pairs of tattooed ears on the marble counter. 'THAT'S the Howling Scars lieutenant!' someone shouts. The guild master himself emerges from his office..."
 
 ## Important Reminders
-- **Tone**: [Maintain this narrative tone]
-- **Player Preferences**: [What they've expressed enjoying]
-- **Avoid**: [Things player hasn't enjoyed]
-- **Emphasize**: [Elements player has engaged with]
+- **Tone**: Fast-paced, visceral combat, humor through culture shock
+- **Player Preferences**: Physics-based creative combat, speedrun mentality
+- **Avoid**: Slow grinding, excessive downtime
+- **Emphasize**: Reputation building, Steve's coffee shop → berserker contrast
 
 ## Technical Notes
-- Last checkpoint: [When saved]
-- Files to update: [Which tracking files need attention]
-- Flags to check: `python3 system/game_engine.py flag --get "[flag_name]"`
+- Last checkpoint: After bandit camp clear
+- Files to update: session_log.md, character_sheet.md, current_scene.md
+- Flags to check: `python3 system/game_engine.py flag --get "howling_scars_defeated"`
 
 ---
 
-**For Claude**: When resuming, provide a "Previously on..." recap, then continue from the Current Situation above. Maintain all narrative threads and honor the world state changes. The player should feel like no time has passed for them, even if time has passed in the world.
+**For Claude**: When resuming, provide a "Previously on..." recap, then continue from the Current Situation above. Steve is at Ironhold's gates with Garrett, ready to collect bounties and explore the city. Maintain the fast pacing and Steve's mix of coffee shop normalcy with berserker instincts.
