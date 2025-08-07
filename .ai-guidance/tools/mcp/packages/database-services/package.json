@@ -1,0 +1,75 @@
+{
+  "name": "@mcp/database-services",
+  "version": "0.0.2",
+  "description": "Database abstraction layer providing a unified interface for multiple database providers",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
+    }
+  },
+  "author": "Steve Biggs",
+  "repository": {
+    "type": "git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.846.0",
+    "dotenv": "^17.2.0",
+    "simple-git": "^3.28.0",
+    "uuid": "*"
+  },
+  "devDependencies": {
+    "@types/mongodb": "*",
+    "@types/node": "*",
+    "@types/sqlite3": "*",
+    "@types/uuid": "*",
+    "mongodb-memory-server": "*",
+    "typescript": "*",
+    "vitest": "*"
+  },
+  "peerDependencies": {
+    "mongodb": "^6.16.0"
+  },
+  "peerDependenciesMeta": {
+    "mongodb": {
+      "optional": true
+    },
+    "sqlite3": {
+      "optional": true
+    },
+    "simple-git": {
+      "optional": true
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "IMPLEMENTATION.md"
+  ],
+  "keywords": [
+    "database",
+    "abstraction",
+    "interface",
+    "provider",
+    "persistence",
+    "memory-services"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "optionalDependencies": {
+    "sqlite3": "^5.1.7"
+  }
+}

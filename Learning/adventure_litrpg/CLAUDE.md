@@ -46,15 +46,29 @@ When starting a new session or initializing the system:
 ```
 adventure_litrpg/
 ├── system/                # Core rules (DO NOT MODIFY during play)
+│   ├── game_engine.py    # Main engine
+│   ├── session_logger.py # Automatic narrative capture
+│   ├── progression_tracker.py # Stat/skill tracking
+│   ├── npc_matrix.py     # NPC relationship system
+│   └── update_stats.py   # Stats helper script
 ├── content/               # World databases (bestiary, items, spells, etc.)
 ├── prompts/               # Narrative templates and guidelines
 ├── session/               # Active game state (create if missing)
-│   ├── state/            # Mechanical state (game_state.json)
+│   ├── state/            # ALL game state files go here
+│   │   ├── game_state.json     # Primary state file
+│   │   ├── progression_history.json # Level/stat history
+│   │   └── skills_tracking.json # Skill progression
 │   ├── narrative/        # Story tracking files
+│   ├── chapters/         # Session logs as novel chapters
+│   ├── combat_replays/   # Visceral combat recordings
 │   ├── world/            # World state and relationships
-│   └── meta/             # Player preferences
+│   │   └── npc_relationships.json # NPC disposition matrix
+│   ├── meta/             # Player preferences
+│   └── PLAYER_NOTES.md   # Player's personal guide
 └── archives/             # Completed adventure backups
 ```
+
+**IMPORTANT**: All state files MUST be saved in `session/state/` directory, not in a root-level `state/` directory. This prevents duplicate files and confusion.
 
 ## Session Management Protocol
 
@@ -107,8 +121,35 @@ Then narrate success/failure dramatically
 2. Update `NEXT_SESSION.md` with continuity notes for next time
 3. Update `session/narrative/CHARACTER_SHEET.md` with current status
 4. Update narrative files with session summary
-5. Note unresolved threads for next time
-6. Archive if campaign complete
+5. Save session as chapter using session_logger.py
+6. Update NPC relationships with npc_matrix.py
+7. Note unresolved threads for next time
+8. Archive if campaign complete
+
+### New Helper Tools
+
+**Session Logger** (`system/session_logger.py`):
+- Automatically captures combat in visceral detail
+- Saves sessions as readable novel chapters
+- Creates combat replay files for epic moments
+- Usage: Import and use throughout session for automatic narrative capture
+
+**Progression Tracker** (`system/progression_tracker.py`):
+- Tracks all stat changes and level ups
+- Visualizes character growth with ASCII charts
+- Records skill acquisitions and upgrades
+- Run to see current progression status
+
+**NPC Matrix** (`system/npc_matrix.py`):
+- Tracks all NPC relationships (-100 to +100 disposition)
+- Predicts NPC reactions based on history
+- Manages faction standings
+- Shows allies/enemies at a glance
+
+**Stats Updater** (`system/update_stats.py`):
+- Quick script to properly update all stat files
+- Ensures consistency across game_state.json
+- Run after major stat changes
 
 ## Narrative Guidelines
 
@@ -351,6 +392,22 @@ When running sessions, be aware of these resources:
 - **`session/narrative/CHARACTER_SHEET.md`**: Maintain this as the authoritative character record
 - **`session/narrative/character_background.md`**: May contain player-provided backstory from quickstart
 - **`content/` directory**: Optional reference content (use as inspiration, not restriction)
+
+## System Architecture Notes (Post-Peer Review)
+
+### Critical Improvements Made (v2)
+1. **Centralized Configuration** (`system/lib/config.py`): Single source of truth for paths and constants
+2. **Singleton Pattern** for Session Logger: Prevents multiple instances losing data
+3. **Auto-save Feature**: Events persist every 10 actions to prevent data loss
+4. **Better Error Handling**: Specific exceptions with informative messages
+5. **Fixed Stat Visualization**: Proper stat mapping and dynamic scaling for high-level characters
+6. **Event Bus Ready**: Architecture prepared for future pub/sub system
+
+### Known Limitations to Address
+- No integration with game_engine.py yet (tools operate independently)
+- Manual sync required between different state files
+- Consider implementing transaction-safe writes for JSON files
+- Physics-based combat still narrative-only (no mechanical support)
 
 ## Final Reminder
 

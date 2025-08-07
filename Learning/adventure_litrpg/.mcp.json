@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "llm-bridges": {
+      "command": "node",
+      "args": [
+        "/Users/sbiggs/Development/D-Drive/Tools/mcp/llm_bridges/index.js"
+      ],
+      "cwd": "/Users/sbiggs/Development/D-Drive/Tools/mcp/llm_bridges"
+    }
+  }
+}
