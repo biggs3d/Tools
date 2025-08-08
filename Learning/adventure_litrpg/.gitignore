@@ -1,9 +1,9 @@
 # Active session data (personal games)
-session/state/*.json
-session/narrative/session_log.md
-session/narrative/current_scene.md
-session/world/relationships.json
-session/meta/notes.md
+#session/state/*.json
+#session/narrative/session_log.md
+#session/narrative/current_scene.md
+#session/world/relationships.json
+#session/meta/notes.md
 
 # But keep the structure with .gitkeep files
 !session/**/.gitkeep

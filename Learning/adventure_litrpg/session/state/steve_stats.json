@@ -1,0 +1,59 @@
+{
+  "name": "Steve",
+  "class": "berserker",
+  "level": 4,
+  "hp": 110,
+  "hp_max": 180,
+  "mp": 30,
+  "mp_max": 30,
+  "stamina": 61,
+  "stamina_max": 130,
+  "xp": 315,
+  "xp_to_next": 337,
+  "gold": 196,
+  "strength": 18,
+  "dexterity": 17,
+  "constitution": 16,
+  "intelligence": 11,
+  "wisdom": 11,
+  "charisma": 10,
+  "equipment": {
+    "weapon": "Greataxe of First Blood (1d12)",
+    "armor": "Leather Armor (+2)",
+    "accessory": null
+  },
+  "inventory": [
+    "Healing Potion x2",
+    "Stamina Draught x1",
+    "Rage Elixir x1",
+    "Antidote x1",
+    "Bandit Ears x9 pairs",
+    "Brute's Eye Patch",
+    "Leader's Insignia"
+  ],
+  "skills": [
+    "Intimidating Presence\u2605\u2605 (can convert enemies)",
+    "Rampage (3x speed below 50% HP)",
+    "Berserker's Recovery (2 HP/turn in combat)",
+    "Unstoppable (immunity once per battle)"
+  ],
+  "titles": [
+    "The Immediate",
+    "Threshold Slayer"
+  ],
+  "achievements": [
+    "First Blood - Killed Threshold Beast <60 seconds",
+    "Speed Runner - Level 4 in first hour",
+    "Bandit's Bane - Eliminated Howling Scars gang"
+  ],
+  "current_area": "ironhold",
+  "active_effects": [],
+  "rage_meter": 0,
+  "flags": {
+    "tutorial_complete": true,
+    "threshold_beast_killed": true,
+    "howling_scars_defeated": true,
+    "garrett_allied": true,
+    "kaya_introduced": true
+  }
+}

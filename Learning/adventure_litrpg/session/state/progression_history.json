@@ -1,0 +1,149 @@
+{
+  "created": "2025-08-07T15:32:33.678882",
+  "checkpoints": [
+    {
+      "timestamp": "2025-08-07T15:32:33.678895",
+      "level": 1,
+      "stats": {
+        "strength": 14,
+        "dexterity": 12,
+        "constitution": 14,
+        "intelligence": 10,
+        "wisdom": 11,
+        "charisma": 10
+      },
+      "skills": [],
+      "narrative": "Fresh from the coffee shop, newly minted berserker"
+    },
+    {
+      "timestamp": "2025-08-07T15:32:33.679150",
+      "level": 3,
+      "stats": {
+        "strength": 16,
+        "dexterity": 15,
+        "constitution": 15,
+        "intelligence": 10,
+        "wisdom": 11,
+        "charisma": 10
+      },
+      "skills": [
+        "Rampage",
+        "Intimidating Presence"
+      ],
+      "narrative": "Defeated Threshold Beast in record time"
+    },
+    {
+      "timestamp": "2025-08-07T15:32:33.679316",
+      "level": 4,
+      "stats": {
+        "strength": 18,
+        "dexterity": 17,
+        "constitution": 16,
+        "intelligence": 11,
+        "wisdom": 11,
+        "charisma": 10
+      },
+      "skills": [
+        "Rampage",
+        "Intimidating Presence\u2605\u2605",
+        "Berserker's Recovery",
+        "Unstoppable"
+      ],
+      "narrative": "Eliminated Howling Scars gang, arrived at Ironhold"
+    },
+    {
+      "timestamp": "2025-08-07T15:45:04.347208",
+      "level": 1,
+      "stats": {
+        "strength": 14,
+        "dexterity": 12,
+        "constitution": 14,
+        "intelligence": 10,
+        "wisdom": 11,
+        "charisma": 10
+      },
+      "skills": [],
+      "narrative": "Fresh from the coffee shop, newly minted berserker"
+    },
+    {
+      "timestamp": "2025-08-07T15:45:04.347534",
+      "level": 3,
+      "stats": {
+        "strength": 16,
+        "dexterity": 15,
+        "constitution": 15,
+        "intelligence": 10,
+        "wisdom": 11,
+        "charisma": 10
+      },
+      "skills": [
+        "Rampage",
+        "Intimidating Presence"
+      ],
+      "narrative": "Defeated Threshold Beast in record time"
+    },
+    {
+      "timestamp": "2025-08-07T15:45:04.347743",
+      "level": 4,
+      "stats": {
+        "strength": 18,
+        "dexterity": 17,
+        "constitution": 16,
+        "intelligence": 11,
+        "wisdom": 11,
+        "charisma": 10
+      },
+      "skills": [
+        "Rampage",
+        "Intimidating Presence\u2605\u2605",
+        "Berserker's Recovery",
+        "Unstoppable"
+      ],
+      "narrative": "Eliminated Howling Scars gang, arrived at Ironhold"
+    }
+  ],
+  "stat_history": [],
+  "skill_history": [],
+  "achievements": [
+    {
+      "timestamp": "2025-08-07T15:32:33.679465",
+      "title": "Speed Demon",
+      "description": "Reached Level 3 in under 5 minutes"
+    },
+    {
+      "timestamp": "2025-08-07T15:32:33.679616",
+      "title": "Threshold Slayer",
+      "description": "+10% damage vs higher level enemies"
+    },
+    {
+      "timestamp": "2025-08-07T15:32:33.679768",
+      "title": "The Immediate",
+      "description": "Earned legendary title in first combat"
+    },
+    {
+      "timestamp": "2025-08-07T15:32:33.679948",
+      "title": "Bandit's Bane",
+      "description": "Eliminated entire Howling Scars gang"
+    },
+    {
+      "timestamp": "2025-08-07T15:45:04.347938",
+      "title": "Speed Demon",
+      "description": "Reached Level 3 in under 5 minutes"
+    },
+    {
+      "timestamp": "2025-08-07T15:45:04.348134",
+      "title": "Threshold Slayer",
+      "description": "+10% damage vs higher level enemies"
+    },
+    {
+      "timestamp": "2025-08-07T15:45:04.348329",
+      "title": "The Immediate",
+      "description": "Earned legendary title in first combat"
+    },
+    {
+      "timestamp": "2025-08-07T15:45:04.348556",
+      "title": "Bandit's Bane",
+      "description": "Eliminated entire Howling Scars gang"
+    }
+  ]
+}

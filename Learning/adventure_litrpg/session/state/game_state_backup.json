@@ -1,0 +1,39 @@
+{
+  "character": {
+    "name": "Steve",
+    "class": "warrior",
+    "level": 4,
+    "xp": 315,
+    "xp_next": 337,
+    "hp": 156,
+    "hp_max": 156,
+    "mp": 39,
+    "mp_max": 39,
+    "stamina": 124,
+    "stamina_max": 124,
+    "strength": 16,
+    "dexterity": 12,
+    "intelligence": 8,
+    "constitution": 14,
+    "wisdom": 10,
+    "charisma": 10,
+    "damage_bonus": 5,
+    "armor": 0,
+    "crit_chance": 0.05,
+    "dodge_chance": 0.12,
+    "gold": 196,
+    "inventory": [],
+    "equipment": {
+      "weapon": "greataxe",
+      "armor": "leather",
+      "accessory": null
+    },
+    "skill_points": 3,
+    "stat_points": 6
+  },
+  "status_effects": {},
+  "current_area": "darkwood_forest",
+  "flags": {},
+  "kills": 0,
+  "session_start": "2025-08-07T11:40:02.157673"
+}

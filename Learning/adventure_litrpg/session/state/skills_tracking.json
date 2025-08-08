@@ -1,0 +1,62 @@
+{
+  "berserker": {
+    "available": [
+      {
+        "name": "Bloodlust",
+        "rank": 0,
+        "max_rank": 5,
+        "description": "Each kill +5% damage per rank"
+      },
+      {
+        "name": "Rampage",
+        "rank": 1,
+        "max_rank": 3,
+        "description": "Speed multiplier when low HP"
+      },
+      {
+        "name": "Blood for Blood",
+        "rank": 0,
+        "max_rank": 1,
+        "description": "Trade HP for damage"
+      },
+      {
+        "name": "Brutal Critical",
+        "rank": 0,
+        "max_rank": 2,
+        "description": "Increased crit damage"
+      },
+      {
+        "name": "Intimidating Presence",
+        "rank": 2,
+        "max_rank": 3,
+        "description": "Fear/convert enemies"
+      },
+      {
+        "name": "Berserker's Recovery",
+        "rank": 1,
+        "max_rank": 5,
+        "description": "HP regen in combat"
+      },
+      {
+        "name": "Weapon Throw",
+        "rank": 0,
+        "max_rank": 1,
+        "description": "Ranged attack"
+      },
+      {
+        "name": "Blood Sense",
+        "rank": 0,
+        "max_rank": 1,
+        "description": "See weakpoints"
+      },
+      {
+        "name": "Unstoppable",
+        "rank": 1,
+        "max_rank": 2,
+        "description": "Immunity to control"
+      }
+    ],
+    "skill_points_spent": 5,
+    "skill_points_available": 0
+  }
+}
