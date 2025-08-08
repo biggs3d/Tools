@@ -1,11 +1,13 @@
 # Next Session Guide
 
+> **Note**: This file contains ONLY narrative continuity. For mechanical stats (HP, MP, Stamina, XP, etc.), always check `session/state/game_state.json` via `python3 system/game_engine.py status`
+
 ## Quick Continuity Checklist
-- [x] Read this file first for context
+- [x] Read this file first for narrative context
+- [ ] Load mechanical state with `python3 system/game_engine.py status`
 - [ ] Check `session/narrative/current_scene.md` for exact position
 - [ ] Review `session/narrative/threads.md` for active plots
-- [ ] Load character state with `python3 system/game_engine.py status`
-- [ ] Check `session/world/relationships.json` for NPC attitudes
+- [ ] Check `session/world/npc_relationships.json` for NPC attitudes
 
 ## Last Session Summary
 **Date**: Session 1 - The Speedrun Begins  
@@ -22,16 +24,16 @@
 **Tension Point**: Need clothes urgently, bounties to collect, city to explore
 
 ## Character Status
-**Mechanical State**:
-- HP: 110/180 (61% - wounded but stable)
-- MP: 30/30  
-- Stamina: 61/130
-- Notable conditions: Clothes destroyed, covered in dried blood
+**Narrative State**:
+- Condition: Wounded but stable after intense battle
+- Appearance: Clothes destroyed, covered in dried blood
+- Notable: Just achieved Level 4 in record time (first hour)
 
-**Inventory Changes**:
-- Gained: 196 gold, 9 bandit ear pairs, rage elixir, healing supplies
-- Lost: Coffee shop clothes (destroyed)
-- Key items: Greataxe of First Blood, damaged leather armor
+**Notable Inventory Events**:
+- Gained substantial gold and bandit ear trophies
+- Lost original coffee shop clothes (destroyed in combat)
+- Wielding the Greataxe of First Blood earned from Threshold Beast
+- Wearing damaged leather armor from bandits
 
 ## Active Narrative Threads
 ### Main Quest
@@ -99,11 +101,45 @@
 - **Avoid**: Slow grinding, excessive downtime
 - **Emphasize**: Reputation building, Steve's coffee shop → berserker contrast
 
-## Technical Notes
-- Last checkpoint: After bandit camp clear
-- Files to update: session_log.md, character_sheet.md, current_scene.md
-- Flags to check: `python3 system/game_engine.py flag --get "howling_scars_defeated"`
+## Technical Notes (Updated Session 2)
+
+### State Migration Complete
+- **Character data migrated** to nested structure (v2 format)
+- **Original equipment preserved** in `session_data` for manual conversion:
+  - Weapon: "Greataxe of First Blood (1d12)" 
+  - Armor: "Leather Armor (+2)"
+  - Inventory items need item ID conversion when ready
+- **Backups created**: `.pre_migration` files saved
+
+### System Updates Applied
+- Engine now uses `session/state/game_state.json` consistently
+- Status effects fixed (DOT damage working with dice strings)
+- Config system unified with proper deep merge
+- All tools reading nested character structure correctly
+
+### Commands to Verify State
+```bash
+# Check current status (Steve at Level 4, HP 108/180)
+python3 system/game_engine.py status
+
+# View all relationships
+python3 system/adventure_tools.py status
+
+# Check specific flags
+python3 system/game_engine.py flag --get howling_scars_defeated
+```
+
+### Files to Update Next Session
+- session_log.md - Continue narrative
+- current_scene.md - Update location/context
+- CHARACTER_SHEET.md - Reflect any changes
 
 ---
 
-**For Claude**: When resuming, provide a "Previously on..." recap, then continue from the Current Situation above. Steve is at Ironhold's gates with Garrett, ready to collect bounties and explore the city. Maintain the fast pacing and Steve's mix of coffee shop normalcy with berserker instincts.
+**For Claude**: 
+1. State is now in nested format - use `state['character']['hp']` not `state['hp']`
+2. Steve's equipment needs conversion from strings to item IDs when appropriate
+3. Status effects properly apply DOT damage and combat modifiers
+4. When resuming, provide a "Previously on..." recap, then continue from the Current Situation above
+5. Steve is at Ironhold's gates with Garrett, ready to collect bounties and explore the city
+6. Maintain the fast pacing and Steve's mix of coffee shop normalcy with berserker instincts

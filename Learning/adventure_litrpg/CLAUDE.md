@@ -46,16 +46,24 @@ When starting a new session or initializing the system:
 ```
 adventure_litrpg/
 ├── system/                # Core rules (DO NOT MODIFY during play)
-│   ├── game_engine.py    # Main engine
+│   ├── game_engine.py    # Main engine (v2 with nested character structure)
+│   ├── config.json       # Game constants and tunable parameters
+│   ├── config.py         # Path management and singleton config
+│   ├── lib/              # Utility modules
+│   │   ├── dice.py       # Dice rolling and parsing utilities
+│   │   └── content.py    # Content loader for items/spells/monsters
 │   ├── session_logger.py # Automatic narrative capture
 │   ├── progression_tracker.py # Stat/skill tracking
 │   ├── npc_matrix.py     # NPC relationship system
-│   └── update_stats.py   # Stats helper script
+│   ├── adventure_tools.py # Master control script
+│   ├── update_stats.py   # Stats helper script
+│   └── migrate_state.py  # Migration tool for old state format
 ├── content/               # World databases (bestiary, items, spells, etc.)
 ├── prompts/               # Narrative templates and guidelines
 ├── session/               # Active game state (create if missing)
 │   ├── state/            # ALL game state files go here
-│   │   ├── game_state.json     # Primary state file
+│   │   ├── game_state.json     # Primary state file (nested character structure)
+│   │   ├── *.pre_migration     # Backup files from state migration
 │   │   ├── progression_history.json # Level/stat history
 │   │   └── skills_tracking.json # Skill progression
 │   ├── narrative/        # Story tracking files
@@ -68,7 +76,11 @@ adventure_litrpg/
 └── archives/             # Completed adventure backups
 ```
 
-**IMPORTANT**: All state files MUST be saved in `session/state/` directory, not in a root-level `state/` directory. This prevents duplicate files and confusion.
+**IMPORTANT STATE STRUCTURE (v2)**: 
+- All state files use `session/state/` directory
+- `game_state.json` now uses nested character structure: `state['character']['hp']` not `state['hp']`
+- Migration tool available: `python system/migrate_state.py` for old flat format
+- All tools (adventure_tools.py, session_logger.py) updated to read nested structure
 
 ## Session Management Protocol
 
@@ -85,11 +97,16 @@ python system/game_engine.py status
 # For new games:
 python system/game_engine.py init --name "[Name]" --class "[Class]"
 
-# Track in narrative files:
-- session/narrative/current_scene.md
-- session/narrative/session_log.md
-- session/narrative/threads.md
-- session/narrative/CHARACTER_SHEET.md (maintain this for player reference)
+# Track in narrative files (DM maintains these during play):
+- session/narrative/current_scene.md - Current location/situation
+- session/narrative/session_log.md - Running log of session events
+- session/narrative/threads.md - Active story threads to track
+- session/narrative/CHARACTER_SHEET.md - Authoritative character record
+
+# Automated narrative capture:
+- SessionLogger auto-saves every 10 events to session_auto_save.json
+- Combat replays saved automatically to combat_replays/
+- Use session_logger.save_session_chapter() to create novel chapters
 ```
 
 ### During Play
@@ -117,12 +134,12 @@ Then narrate success/failure dramatically
 
 ### Session Ending
 
-1. Create checkpoint: Save current state comprehensively
-2. Update `NEXT_SESSION.md` with continuity notes for next time
-3. Update `session/narrative/CHARACTER_SHEET.md` with current status
-4. Update narrative files with session summary
-5. Save session as chapter using session_logger.py
-6. Update NPC relationships with npc_matrix.py
+1. Create checkpoint: Save current state comprehensively in game_state.json
+2. Update `NEXT_SESSION.md` with **narrative continuity only** (location, NPCs, plot threads - NO hard stats like HP/MP/Stamina)
+3. Update narrative files with session summary
+4. Save session as chapter using session_logger.py
+5. Update NPC relationships with npc_matrix.py
+6. **Important**: All mechanical state (HP, MP, Stamina, XP, etc.) lives ONLY in game_state.json
 7. Note unresolved threads for next time
 8. Archive if campaign complete
 
@@ -232,7 +249,51 @@ python system/game_engine.py check --attribute dexterity --dc 15
 python system/game_engine.py flag --set quest_complete --value true
 ```
 
-## Enhanced Engine Features
+## Enhanced Engine Features (v3 - Dynamic Content Update)
+
+### New Flexible Class System
+- **Dynamic Classes**: Config now supports multiple classes including berserker, paladin, ranger, necromancer, monk
+- **Custom Class Template**: Use the "custom" class as a template for new character types
+- **Automatic Stat Calculation**: Starting stats derived from class progression settings
+- **Primary Stats Boost**: Classes get +6 to their primary attributes automatically
+
+### Dynamic Item System
+- **Custom Items**: `content/custom_items.json` for unique/legendary items
+- **Item Inheritance**: Custom items can inherit from base items and override properties
+- **Living Content**: Items can be added during play without modifying base files
+- **Special Properties**: Support for unique effects, lore, and conditions
+
+### Event Bus Architecture
+- **Automatic Syncing**: Level-ups, XP gains, and combat events automatically update all relevant files
+- **No Manual Sync Required**: Progression history, session logs updated via events
+- **Extensible**: New events can be added without modifying core engine
+
+### Consumables Support
+```python
+# New use-item command
+python system/game_engine.py use-item --item health_potion
+python system/game_engine.py use-item --item antidote  # Cures poison
+python system/game_engine.py use-item --item rage_elixir  # Applies status
+```
+
+### Berserker Skills as Status Effects
+- **berserker_recovery**: Passive 2 HP/turn regeneration
+- **bloodlust**: +10% damage when below 50% HP (automatic)
+- **unstoppable**: One-time immunity to control effects
+- **intimidating_presence**: +3 to intimidation checks
+
+### Sanity Check System
+```bash
+# Run consistency checks
+python3 system/sanity_check.py
+
+# Checks for:
+# - Data mismatches between files
+# - Missing item definitions
+# - Unsupported classes
+# - Duplicate progression entries
+# - Provides fix suggestions
+```
 
 ### Inventory & Equipment System
 - Characters now have a proper inventory that tracks items
@@ -245,8 +306,14 @@ python system/game_engine.py flag --set quest_complete --value true
 - Full status effect system with duration tracking
 - Effects include: poisoned, burning, frozen, blessed, shield_spell, rage
 - Use `status-effect --apply` to add effects
-- Use `status-effect --tick` to process effects each turn
-- Effects modify combat, skill checks, and recovery
+- Use `status-effect --tick` to process effects each turn (triggers DOT damage)
+- Effects modify combat, skill checks, and recovery:
+  - **poisoned/burning**: Deal `damage_per_turn` each tick (dice strings supported)
+  - **rage**: +5 damage bonus on attacks, -2 armor penalty when taking damage
+  - **shield_spell**: +3 armor bonus when taking damage
+  - **blessed**: +2 bonus to all skill checks
+  - **frozen**: -3 penalty to dexterity-based skill checks
+- Spells now apply their effects automatically (healing heals, shield applies buff)
 
 ### Area-Based Scaling
 - Five predefined areas with increasing difficulty levels
@@ -256,10 +323,17 @@ python system/game_engine.py flag --set quest_complete --value true
 - XP and loot scale with area difficulty
 
 ### Configuration System
-- All game constants now in `system/config.json`
-- Tunable parameters: stamina costs, crit chance, XP curves, recovery rates
-- Class-specific progression rates
-- Difficulty presets (easy, normal, hard, nightmare)
+- All game constants in `system/config.json` with proper deep merge support
+- Key parameters (unified naming):
+  - `stamina_attack_cost` (not `base_stamina_cost_attack`)
+  - `crit_chance` and `crit_multiplier`
+  - `xp_base` and `xp_multiplier` (not `xp_scaling_factor`)
+  - `damage_per_turn` for DOT effects (not just `damage`)
+  - `duration` for effect durations (not `duration_base`)
+- Class-specific progression rates in `class_progression`
+- Area scaling with enemy/loot/xp modifiers
+- Config loads from `system/config.json`, saves override to same location
+- Atomic JSON writes prevent corruption
 
 ### Improved CLI
 - Now uses argparse for robust command parsing
@@ -388,26 +462,145 @@ When running sessions, be aware of these resources:
 
 - **`quickstart.py`**: Interactive character creator the player may have used
 - **`QUICK_REFERENCE.md`**: Player command reference (they may ask about commands)
-- **`NEXT_SESSION.md`**: Template for session continuity (update at session end)
-- **`session/narrative/CHARACTER_SHEET.md`**: Maintain this as the authoritative character record
+- **`NEXT_SESSION.md`**: Narrative continuity guide (plot threads, NPCs, location - NO mechanical stats)
+- **`session/state/game_state.json`**: The ONLY authoritative source for all mechanical data (HP, MP, XP, equipment, etc.)
 - **`session/narrative/character_background.md`**: May contain player-provided backstory from quickstart
 - **`content/` directory**: Optional reference content (use as inspiration, not restriction)
 
+## Important Implementation Details (v2 - Post-Fix Session)
+
+### State File Structure
+The game state now uses a **nested character structure**:
+```python
+# CORRECT (v2):
+state = {
+    "character": {
+        "name": "Steve",
+        "hp": 110,
+        "level": 4,
+        # ... all character stats here
+    },
+    "current_area": "ironhold",
+    "status_effects": {},
+    "flags": {}
+}
+
+# OLD/WRONG (v1 - flat structure):
+state = {
+    "name": "Steve",
+    "hp": 110,
+    "level": 4,
+    # ... mixed with top-level data
+}
+```
+
+### Key Bug Fixes Applied
+1. **Module imports**: Uses `BASE_DIR` and `sys.path` management for reliable imports
+2. **Config merge**: Proper deep merge ensures defaults aren't lost when config exists
+3. **Status effects**: DOT damage now works with dice strings ("1d4") and proper key names
+4. **Atomic writes**: Prevents JSON corruption with temp file + rename pattern
+5. **Path consistency**: All tools use `session/state/game_state.json`
+
+### Migration from Old Sessions
+If loading an old session with flat state structure:
+```bash
+python system/migrate_state.py
+```
+This will:
+- Convert flat structure to nested character format
+- Preserve original equipment/inventory in `session_data` for manual conversion
+- Create `.pre_migration` backup files
+
+### Status Effect Implementation
+Effects store both duration and power (damage) in state:
+```python
+state["status_effects"]["poisoned"] = {
+    "duration": 3,
+    "power": "1d4"  # Can be dice string or number
+}
+```
+
 ## System Architecture Notes (Post-Peer Review)
 
-### Critical Improvements Made (v2)
-1. **Centralized Configuration** (`system/lib/config.py`): Single source of truth for paths and constants
-2. **Singleton Pattern** for Session Logger: Prevents multiple instances losing data
-3. **Auto-save Feature**: Events persist every 10 actions to prevent data loss
-4. **Better Error Handling**: Specific exceptions with informative messages
-5. **Fixed Stat Visualization**: Proper stat mapping and dynamic scaling for high-level characters
-6. **Event Bus Ready**: Architecture prepared for future pub/sub system
+### Critical Improvements Made (v2.1 - Post-Review Fixes)
+1. **All Critical Bugs Fixed**:
+   - Rest method now uses correct config structure (recovery.short_rest.hp/mp/stamina)
+   - Area scaling uses actual player level, not hardcoded 1
+   - Flag --get command added for retrieving flag values
+   - Config systems unified with GAME_STATE_FILE from config.py
+   - Dodge stamina cost properly applied
+   - SessionLogger now singleton with auto-save every 10 events
+   
+2. **State Management**:
+   - Duplicate steve_stats.json removed (was created by update_stats.py)
+   - update_stats.py fixed to write nested v2 format
+   - All tools read from nested character structure consistently
+   
+3. **Better Error Handling**: Specific exceptions with informative messages
+4. **Fixed Stat Visualization**: Proper stat mapping and dynamic scaling for high-level characters
+5. **Event Bus Ready**: Architecture prepared for future pub/sub system (not yet implemented)
 
-### Known Limitations to Address
-- No integration with game_engine.py yet (tools operate independently)
-- Manual sync required between different state files
-- Consider implementing transaction-safe writes for JSON files
-- Physics-based combat still narrative-only (no mechanical support)
+### Recent Improvements (v3.1 - Final Polish Update)
+- ✅ Event bus integration - automatic sync between components
+- ✅ Dynamic class system - easily add new classes via config
+- ✅ Custom items system - unique items without code changes
+- ✅ Consumables support - potions, antidotes, status items
+- ✅ Berserker skills mechanized - passive effects work automatically
+- ✅ Sanity checking - automated consistency validation
+- ✅ Config keys aligned - all values now properly read from config.json
+
+### Critical System Principles
+
+#### Data Separation (STRICT)
+- **game_state.json**: ONLY source for mechanical data (HP, MP, XP, equipment)
+- **NEXT_SESSION.md**: Narrative continuity ONLY (location, NPCs, plot)
+- **No Duplication**: NEVER put hard stats in narrative files
+
+#### Combat Philosophy
+- **Narrative-Driven**: No rigid combat loops or turn structure
+- **Engine for Math Only**: Attack/damage/heal commands provide numbers
+- **DM Controls Flow**: You orchestrate combat cinematically
+- **Events Track Impact**: Damage dealt/taken logged automatically
+
+#### Content Expansion
+- **Custom Items**: Add unique items to custom_items.json during play
+- **New Classes**: Add to config.json class_progression (no code changes)
+- **Status Effects**: Define in config.json with duration_base and effects
+- **Living World**: Content grows with each story/campaign
+
+### Common Pitfalls to Avoid
+- **Config Key Mismatches**: Always use exact keys the engine expects
+- **Status Effect Scope**: Effects live at state level, not character level
+- **Passive Effects**: Mark with "passive": true and duration: -1
+- **Event Coverage**: Major state changes should emit events for tracking
+
+### Quick Command Reference
+```bash
+# Sanity check - run this regularly
+python3 system/sanity_check.py
+
+# Common combat flow
+python3 system/game_engine.py attack --weapon "1d12" --armor 2
+python3 system/game_engine.py enemy-attack --enemy-damage "2d6"
+python3 system/game_engine.py status-effect --tick
+
+# Consumables
+python3 system/game_engine.py use-item --item health_potion
+python3 system/game_engine.py use-item --item antidote
+
+# Status management
+python3 system/game_engine.py status  # Check current state
+```
+
+### Remaining Considerations
+- Physics-based combat narrative-only (by design - maintains flexibility)
+- Combat events (start/end) omitted intentionally for narrative freedom
+
+### Testing After Changes
+Always verify changes with these commands:
+1. `python3 system/sanity_check.py` - Check for inconsistencies
+2. `python3 system/game_engine.py status` - Verify current state
+3. `python3 system/game_engine.py init --help` - Confirm dynamic classes load
 
 ## Final Reminder
 

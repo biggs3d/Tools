@@ -9,7 +9,7 @@ import json
 from typing import Dict, Any, Optional
 
 # Base paths
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent  # Goes from system/ to adventure_litrpg/
 SYSTEM_DIR = PROJECT_ROOT / "system"
 CONTENT_DIR = PROJECT_ROOT / "content"
 SESSION_DIR = PROJECT_ROOT / "session"
@@ -84,7 +84,7 @@ class GameConfig:
     
     def load_config(self):
         """Load configuration from file if it exists"""
-        config_file = SESSION_DIR / "config.json"
+        config_file = SYSTEM_DIR / "config.json"
         if config_file.exists():
             with open(config_file) as f:
                 self._config_data = json.load(f)
@@ -100,7 +100,7 @@ class GameConfig:
     
     def save_config(self):
         """Save configuration to file"""
-        config_file = SESSION_DIR / "config.json"
+        config_file = SYSTEM_DIR / "config.json"
         config_file.parent.mkdir(parents=True, exist_ok=True)
         with open(config_file, 'w') as f:
             json.dump(self._config_data, f, indent=2)

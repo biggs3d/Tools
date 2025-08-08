@@ -1,0 +1,84 @@
+{
+  "unique_weapons": {
+    "greataxe_first_blood": {
+      "base_item": "greataxe",
+      "name": "Greataxe of First Blood",
+      "damage": "1d12+1",
+      "value": 150,
+      "description": "Earned from the Threshold Beast, still stained with its blood",
+      "special_properties": {
+        "first_strike_bonus": 2,
+        "intimidation": "+3 to intimidation checks"
+      },
+      "lore": "The first weapon earned in this world carries special significance"
+    },
+    "garrett_blade": {
+      "base_item": "longsword",
+      "name": "Garrett's Veteran Blade",
+      "damage": "1d8+1",
+      "value": 100,
+      "description": "A well-maintained sword from years of service",
+      "special_properties": {
+        "parry_bonus": 1
+      }
+    }
+  },
+  
+  "unique_armor": {
+    "leather_plus_2": {
+      "base_item": "leather",
+      "name": "Reinforced Leather Armor",
+      "armor": 2,
+      "value": 50,
+      "description": "Leather armor with additional reinforcement",
+      "special_properties": {
+        "stamina_regen": "+1 stamina per rest"
+      }
+    },
+    "bandit_leather": {
+      "base_item": "leather",
+      "name": "Scarred Bandit Leather",
+      "armor": 1,
+      "value": 20,
+      "description": "Damaged leather armor taken from bandits",
+      "condition": "damaged"
+    }
+  },
+  
+  "custom_consumables": {
+    "rage_elixir": {
+      "type": "consumable",
+      "name": "Rage Elixir",
+      "effect": "apply_status",
+      "status": "rage",
+      "duration": 5,
+      "value": 50,
+      "description": "Induces berserker rage for a short time"
+    },
+    "memory_crystal": {
+      "type": "special",
+      "name": "Kaya's Memory Crystal",
+      "value": 0,
+      "description": "A golden crystal that records combat experiences",
+      "special": "quest_item",
+      "bound_to": "Kaya"
+    }
+  },
+  
+  "template": {
+    "_comment": "Use this template for adding new unique items during play",
+    "item_id": {
+      "base_item": "optional - references items.json",
+      "name": "Display Name",
+      "damage": "for weapons - dice string",
+      "armor": "for armor - number",
+      "value": 0,
+      "description": "What it looks like and does",
+      "special_properties": {
+        "property_name": "effect description"
+      },
+      "condition": "pristine/good/damaged/broken",
+      "lore": "Optional backstory"
+    }
+  }
+}

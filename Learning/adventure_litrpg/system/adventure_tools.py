@@ -37,10 +37,12 @@ class AdventureTools:
         if state_file.exists():
             with open(state_file) as f:
                 state = json.load(f)
+                # Read from nested character structure
+                char = state.get('character', {})
                 print(f"\n⚔️ CURRENT STATUS:")
-                print(f"  Level: {state.get('level', 1)}")
-                print(f"  HP: {state.get('hp', 100)}/{state.get('hp_max', 100)}")
-                print(f"  Gold: {state.get('gold', 0)}")
+                print(f"  Level: {char.get('level', 1)}")
+                print(f"  HP: {char.get('hp', 100)}/{char.get('hp_max', 100)}")
+                print(f"  Gold: {char.get('gold', 0)}")
                 print(f"  Location: {state.get('current_area', 'unknown')}")
     
     def log_combat_start(self, description: str, enemies: list):

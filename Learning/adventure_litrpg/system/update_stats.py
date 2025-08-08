@@ -80,23 +80,72 @@ def update_stats(name="Steve"):
         }
     }
     
-    # Save to multiple locations for redundancy
+    # Convert to nested structure for v2 format
+    nested_state = {
+        "character": {
+            "name": stats["name"],
+            "class": stats["class"],
+            "level": stats["level"],
+            "xp": stats["xp"],
+            "xp_next": stats["xp_to_next"],
+            "hp": stats["hp"],
+            "hp_max": stats["hp_max"],
+            "mp": stats["mp"],
+            "mp_max": stats["mp_max"],
+            "stamina": stats["stamina"],
+            "stamina_max": stats["stamina_max"],
+            "strength": stats["strength"],
+            "dexterity": stats["dexterity"],
+            "intelligence": stats["intelligence"],
+            "constitution": stats["constitution"],
+            "wisdom": stats["wisdom"],
+            "charisma": stats["charisma"],
+            "damage_bonus": stats["strength"] // 3,
+            "armor": 0,
+            "crit_chance": 0.1,
+            "dodge_chance": stats["dexterity"] * 0.01,
+            "equipment": {
+                "weapon": None,  # Needs conversion to item ID
+                "armor": None,
+                "accessory": None
+            },
+            "inventory": [],  # Needs conversion to item IDs
+            "gold": stats["gold"],
+            "skill_points": 0,
+            "stat_points": 0
+        },
+        "current_area": stats["current_area"],
+        "status_effects": {},
+        "flags": stats["flags"],
+        "session_data": {
+            "original_equipment": stats["equipment"],
+            "original_inventory": stats["inventory"],
+            "original_skills": stats["skills"],
+            "original_titles": stats["titles"],
+            "original_achievements": stats["achievements"],
+            "rage_meter": stats.get("rage_meter", 0)
+        }
+    }
+    
+    # Save to session/state directory
     state_dir = Path(__file__).parent.parent / "session" / "state"
     state_dir.mkdir(parents=True, exist_ok=True)
     
-    # Main game state
+    # Main game state (only one file now - no duplicate)
     game_state_path = state_dir / "game_state.json"
+    
+    # Create backup before overwriting
+    if game_state_path.exists():
+        backup_path = state_dir / "game_state_backup.json"
+        import shutil
+        shutil.copy2(game_state_path, backup_path)
+        print(f"✅ Created backup: game_state_backup.json")
+    
+    # Write nested state
     with open(game_state_path, 'w') as f:
-        json.dump(stats, f, indent=2)
+        json.dump(nested_state, f, indent=2)
     
-    print(f"✅ Updated game_state.json")
-    
-    # Character sheet backup
-    char_sheet_path = state_dir / "steve_stats.json"
-    with open(char_sheet_path, 'w') as f:
-        json.dump(stats, f, indent=2)
-    
-    print(f"✅ Created backup in steve_stats.json")
+    print(f"✅ Updated game_state.json with v2 nested structure")
     print(f"\nLevel 4 {name} the {stats['class'].title()}")
     print(f"STR: {stats['strength']} (+{(stats['strength']-10)//2})")
     print(f"DEX: {stats['dexterity']} (+{(stats['dexterity']-10)//2})")

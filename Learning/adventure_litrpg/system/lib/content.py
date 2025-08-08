@@ -26,7 +26,7 @@ class ContentLoader:
                 self._cache[filename] = {}
         return self._cache[filename]
     
-    def get_monster(self, monster_id: str, area_level: int = 1) -> Optional[Dict]:
+    def get_monster(self, monster_id: str, area_level: int = 1, player_level: int = 1) -> Optional[Dict]:
         """
         Get monster data by ID, optionally scaled for area level
         Searches through common, elite, and boss categories
@@ -41,8 +41,8 @@ class ContentLoader:
                 # Scale for area if needed
                 if area_level > 1:
                     from .dice import scale_for_area
-                    monster["hp"] = scale_for_area(monster["hp"], area_level, 1)
-                    monster["damage"] = scale_for_area(monster["damage"], area_level, 1)
+                    monster["hp"] = scale_for_area(monster["hp"], area_level, player_level)
+                    monster["damage"] = scale_for_area(monster["damage"], area_level, player_level)
                     monster["xp"] = int(monster["xp"] * (1 + (area_level - 1) * 0.5))
                     monster["armor"] = monster.get("armor", 0) + (area_level // 3)
                 
@@ -53,18 +53,61 @@ class ContentLoader:
         return None
     
     def get_item(self, item_id: str) -> Optional[Dict]:
-        """Get item data by ID from any category"""
-        items = self._load_json("items.json")
+        """Get item data by ID from any category, checking custom items first"""
+        # First check custom items
+        custom_items = self._load_json("custom_items.json")
+        for category in ["unique_weapons", "unique_armor", "custom_consumables"]:
+            if category in custom_items and item_id in custom_items[category]:
+                item = custom_items[category][item_id].copy()
+                
+                # If it has a base_item, merge with base properties
+                if "base_item" in item:
+                    base = self.get_item(item["base_item"])
+                    if base:
+                        # Custom properties override base
+                        merged = base.copy()
+                        merged.update(item)
+                        item = merged
+                
+                item["category"] = category
+                item["id"] = item_id
+                item["is_unique"] = True
+                return item
         
-        # Search all categories
+        # Then check standard items
+        items = self._load_json("items.json")
         for category in ["weapons", "armor", "consumables", "special"]:
             if category in items and item_id in items[category]:
                 item = items[category][item_id].copy()
                 item["category"] = category
                 item["id"] = item_id
+                item["is_unique"] = False
                 return item
         
         return None
+    
+    def create_custom_item(self, base_item_id: str, name: str, modifiers: Dict) -> Dict:
+        """Create a custom item based on a base item with modifiers"""
+        base = self.get_item(base_item_id)
+        if not base:
+            # Create from scratch if no base
+            custom = {
+                "name": name,
+                "value": modifiers.get("value", 0),
+                "description": modifiers.get("description", "A custom item"),
+                "is_unique": True,
+                "custom_generated": True
+            }
+        else:
+            custom = base.copy()
+            custom["name"] = name
+            custom["base_item"] = base_item_id
+            custom["is_unique"] = True
+            custom["custom_generated"] = True
+        
+        # Apply modifiers
+        custom.update(modifiers)
+        return custom
     
     def get_spell(self, spell_id: str) -> Optional[Dict]:
         """Get spell data by ID from any category"""

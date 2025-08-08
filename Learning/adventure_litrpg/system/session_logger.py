@@ -10,17 +10,33 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 class SessionLogger:
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+    
     def __init__(self):
+        # Only initialize once
+        if self._initialized:
+            return
+            
         self.session_dir = Path(__file__).parent.parent / "session"
         self.chapters_dir = self.session_dir / "chapters"
         self.combat_dir = self.session_dir / "combat_replays"
         self.current_session = []
         self.combat_buffer = []
         self.session_start = datetime.datetime.now()
+        self.event_count = 0
+        self.auto_save_threshold = 10  # Auto-save every 10 events
         
         # Create directories
         self.chapters_dir.mkdir(parents=True, exist_ok=True)
         self.combat_dir.mkdir(parents=True, exist_ok=True)
+        
+        self._initialized = True
         
     def log_event(self, event_type: str, data: Dict, narrative: Optional[str] = None):
         """Log any game event with optional narrative description"""
@@ -31,10 +47,15 @@ class SessionLogger:
             "narrative": narrative
         }
         self.current_session.append(event)
+        self.event_count += 1
         
         # If combat event, add to combat buffer
         if event_type in ["attack", "damage", "rage_release", "kill", "level_up"]:
             self.combat_buffer.append(event)
+        
+        # Auto-save if threshold reached
+        if self.event_count >= self.auto_save_threshold:
+            self.auto_save()
     
     def start_combat(self, description: str, enemies: List[str]):
         """Mark the beginning of a combat encounter"""
@@ -156,7 +177,9 @@ class SessionLogger:
             state_file = self.session_dir / "state" / "game_state.json"
             with open(state_file) as f:
                 state = json.load(f)
-                return (state.get("hp", 100), state.get("hp_max", 100))
+                # Read from nested character structure
+                char = state.get('character', {})
+                return (char.get("hp", 100), char.get("hp_max", 100))
         except:
             return (100, 100)
     
@@ -177,6 +200,22 @@ class SessionLogger:
         
         print(f"📖 Session saved as chapter: {chapter_file.name}")
         self.current_session = []
+        self.event_count = 0
+    
+    def auto_save(self):
+        """Auto-save session to temporary file"""
+        temp_file = self.session_dir / "narrative" / "session_auto_save.json"
+        temp_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(temp_file, 'w') as f:
+            json.dump({
+                "session_start": self.session_start.isoformat(),
+                "last_save": datetime.datetime.now().isoformat(),
+                "event_count": self.event_count,
+                "events": self.current_session
+            }, f, indent=2)
+        
+        self.event_count = 0  # Reset counter after save
 
 # Example usage functions
 def log_attack(damage: int, weapon: str = "greataxe", critical: bool = False, narrative: str = None):

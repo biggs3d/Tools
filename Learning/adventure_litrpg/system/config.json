@@ -1,13 +1,13 @@
 {
   "game_constants": {
-    "base_stamina_cost_attack": 5,
-    "base_stamina_cost_dodge": 3,
-    "base_crit_chance": 0.05,
+    "stamina_attack_cost": 5,
+    "stamina_dodge_cost": 3,
+    "crit_chance": 0.05,
     "crit_multiplier": 2.0,
     "dodge_modifier": 0.01,
     "sneak_attack_bonus_per_level": 3,
     "xp_base": 100,
-    "xp_scaling_factor": 1.5,
+    "xp_multiplier": 1.5,
     "level_up_hp_base": 10,
     "level_up_mp_base": 5,
     "level_up_stamina_base": 5,
@@ -60,21 +60,73 @@
       "mp_per_level": 3,
       "stamina_per_level": 8,
       "primary_stats": ["strength", "constitution"],
-      "skill_focus": "melee_combat"
+      "skill_focus": "melee_combat",
+      "description": "Balanced frontline fighter"
+    },
+    "berserker": {
+      "hp_per_level": 15,
+      "mp_per_level": 2,
+      "stamina_per_level": 10,
+      "primary_stats": ["strength", "constitution"],
+      "skill_focus": "rage_combat",
+      "description": "High HP, aggressive melee specialist",
+      "special_mechanics": ["rage_scaling", "bloodlust"]
     },
     "mage": {
       "hp_per_level": 6,
       "mp_per_level": 12,
       "stamina_per_level": 4,
       "primary_stats": ["intelligence", "wisdom"],
-      "skill_focus": "magic"
+      "skill_focus": "magic",
+      "description": "Spellcasting specialist"
     },
     "rogue": {
       "hp_per_level": 8,
       "mp_per_level": 5,
       "stamina_per_level": 10,
       "primary_stats": ["dexterity", "charisma"],
-      "skill_focus": "stealth_precision"
+      "skill_focus": "stealth_precision",
+      "description": "Agile and cunning fighter"
+    },
+    "paladin": {
+      "hp_per_level": 10,
+      "mp_per_level": 7,
+      "stamina_per_level": 7,
+      "primary_stats": ["strength", "wisdom"],
+      "skill_focus": "holy_combat",
+      "description": "Holy warrior with balanced stats"
+    },
+    "ranger": {
+      "hp_per_level": 9,
+      "mp_per_level": 5,
+      "stamina_per_level": 9,
+      "primary_stats": ["dexterity", "wisdom"],
+      "skill_focus": "ranged_nature",
+      "description": "Wilderness expert and archer"
+    },
+    "necromancer": {
+      "hp_per_level": 7,
+      "mp_per_level": 10,
+      "stamina_per_level": 5,
+      "primary_stats": ["intelligence", "constitution"],
+      "skill_focus": "death_magic",
+      "description": "Death magic and minion control"
+    },
+    "monk": {
+      "hp_per_level": 9,
+      "mp_per_level": 6,
+      "stamina_per_level": 11,
+      "primary_stats": ["dexterity", "wisdom"],
+      "skill_focus": "martial_arts",
+      "description": "Unarmed combat specialist"
+    },
+    "custom": {
+      "hp_per_level": 10,
+      "mp_per_level": 5,
+      "stamina_per_level": 7,
+      "primary_stats": ["varies"],
+      "skill_focus": "adaptable",
+      "description": "Template for custom classes - modify as needed"
     }
   },
   
@@ -95,7 +147,7 @@
       "description": "Slowed movement and actions"
     },
     "blessed": {
-      "bonus_to_rolls": 2,
+      "skill_bonus": 2,
       "duration_base": 10,
       "description": "Divine favor grants bonuses"
     },
@@ -109,6 +161,30 @@
       "armor_penalty": 2,
       "duration_base": 4,
       "description": "Increased damage but reduced defense"
+    },
+    "berserker_recovery": {
+      "heal_per_turn": "2",
+      "duration_base": -1,
+      "description": "Passive: Regenerate 2 HP per turn",
+      "passive": true
+    },
+    "unstoppable": {
+      "immunity": "control",
+      "duration_base": 1,
+      "single_use": true,
+      "description": "Ignore next control effect"
+    },
+    "bloodlust": {
+      "damage_scaling": 0.1,
+      "threshold": 0.5,
+      "description": "Passive: +10% damage when below 50% HP",
+      "passive": true
+    },
+    "intimidating_presence": {
+      "charisma_bonus": 3,
+      "duration_base": -1,
+      "description": "Passive: +3 to intimidation checks",
+      "passive": true
     }
   },
   

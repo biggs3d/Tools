@@ -12,27 +12,83 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 
+# Determine base directory for project
+BASE_DIR = Path(__file__).resolve().parents[1]  # adventure_litrpg root
+SYSTEM_DIR = BASE_DIR / "system"
+sys.path.insert(0, str(SYSTEM_DIR))  # Add system dir to path for imports
+
 # Import our new utility modules
 from lib.dice import roll_dice, roll_damage, roll_healing, parse_dice_string, scale_for_area
 from lib.content import ContentLoader
+from lib.event_bus import emit_event
+from config import config as game_config, GAME_STATE_FILE
 
 class LitRPGEngine:
-    def __init__(self, state_file="state/game_state.json", config_file="system/config.json"):
+    def __init__(self, state_file=None, config_file=None):
+        # Use proper paths from config module
+        if state_file is None:
+            state_file = GAME_STATE_FILE
+        if config_file is None:
+            config_file = SYSTEM_DIR / "config.json"
+            
         self.state_file = Path(state_file)
-        self.state_file.parent.mkdir(exist_ok=True)
+        self.state_file.parent.mkdir(parents=True, exist_ok=True)
         self.state = self.load_state()
         
-        # Load configuration
+        # Load configuration (still load from file but could transition to singleton)
         self.config = self.load_config(config_file)
-        self.content = ContentLoader()
+        # Pass proper content directory path
+        self.content = ContentLoader(content_dir=str(BASE_DIR / "content"))
         
     def load_config(self, config_file: str) -> Dict:
-        """Load game configuration"""
+        """Load game configuration with defaults"""
         config_path = Path(config_file)
+        defaults = {
+            "game_constants": {
+                "xp_base": 100,
+                "xp_multiplier": 1.5,
+                "crit_chance": 0.1,
+                "crit_multiplier": 2.0,
+                "dodge_chance": 0.1,
+                "stamina_attack_cost": 10,
+                "stamina_dodge_cost": 5,
+                "mp_regen_rate": 0.1,
+                "stamina_regen_rate": 0.2,
+                "sneak_attack_bonus_per_level": 3
+            },
+            "area_scaling": {},
+            "status_effects": {
+                "poisoned": {"damage_per_turn": 5, "duration": 3},
+                "burning": {"damage_per_turn": 8, "duration": 2},
+                "frozen": {"duration": 2},
+                "blessed": {"skill_bonus": 2, "duration": 5},
+                "shield_spell": {"armor_bonus": 3, "duration": 3},
+                "rage": {"damage_bonus": 5, "armor_penalty": 2, "duration": 3}
+            },
+            "recovery": {
+                "short_rest": {"hp": 0.3, "mp": 0.5, "stamina": 1.0},
+                "long_rest": {"hp": 1.0, "mp": 1.0, "stamina": 1.0}
+            }
+        }
+        
+        # Proper merge logic
         if config_path.exists():
             with open(config_path, 'r') as f:
-                return json.load(f)
-        return {"game_constants": {}, "area_scaling": {}}
+                loaded = json.load(f)
+                # Deep merge loaded into defaults
+                merged = self._deep_merge(defaults, loaded)
+                return merged
+        return defaults
+    
+    def _deep_merge(self, base: Dict, override: Dict) -> Dict:
+        """Deep merge two dictionaries"""
+        result = base.copy()
+        for key, value in override.items():
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = self._deep_merge(result[key], value)
+            else:
+                result[key] = value
+        return result
     
     def load_state(self) -> Dict:
         """Load game state or return empty dict"""
@@ -42,33 +98,54 @@ class LitRPGEngine:
         return {}
     
     def save_state(self):
-        """Save current state to file"""
-        with open(self.state_file, 'w') as f:
+        """Save current state to file atomically"""
+        # Atomic write to prevent corruption
+        tmp_file = self.state_file.with_suffix('.tmp')
+        with open(tmp_file, 'w') as f:
             json.dump(self.state, f, indent=2)
+        tmp_file.replace(self.state_file)
     
     def init_new_game(self, name: str, class_name: str = "warrior") -> Dict:
         """Create a new character with enhanced features"""
         
-        # Base stats by class
-        class_configs = {
-            "warrior": {
-                "hp": 120, "mp": 30, "stamina": 100,
-                "strength": 16, "dexterity": 12, "intelligence": 8,
-                "constitution": 14, "wisdom": 10, "charisma": 10
-            },
-            "mage": {
-                "hp": 60, "mp": 120, "stamina": 60,
-                "strength": 8, "dexterity": 12, "intelligence": 16,
-                "constitution": 10, "wisdom": 14, "charisma": 10
-            },
-            "rogue": {
-                "hp": 80, "mp": 50, "stamina": 120,
-                "strength": 10, "dexterity": 16, "intelligence": 12,
-                "constitution": 10, "wisdom": 12, "charisma": 14
-            }
+        # Load class progression from config
+        class_progression = self.config.get("class_progression", {})
+        constants = self.config.get("game_constants", {})
+        
+        # Get class config or use custom template
+        class_config = class_progression.get(class_name.lower(), class_progression.get("custom", {}))
+        
+        # Calculate starting stats based on class progression
+        # Base stats = level 1 equivalent (10x the per-level gain as starting pool)
+        base_hp = class_config.get("hp_per_level", 10) * 10
+        base_mp = class_config.get("mp_per_level", 5) * 10  
+        base_stamina = class_config.get("stamina_per_level", 7) * 10
+        
+        # Generate starting attributes based on primary stats
+        primary_stats = class_config.get("primary_stats", ["strength", "constitution"])
+        
+        # Default attributes
+        attributes = {
+            "strength": 10,
+            "dexterity": 10,
+            "intelligence": 10,
+            "constitution": 10,
+            "wisdom": 10,
+            "charisma": 10
         }
         
-        config = class_configs.get(class_name.lower(), class_configs["warrior"])
+        # Boost primary stats
+        for stat in primary_stats:
+            if stat in attributes:
+                attributes[stat] += 6  # Primary stats get +6
+        
+        # Build character config
+        config = {
+            "hp": base_hp,
+            "mp": base_mp,
+            "stamina": base_stamina,
+            **attributes
+        }
         constants = self.config.get("game_constants", {})
         
         self.state = {
@@ -98,7 +175,7 @@ class LitRPGEngine:
                 # Combat stats
                 "damage_bonus": config["strength"] // 3,
                 "armor": 0,
-                "crit_chance": constants.get("base_crit_chance", 0.05),
+                "crit_chance": constants.get("crit_chance", 0.1),
                 "dodge_chance": config["dexterity"] * constants.get("dodge_modifier", 0.01),
                 
                 # NEW: Inventory and equipment
@@ -151,6 +228,12 @@ class LitRPGEngine:
         damage = roll_damage(weapon_damage, char["damage_bonus"], 
                            is_crit, constants.get("crit_multiplier", 2.0))
         
+        # Check for bloodlust (berserker passive)
+        if "bloodlust" in self.state.get("status_effects", {}):
+            hp_percent = char["hp"] / char["hp_max"]
+            if hp_percent <= 0.5:  # Below 50% HP
+                damage = int(damage * 1.1)  # +10% damage
+        
         # Check for actual crit
         if not is_crit and random.random() < char["crit_chance"]:
             damage = int(damage * constants.get("crit_multiplier", 2.0))
@@ -169,8 +252,16 @@ class LitRPGEngine:
         damage = max(1, damage - target_armor)
         
         # Stamina cost
-        stamina_cost = constants.get("base_stamina_cost_attack", 5)
+        stamina_cost = constants.get("stamina_attack_cost", 10)
         char["stamina"] = max(0, char["stamina"] - stamina_cost)
+        
+        # Emit damage dealt event
+        emit_event('damage_dealt', {
+            'amount': damage,
+            'target': 'enemy',
+            'critical': is_crit,
+            'sneak_attack': is_sneak
+        })
         
         self.save_state()
         
@@ -183,7 +274,7 @@ class LitRPGEngine:
         }
     
     def take_damage(self, amount: int, damage_type: str = "physical") -> Dict:
-        """Take damage with armor from equipment"""
+        """Take damage with armor from equipment and status effects"""
         char = self.state["character"]
         
         # Get total armor value
@@ -198,11 +289,25 @@ class LitRPGEngine:
         if "shield_spell" in self.state.get("status_effects", {}):
             total_armor += self.config["status_effects"]["shield_spell"].get("armor_bonus", 3)
         
+        # Apply rage armor penalty if active
+        if "rage" in self.state.get("status_effects", {}):
+            total_armor -= self.config["status_effects"]["rage"].get("armor_penalty", 2)
+            total_armor = max(0, total_armor)  # Can't go negative
+        
         # Apply armor to physical damage
         if damage_type == "physical":
             amount = max(1, amount - total_armor)
         
         char["hp"] = max(0, char["hp"] - amount)
+        
+        # Emit damage taken event
+        emit_event('damage_taken', {
+            'amount': amount,
+            'source': damage_type,
+            'armor_reduced': total_armor if damage_type == "physical" else 0,
+            'hp_remaining': char["hp"]
+        })
+        
         self.save_state()
         
         return {
@@ -250,6 +355,12 @@ class LitRPGEngine:
         for _ in range(quantity):
             char["inventory"].append(item_id)
         
+        # Emit item acquired event
+        emit_event('item_acquired', {
+            'item': item.get('name', item_id),
+            'quantity': quantity
+        })
+        
         self.save_state()
         
         return {
@@ -258,6 +369,79 @@ class LitRPGEngine:
             "quantity": quantity,
             "inventory_size": len(char["inventory"])
         }
+    
+    def use_item(self, item_id: str) -> Dict:
+        """Use a consumable item from inventory"""
+        char = self.state["character"]
+        
+        # Check if item is in inventory
+        if item_id not in char["inventory"]:
+            return {"success": False, "error": f"You don't have {item_id}"}
+        
+        # Get item data
+        item = self.content.get_item(item_id)
+        if not item:
+            return {"success": False, "error": f"Unknown item: {item_id}"}
+        
+        # Check if item is consumable
+        if item.get("category") not in ["consumables", "custom_consumables"]:
+            return {"success": False, "error": f"{item_id} is not consumable"}
+        
+        result = {"success": True, "item_used": item.get("name", item_id), "effects": []}
+        
+        # Apply item effects
+        if "heal" in item:
+            heal_amount = roll_healing(item["heal"])
+            char["hp"] = min(char["hp"] + heal_amount, char["hp_max"])
+            result["effects"].append(f"Healed {heal_amount} HP")
+            
+        if "restore" in item:
+            # Restore MP or Stamina
+            restore_amount = roll_healing(str(item["restore"]))
+            if "mana" in item_id.lower() or "mp" in item_id.lower():
+                char["mp"] = min(char["mp"] + restore_amount, char["mp_max"])
+                result["effects"].append(f"Restored {restore_amount} MP")
+            else:
+                char["stamina"] = min(char["stamina"] + restore_amount, char["stamina_max"])
+                result["effects"].append(f"Restored {restore_amount} Stamina")
+                
+        if item.get("effect") == "apply_status":
+            # Apply status effect
+            status = item.get("status")
+            duration = item.get("duration", 3)
+            if status:
+                # Initialize status_effects if needed
+                if "status_effects" not in self.state:
+                    self.state["status_effects"] = {}
+                    
+                # Always apply the status (no special case here)
+                self.state["status_effects"][status] = {
+                    "duration": duration,
+                    "power": item.get("power", "1d4")
+                }
+                result["effects"].append(f"Applied {status} for {duration} turns")
+                emit_event('status_applied', {'status': status, 'duration': duration})
+                    
+        if item.get("cure") == "poison" or "antidote" in item_id.lower():
+            # Remove poison status
+            if "status_effects" in self.state and "poisoned" in self.state["status_effects"]:
+                del self.state["status_effects"]["poisoned"]
+                result["effects"].append("Cured poison")
+                emit_event('status_removed', {'status': 'poisoned'})
+            else:
+                result["effects"].append("No poison to cure")
+                
+        # Remove item from inventory
+        char["inventory"].remove(item_id)
+        
+        # Emit item used event
+        emit_event('item_used', {
+            'item': item.get('name', item_id),
+            'effect': ', '.join(result["effects"])
+        })
+        
+        self.save_state()
+        return result
     
     def equip_item(self, item_id: str) -> Dict:
         """Equip an item from inventory"""
@@ -288,6 +472,13 @@ class LitRPGEngine:
         char["equipment"][slot] = item_id
         char["inventory"].remove(item_id)
         
+        # Emit item equipped event
+        emit_event('item_equipped', {
+            'item': item.get('name', item_id),
+            'slot': slot,
+            'unequipped': old_item
+        })
+        
         self.save_state()
         
         return {
@@ -309,7 +500,9 @@ class LitRPGEngine:
         if not effect_config:
             return {"success": False, "error": f"Unknown status effect: {effect_name}"}
         
-        duration = duration or effect_config.get("duration_base", 5)
+        # Use provided duration, or fall back to config (checking both keys for compatibility)
+        if duration is None:
+            duration = effect_config.get("duration", effect_config.get("duration_base", 5))
         
         self.state["status_effects"][effect_name] = {
             "duration": duration,
@@ -337,23 +530,49 @@ class LitRPGEngine:
             effect_config = self.config.get("status_effects", {}).get(effect_name, {})
             
             # Apply damage over time effects
-            if "damage_per_turn" in effect_config:
-                damage = roll_dice(effect_config["damage_per_turn"])
-                char["hp"] = max(0, char["hp"] - damage)
-                effects_log.append({
-                    "effect": effect_name,
-                    "type": "damage",
-                    "amount": damage
-                })
+            # Use stored power if available, otherwise config value (don't use 'or' to preserve 0)
+            damage_value = effect_data.get("power", effect_config.get("damage_per_turn", 0))
+            if damage_value:
+                # Handle both dice strings and numeric values
+                if isinstance(damage_value, str):
+                    damage = roll_dice(damage_value)
+                else:
+                    damage = int(damage_value)
+                    
+                if damage > 0:
+                    char["hp"] = max(0, char["hp"] - damage)
+                    effects_log.append({
+                        "effect": effect_name,
+                        "type": "damage",
+                        "amount": damage
+                    })
             
-            # Reduce duration
-            effect_data["duration"] -= 1
-            if effect_data["duration"] <= 0:
-                del self.state["status_effects"][effect_name]
-                effects_log.append({
-                    "effect": effect_name,
-                    "type": "expired"
-                })
+            # Apply healing over time effects (e.g., berserker_recovery)
+            heal_value = effect_config.get("heal_per_turn", 0)
+            if heal_value:
+                if isinstance(heal_value, str):
+                    healing = roll_dice(heal_value)
+                else:
+                    healing = int(heal_value)
+                    
+                if healing > 0:
+                    char["hp"] = min(char["hp"] + healing, char["hp_max"])
+                    effects_log.append({
+                        "effect": effect_name,
+                        "type": "healing",
+                        "amount": healing
+                    })
+            
+            # Reduce duration (skip for passive/infinite effects)
+            if not effect_config.get("passive", False) and effect_data.get("duration", 0) > 0:
+                effect_data["duration"] -= 1
+                if effect_data["duration"] <= 0:
+                    del self.state["status_effects"][effect_name]
+                    effects_log.append({
+                        "effect": effect_name,
+                        "type": "expired"
+                    })
+                    emit_event('status_removed', {'status': effect_name})
         
         self.save_state()
         
@@ -372,20 +591,12 @@ class LitRPGEngine:
         area_level = area_config.get("level", 1)
         player_level = self.state["character"]["level"]
         
-        monster = self.content.get_monster(monster_id, area_level)
+        # content.get_monster already handles area scaling internally
+        monster = self.content.get_monster(monster_id, area_level, player_level)
         
-        if monster:
-            # Additional scaling based on area modifiers
-            modifier = area_config.get("enemy_modifier", 1.0)
-            if modifier != 1.0:
-                # Parse and scale HP
-                hp_dice = monster["hp"]
-                num_dice, die_size, bonus = parse_dice_string(hp_dice)
-                scaled_bonus = int(bonus * modifier)
-                monster["hp"] = f"{num_dice}d{die_size}+{scaled_bonus}"
-                
-                # Scale XP
-                monster["xp"] = int(monster["xp"] * area_config.get("xp_modifier", 1.0))
+        # Only apply XP modifier if configured (not HP/damage which are already scaled)
+        if monster and "xp_modifier" in area_config:
+            monster["xp"] = int(monster["xp"] * area_config["xp_modifier"])
         
         return monster
     
@@ -395,9 +606,17 @@ class LitRPGEngine:
             return {"success": False, "error": f"Unknown area: {area_name}"}
         
         self.state["current_area"] = area_name
-        self.save_state()
         
         area_config = self.config["area_scaling"][area_name]
+        
+        # Emit area entered event
+        emit_event('area_entered', {
+            'area': area_name,
+            'level': area_config.get("level", 1),
+            'description': area_config.get("description", "")
+        })
+        
+        self.save_state()
         
         return {
             "success": True,
@@ -408,8 +627,10 @@ class LitRPGEngine:
     
     def cast_spell(self, mp_cost: int = None, spell_id: str = None, 
                    spell_power: str = None) -> Dict:
-        """Enhanced spell casting with spell database support"""
+        """Enhanced spell casting with spell database support and automatic effects"""
         char = self.state["character"]
+        spell = None
+        spell_type = "damage"  # default
         
         # Look up spell if ID provided
         if spell_id:
@@ -417,7 +638,17 @@ class LitRPGEngine:
             if not spell:
                 return {"success": False, "reason": "unknown_spell"}
             mp_cost = mp_cost or spell.get("mp_cost", 10)
-            spell_power = spell_power or spell.get("damage", spell.get("healing", "1d6"))
+            
+            # Determine spell type and power
+            if "healing" in spell:
+                spell_type = "healing"
+                spell_power = spell_power or spell.get("healing", "1d6")
+            elif "damage" in spell:
+                spell_type = "damage"
+                spell_power = spell_power or spell.get("damage", "1d6")
+            elif "effect" in spell or "shield" in spell_id.lower():
+                spell_type = "buff"
+                spell_power = spell_power or "0"
         else:
             mp_cost = mp_cost or 10
             spell_power = spell_power or "1d6"
@@ -428,20 +659,44 @@ class LitRPGEngine:
         char["mp"] -= mp_cost
         
         # Calculate spell effect
-        if isinstance(spell_power, str):
+        if isinstance(spell_power, str) and spell_power != "0":
             effect_value = roll_dice(spell_power) + (char["intelligence"] // 2)
         else:
-            effect_value = spell_power + (char["intelligence"] // 2)
+            effect_value = int(spell_power) if spell_power != "0" else 0
         
-        self.save_state()
-        
-        return {
+        # Apply spell effects based on type
+        result = {
             "success": True,
-            "effect_value": effect_value,
+            "type": spell_type,
             "mp_remaining": char["mp"],
             "mp_cost": mp_cost,
             "spell_id": spell_id
         }
+        
+        if spell_type == "healing":
+            # Apply healing immediately
+            old_hp = char["hp"]
+            char["hp"] = min(char["hp_max"], char["hp"] + effect_value)
+            actual_healed = char["hp"] - old_hp
+            result.update({
+                "healed": actual_healed,
+                "hp": char["hp"],
+                "hp_max": char["hp_max"]
+            })
+        elif spell_type == "buff":
+            # Apply buff status effects
+            if spell_id and "shield" in spell_id.lower():
+                self.apply_status_effect("shield_spell")
+                result["effect_applied"] = "shield_spell"
+            elif spell_id and "bless" in spell_id.lower():
+                self.apply_status_effect("blessed")
+                result["effect_applied"] = "blessed"
+        else:
+            # Damage spell - return damage value for use on enemies
+            result["effect_value"] = effect_value
+        
+        self.save_state()
+        return result
     
     def gain_xp(self, amount: int) -> Dict:
         """Award XP with configurable progression"""
@@ -454,6 +709,13 @@ class LitRPGEngine:
         amount = int(amount * area_config.get("xp_modifier", 1.0))
         
         char["xp"] += amount
+        
+        # Emit XP gained event
+        emit_event('xp_gained', {
+            'amount': amount,
+            'total_xp': char["xp"],
+            'current_level': char["level"]
+        })
         
         level_ups = 0
         while char["xp"] >= char["xp_next"]:
@@ -473,13 +735,25 @@ class LitRPGEngine:
             char["mp"] = char["mp_max"]
             char["stamina"] = char["stamina_max"]
             
+            # Emit level up event
+            emit_event('level_up', {
+                'new_level': char["level"],
+                'stats': {
+                    'hp_max': char["hp_max"],
+                    'mp_max': char["mp_max"],
+                    'stamina_max': char["stamina_max"]
+                },
+                'location': area,
+                'total_xp': char["xp"] + char["xp_next"]
+            })
+            
             # Grant points
             char["skill_points"] += 1
             char["stat_points"] += 2
             
             # Next level requirement
             xp_base = constants.get("xp_base", 100)
-            xp_scaling = constants.get("xp_scaling_factor", 1.5)
+            xp_scaling = constants.get("xp_multiplier", 1.5)
             char["xp_next"] = int(xp_base * (xp_scaling ** (char["level"] - 1)))
         
         self.save_state()
@@ -497,16 +771,18 @@ class LitRPGEngine:
     def rest(self, rest_type: str = "short") -> Dict:
         """Rest with configurable recovery rates"""
         char = self.state["character"]
-        constants = self.config.get("game_constants", {})
         
-        if rest_type == "short":
-            recovery = constants.get("rest_short_recovery", 0.25)
-        else:
-            recovery = constants.get("rest_long_recovery", 1.0)
+        # Use the proper recovery config structure
+        recovery_config = self.config.get("recovery", {}).get(f"{rest_type}_rest", {})
         
-        hp_recover = int(char["hp_max"] * recovery)
-        mp_recover = int(char["mp_max"] * recovery)
-        stamina_recover = int(char["stamina_max"] * recovery)
+        # Get recovery rates for each resource with fallbacks
+        hp_recovery_rate = recovery_config.get("hp", 0.3 if rest_type == "short" else 1.0)
+        mp_recovery_rate = recovery_config.get("mp", 0.5 if rest_type == "short" else 1.0)
+        stamina_recovery_rate = recovery_config.get("stamina", 1.0)
+        
+        hp_recover = int(char["hp_max"] * hp_recovery_rate)
+        mp_recover = int(char["mp_max"] * mp_recovery_rate)
+        stamina_recover = int(char["stamina_max"] * stamina_recovery_rate)
         
         old_hp = char["hp"]
         old_mp = char["mp"]
@@ -559,7 +835,11 @@ class LitRPGEngine:
         
         # Apply status effect bonuses
         if "blessed" in self.state.get("status_effects", {}):
-            modifier += self.config["status_effects"]["blessed"].get("bonus_to_rolls", 2)
+            modifier += self.config["status_effects"]["blessed"].get("skill_bonus", 2)
+        
+        # Apply frozen penalty (reduces dexterity-based checks)
+        if "frozen" in self.state.get("status_effects", {}) and attribute == "dexterity":
+            modifier -= 3
         
         # Roll d20
         roll = random.randint(1, 20)
@@ -594,9 +874,14 @@ class LitRPGEngine:
             "value": value
         }
     
-    def get_flag(self, key: str) -> Any:
+    def get_flag(self, key: str) -> Dict:
         """Get a story flag"""
-        return self.state["flags"].get(key, None)
+        value = self.state.get("flags", {}).get(key, None)
+        return {
+            "flag": key,
+            "value": value,
+            "exists": value is not None
+        }
     
     def get_status(self) -> Dict:
         """Get enhanced character status"""
@@ -645,9 +930,16 @@ class LitRPGEngine:
         # Check if player dodges
         char = self.state["character"]
         if random.random() < char["dodge_chance"]:
+            # Apply stamina cost for dodging
+            dodge_cost = self.config.get("game_constants", {}).get("stamina_dodge_cost", 5)
+            char["stamina"] = max(0, char["stamina"] - dodge_cost)
+            self.save_state()
+            
             return {
                 "dodged": True,
-                "damage": 0
+                "damage": 0,
+                "stamina_cost": dodge_cost,
+                "stamina_remaining": char["stamina"]
             }
         
         # Apply damage
@@ -659,16 +951,30 @@ class LitRPGEngine:
 
 def create_parser():
     """Create argument parser with all commands"""
+    
+    # Load available classes from config for dynamic choices
+    config_file = SYSTEM_DIR / "config.json"
+    available_classes = ['warrior', 'mage', 'rogue']  # Defaults
+    if config_file.exists():
+        with open(config_file, 'r') as f:
+            config = json.load(f)
+            if 'class_progression' in config:
+                available_classes = list(config['class_progression'].keys())
+                # Remove 'custom' from choices as it's a template
+                if 'custom' in available_classes:
+                    available_classes.remove('custom')
+    
     parser = argparse.ArgumentParser(
         description='LitRPG Game Engine - Mechanical number handler',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s init --name "Marcus" --class warrior
+  %(prog)s init --name "Marcus" --class berserker
   %(prog)s attack --weapon "2d6+3" --armor 2
   %(prog)s cast --spell firebolt
   %(prog)s add-item --item health_potion --quantity 3
   %(prog)s equip --item longsword
+  %(prog)s use-item --item antidote
   %(prog)s status-effect --apply poisoned --duration 5
   %(prog)s change-area --area darkwood_forest
         """
@@ -679,8 +985,9 @@ Examples:
     # Init command
     init_parser = subparsers.add_parser('init', help='Initialize new character')
     init_parser.add_argument('--name', required=True, help='Character name')
-    init_parser.add_argument('--class', choices=['warrior', 'mage', 'rogue'], 
-                            default='warrior', help='Character class')
+    init_parser.add_argument('--class', choices=available_classes, 
+                            default='warrior', 
+                            help=f'Character class (available: {", ".join(available_classes)})')
     
     # Attack command
     attack_parser = subparsers.add_parser('attack', help='Perform attack')
@@ -739,6 +1046,10 @@ Examples:
     equip_parser = subparsers.add_parser('equip', help='Equip item')
     equip_parser.add_argument('--item', required=True, help='Item ID to equip')
     
+    # Use consumable item
+    use_parser = subparsers.add_parser('use-item', help='Use a consumable item')
+    use_parser.add_argument('--item', required=True, help='Item ID to use')
+    
     # Status effects
     effect_parser = subparsers.add_parser('status-effect', help='Manage status effects')
     effect_parser.add_argument('--apply', help='Effect to apply')
@@ -753,9 +1064,10 @@ Examples:
     subparsers.add_parser('status', help='Get character status')
     
     # Flag command
-    flag_parser = subparsers.add_parser('flag', help='Set story flag')
-    flag_parser.add_argument('--set', required=True, help='Flag key')
-    flag_parser.add_argument('--value', required=True, help='Flag value')
+    flag_parser = subparsers.add_parser('flag', help='Get or set story flags')
+    flag_parser.add_argument('--get', help='Flag key to retrieve')
+    flag_parser.add_argument('--set', help='Flag key to set')
+    flag_parser.add_argument('--value', help='Flag value (required with --set)')
     
     return parser
 
@@ -808,6 +1120,9 @@ def main():
         elif args.command == 'equip':
             result = engine.equip_item(args.item)
             
+        elif args.command == 'use-item':
+            result = engine.use_item(args.item)
+            
         elif args.command == 'status-effect':
             if args.tick:
                 result = engine.tick_status_effects()
@@ -823,13 +1138,19 @@ def main():
             result = engine.get_status()
             
         elif args.command == 'flag':
-            # Convert string "true"/"false" to boolean
-            value = args.value
-            if value.lower() == "true":
-                value = True
-            elif value.lower() == "false":
-                value = False
-            result = engine.set_flag(args.set, value)
+            if args.get:
+                # Get flag value
+                result = engine.get_flag(args.get)
+            elif args.set and args.value is not None:
+                # Set flag value - convert string "true"/"false" to boolean
+                value = args.value
+                if value.lower() == "true":
+                    value = True
+                elif value.lower() == "false":
+                    value = False
+                result = engine.set_flag(args.set, value)
+            else:
+                result = {"error": "Specify --get or --set with --value"}
             
         else:
             result = {"error": f"Unknown command: {args.command}"}

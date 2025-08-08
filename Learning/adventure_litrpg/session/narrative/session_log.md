@@ -53,4 +53,4 @@
 - Poisoned: 2 turns remaining
 - HP: 133/156
 - Gold: 28
-- Inventory: Added poison daggers, half healing potion
+- Inventory: Added poison daggers, half healing potion[20:21:09] DAMAGE: Dealt 32 to enemy
