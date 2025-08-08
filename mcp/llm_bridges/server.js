@@ -40,7 +40,7 @@ class LLMBridgesServer {
                 files: z.array(z.string())
                     .optional()
                     .default([])
-                    .describe('Array of file paths to analyze'),
+                    .describe('Array of absolute file paths to analyze (e.g., /home/user/project/file.js)'),
                     
                 prompt: z.string()
                     .optional()

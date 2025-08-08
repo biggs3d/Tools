@@ -171,7 +171,7 @@ export function createSendToLLMTool() {
             files: z.array(z.string())
                 .optional()
                 .default([])
-                .describe('File paths to include in context'),
+                .describe('Absolute file paths to include in context (e.g., /home/user/project/file.js)'),
             
             model: z.string()
                 .optional()
