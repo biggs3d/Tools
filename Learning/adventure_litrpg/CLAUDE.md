@@ -183,6 +183,16 @@ chronicle_scene(
 **REMINDER RULE**: If you write more than 3 paragraphs of narrative, CHRONICLE IT!
 This preserves the ACTUAL narrative, not summaries!
 
+**IMPORTANT CHRONICLE TIMING**:
+1. **During Play**: Chronicle scenes as they happen (best practice)
+2. **Before Session End**: Chronicle any remaining scenes BEFORE running `end_session.py`
+3. **If Missed**: After running `end_session.py`, manually add missing scenes and merge:
+   ```python
+   # Add missing scenes first with chronicle_scene()
+   # Then merge into archived chronicle if needed
+   ```
+4. The `current_session.json` gets reset when starting a new session, so make sure all scenes are chronicled before ending!
+
 **Combat Flow**:
 
 1. Describe the scene cinematically

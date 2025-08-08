@@ -65,6 +65,37 @@
     }
   },
   
+  "session_gear": {
+    "berserker_outfit": {
+      "type": "clothing",
+      "name": "Berserker's Practical Outfit",
+      "armor": 1,
+      "value": 50,
+      "description": "Reinforced pants, breathable shirt, vest with breakaway panels for rage transformations",
+      "special_properties": {
+        "rage_friendly": "Doesn't restrict movement during rage",
+        "blood_resistant": "Darker colors hide stains"
+      }
+    },
+    "marcus_coat": {
+      "type": "clothing", 
+      "name": "Well-Worn Leather Coat",
+      "armor": 0,
+      "value": 20,
+      "description": "Dark leather coat with inner pockets, hides bloodstains well",
+      "special_properties": {
+        "concealment": "Multiple hidden pockets for small items"
+      }
+    },
+    "basic_shirt": {
+      "type": "clothing",
+      "name": "Basic Cotton Shirt",
+      "value": 2,
+      "description": "Simple, practical shirt",
+      "quantity": 3
+    }
+  },
+  
   "template": {
     "_comment": "Use this template for adding new unique items during play",
     "item_id": {

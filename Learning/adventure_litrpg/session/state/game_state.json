@@ -5,7 +5,7 @@
     "level": 4,
     "xp": 315,
     "xp_next": 337,
-    "hp": 162,
+    "hp": 167,
     "hp_max": 180,
     "mp": 30,
     "mp_max": 30,
@@ -22,20 +22,25 @@
     "crit_chance": 0.1,
     "dodge_chance": 0.17,
     "equipment": {
-      "weapon": null,
-      "armor": null,
+      "weapon": "greataxe_first_blood",
+      "armor": "berserker_outfit",
       "accessory": null
     },
-    "inventory": [],
-    "gold": 196
+    "inventory": [
+      "health_potion",
+      "health_potion",
+      "stamina_draught",
+      "rage_elixir",
+      "antidote",
+      "marcus_coat",
+      "basic_shirt",
+      "basic_shirt",
+      "basic_shirt"
+    ],
+    "gold": 496
   },
   "current_area": "ironhold",
-  "status_effects": {
-    "poisoned": {
-      "duration": 2,
-      "power": "1d4"
-    }
-  },
+  "status_effects": {},
   "flags": {
     "tutorial_complete": true,
     "threshold_beast_killed": true,

@@ -19,32 +19,33 @@
 - Achieved Level 4 in first hour (world record pace)
 
 ## Current Situation
-**Location**: Ironhold City Gates, just arrived with caravan  
-**Immediate Context**: Standing at gates covered in blood, guards nervous but impressed  
-**Tension Point**: Need clothes urgently, bounties to collect, city to explore
+**Location**: Ironhold Back Alleys, heading to East Gate  
+**Immediate Context**: Slipping away from the Drunken Griffin after strategy session with Garrett  
+**Tension Point**: One hour until departure on the Ashwood Trail to level up before facing Scarred Wolves
 
 ## Character Status
 **Narrative State**:
-- Condition: Wounded but stable after intense battle
-- Appearance: Clothes destroyed, covered in dried blood
-- Notable: Just achieved Level 4 in record time (first hour)
+- Condition: Energized and ready after food and rest at the inn
+- Appearance: New berserker outfit and dark leather coat from Marcus's shop
+- Notable: Known as "Speedrun Berserker" thanks to Kaya's memory crystals
 
 **Notable Inventory Events**:
-- Gained substantial gold and bandit ear trophies
-- Lost original coffee shop clothes (destroyed in combat)
-- Wielding the Greataxe of First Blood earned from Threshold Beast
-- Wearing damaged leather armor from bandits
+- Collected 370 gold bounty from Merchants' Guild (total: 496g)
+- Purchased complete berserker outfit from Marcus (70g)
+- Still carrying Greataxe of First Blood
+- Left note for young Tom at the Drunken Griffin
 
 ## Active Narrative Threads
 ### Main Quest
-**Thread**: Establishing reputation in new world  
-**Current Objective**: Get paid, equipped, and registered as adventurer  
-**Next Step**: Visit Merchants' Guild for bounties
+**Thread**: Strategic leveling before confronting Scarred Wolves  
+**Current Objective**: Leave Ironhold quietly and begin Ashwood Trail  
+**Next Step**: Meet Garrett at East Gate with Henrik's wagon in one hour
 
 ### Side Threads
-1. **Scarred Wolves Raid**: Garrett organizing assault on 40+ bandits, wants Steve involved
-2. **Kaya's Mystery**: Golden-eyed guide appears/disappears, recording Steve's exploits
-3. **The Convergence**: Why was Steve pulled into this world?
+1. **Ashwood Trail Campaign**: Three crisis zones to clear (Sunken Mills, Crow's Rest, Iron Mines)
+2. **Kaya's Mystery**: Left message that "real game begins when you leave tutorial city"
+3. **Tom's Hero Worship**: Young aspiring berserker, son of deceased guard, now Steve's biggest fan
+4. **Cromwell's Interest**: Guild Master intrigued by Steve walking out mid-pitch
 
 ### Unresolved Mysteries
 - What is Kaya really? Why is she helping Steve specifically?
@@ -53,27 +54,33 @@
 
 ## NPCs to Remember
 ### Recently Met
-- **Garrett**: Level 4 ex-Captain - Friendly - Wants to raid Scarred Wolves together
-- **Kaya**: Mysterious guide - Helpful/Amused - Has memory crystal of fights
+- **Garrett**: Level 4 ex-Captain - Allied - Planning Ashwood Trail campaign together
+- **Kaya**: Mysterious guide - Cryptic/Amused - Spreading Steve's reputation via memory crystals
+- **Tom**: 13-year-old aspiring berserker - Hero worship - Works for Marcus
+- **Sara**: Drunken Griffin owner - Protective/Discrete - Providing cover story
+- **Marcus**: Clothier - Professional/Friendly - Supplied berserker outfit
+- **Cromwell**: Merchants' Guild Master - Intrigued/Calculating - Wants Steve under contract
 
 ### Expecting Return
-- **Merchants' Guild**: Owes 330g+ in various bounties
-- **Ironhold Guards**: Will spread word of Howling Scars elimination
+- **Viktor 'The Red Wolf'**: Level 7 bandit leader - Will hear about Howling Scars by nightfall
+- **Tom**: Expecting to see Steve again (has promise and note)
+- **Cromwell**: Likely investigating Steve's background and movements
 
 ### Active Antagonists
 - **Scarred Wolves**: Main bandit force - Unaware their subsidiary gang is dead - 40+ members
 
 ## World State Changes
-**Time Passed**: Morning to near-noon  
-**Environmental**: Clear day, good road conditions  
-**Political/Social**: Roads temporarily safer, bandit threat reduced  
-**Consequences Pending**: Scarred Wolves will learn about Howling Scars elimination
+**Time Passed**: Morning to late afternoon  
+**Environmental**: Clear day, shadows lengthening, perfect for discrete departure  
+**Political/Social**: Entire city buzzing about "Speedrun Berserker"  
+**Consequences Pending**: Scarred Wolves learning about Howling Scars, Viktor planning response
 
 ## DM Notes for Next Session
 ### Prepared Encounters
-- If player goes to Merchants' Guild: Big payday, reputation boost, job offers
-- If player goes to equipment shop: Friendly merchant, berserker-appropriate gear available
-- If player goes to inn first: Overhears rumors about their exploits already spreading
+- **Sunken Mills**: Flooded ruins, creatures Level 3-5 dragging travelers off road
+- **Crow's Rest**: Giant ravens Level 4-6, terrorizing grain shipments, 200g bounty
+- **Iron Mines**: Something awakened in deep tunnels, leads to mountain approach on Howling Ridge
+- **Random Road Encounter**: Possible Scarred Wolves scouts or assassins if they mobilize quickly
 
 ### Potential Complications
 - Other adventurers jealous of rapid advancement
@@ -81,19 +88,21 @@
 - Noble might try to hire/control the "Immediate"
 
 ### Rewards Ready
-- For bounty collection: 330g minimum plus reputation
-- Hidden discovery at Adventurers' Hall: Special berserker trainer interested in Steve
+- Crow's Rest village: 200g for clearing giant ravens
+- Strategic advantage: Mountain approach to Howling Ridge unexpected by bandits
+- Level progression: Potential to reach Level 6-7 through intense combat
+- Psychological warfare: Building fear in Scarred Wolves through destruction trail
 
 ## Opening Options for Next Session
 
-### Option A: Continue Immediately
-"The guard's eyes widen as he recognizes the Razorback tattoos on the ears you're carrying. 'By the gods... you're the one? The whole gatehouse is talking about it - someone said a Level 3 wiped out the Howling Scars!' Behind you, Garrett chuckles..."
+### Option A: Continue at East Gate
+"The East Gate is quieter than the main entrances, mostly used by farmers and local merchants. You spot Henrik's weathered produce wagon, and there's Garrett, casually inspecting cabbages while Henrik complains loudly about his back. No one's paying attention to either of you—perfect."
 
-### Option B: Short Time Skip
-"You wake in the Drunken Griffin Inn, finally clean, bandaged, and in fresh clothes. The events of yesterday feel like a fever dream - except for the Level 4 tag floating above your head and the 500+ gold in your purse. Garrett knocks on your door..."
+### Option B: Quick Travel Montage
+"The first hour on the road passes in tense silence, both of you listening for pursuit. But there's nothing—just the creak of wagon wheels and distant bird calls. 'We did it,' Garrett grins. 'Ghosted out of Ironhold like smoke. Now the real work begins...'"
 
-### Option C: Scene Transition
-"The Merchants' Guild erupts in chaos as you dump nine pairs of tattooed ears on the marble counter. 'THAT'S the Howling Scars lieutenant!' someone shouts. The guild master himself emerges from his office..."
+### Option C: Sunken Mills Arrival
+"The Sunken Mills loom before you in the dying light, half-drowned buildings jutting from murky water like broken teeth. Something moves beneath the surface—several somethings. Garrett hefts his warhammer. 'Well, hermano, ready to start building that legend?'"
 
 ## Important Reminders
 - **Tone**: Fast-paced, visceral combat, humor through culture shock

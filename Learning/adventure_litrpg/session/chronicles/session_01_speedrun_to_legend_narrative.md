@@ -310,3 +310,29 @@ final_level: 4
 
 ---
 
+## Scene 9: Blood Money at the Merchants Guild
+
+The Merchants Guild fell silent as Steve pushed through the heavy oak doors, blood-soaked and carrying nine pairs of tattooed ears. Cromwell, the guild master dripping in gold rings and purple robes, emerged like a calculating predator. The scale tipped dramatically under the weight of the trophies - 370 gold for the morning's work. But Steve walked away from Cromwell's honeyed offers of exclusive contracts, leaving the man intrigued and the entire guild buzzing.
+
+**Player**: We're here, might as well get it over with. Signing up for some big commitment isn't my thing.
+
+```
+gold_gained: 370
+reputation: increased
+```
+
+---
+
+## Scene 10: The Speedrun Berserker and His Young Fan
+
+In Marcus's shop, young Tom burst in with news - Kaya had been showing memory crystals of Steve's Threshold Beast fight across the city, earning him the title 'Speedrun Berserker'. The thirteen-year-old aspiring warrior, who lost his guard father to sickness, nearly buckled under the weight of the Greataxe of First Blood when Steve let him hold it. Through back alleys known only to locals, Tom guided Steve to the Drunken Griffin, chattering with hero worship about the man who went from coffee shop to Level 4 in a single hour.
+
+**Player**: Here ya go. Let's not hang around here too long though\! Know a good place to grab some food?
+
+```
+gold_spent: 70
+equipment_gained: berserker outfit set
+```
+
+---
+

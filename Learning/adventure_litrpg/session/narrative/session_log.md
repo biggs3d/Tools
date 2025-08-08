@@ -54,3 +54,5 @@
 - HP: 133/156
 - Gold: 28
 - Inventory: Added poison daggers, half healing potion[20:21:09] DAMAGE: Dealt 32 to enemy
+[12:06:20] STATUS: poisoned removed
+[12:45:34] ITEM: Acquired health_potion
