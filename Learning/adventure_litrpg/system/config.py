@@ -17,7 +17,8 @@ SESSION_DIR = PROJECT_ROOT / "session"
 # Session subdirectories
 STATE_DIR = SESSION_DIR / "state"
 NARRATIVE_DIR = SESSION_DIR / "narrative"
-CHAPTERS_DIR = SESSION_DIR / "chapters"
+CHAPTERS_DIR = SESSION_DIR / "chapters"  # Polished novel chapters
+CHRONICLES_DIR = SESSION_DIR / "chronicles"  # Real-time narrative capture
 COMBAT_REPLAYS_DIR = SESSION_DIR / "combat_replays"
 WORLD_DIR = SESSION_DIR / "world"
 META_DIR = SESSION_DIR / "meta"
@@ -111,6 +112,7 @@ def ensure_directories():
         STATE_DIR,
         NARRATIVE_DIR,
         CHAPTERS_DIR,
+        CHRONICLES_DIR,
         COMBAT_REPLAYS_DIR,
         WORLD_DIR,
         META_DIR

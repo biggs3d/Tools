@@ -125,6 +125,20 @@ Say: "Can we rewind that last action?" (Claude is flexible!)
 Check `archives/` folder for checkpoints
 Or say: "Let's reconstruct from what we remember"
 
+## 📸 Session Preservation
+
+When you say "ending session" or "done for today", Claude (your DM) will:
+1. Run the session preservation workflow
+2. Save all narrative chapters and combat replays
+3. Archive the complete conversation
+4. Update NEXT_SESSION.md with hooks for next time
+
+If you want to manually check saved sessions:
+```bash
+# List all saved Claude sessions:
+python3 system/claude_session_capture.py --list
+```
+
 ## 🎭 Remember: You're the Hero
 
 This is YOUR story. Claude is here to make it epic, not to "win" against you. Every failure teaches something, every success was earned, and every choice matters.
