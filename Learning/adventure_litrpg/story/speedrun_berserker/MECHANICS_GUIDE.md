@@ -1,7 +1,7 @@
-# Enemy & Combat Handling Guide
+# Mechanics Guide - Enemies, Combat, and Game Systems
 
 ## Core Philosophy
-**Create enemies on the fly. Stats serve the story, not vice versa.**
+**Create mechanics on the fly. Stats serve the story, not vice versa.**
 
 ## Where Enemies Live
 

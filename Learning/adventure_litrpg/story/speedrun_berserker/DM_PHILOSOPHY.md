@@ -1,16 +1,4 @@
-# DM Guide - LitRPG Adventure System
-
-## Session Startup Checklist
-
-**ALWAYS read these files at session start:**
-
-1. `session.json` - Current state and character data
-2. `DM_GUIDE.md` - This file (philosophy and mechanics)
-3. `CHARACTER_VOICE_GUIDE.md` - Speech patterns and personality
-4. `SESSION_CONTINUITY.md` - How to maintain consistency
-5. Latest `raw/*.md` file - Recent narrative for voice/style
-
-This takes ~2 minutes and ensures perfect continuity.
+# DM Philosophy - LitRPG Adventure System
 
 ## Core Philosophy
 

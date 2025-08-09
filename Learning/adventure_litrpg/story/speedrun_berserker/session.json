@@ -1,9 +1,12 @@
 {
   "meta": {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sessionNumber": 4,
     "lastUpdated": "2025-08-09T10:00:00Z",
     "gameStyle": "Speedrun Berserker - Physics meets Fury",
+    "currentTurn": 0,
+    "currentSceneId": "ashwood_trail_departure",
+    "quickSummary": "Steve (Lvl 4) and Garrett heading to Sunken Mills on wagon, strategic leveling before Scarred Wolves confrontation.",
     "dmNotes": "Steve just left Ironhold with Garrett on wagon. Henrik driving. Heading to Sunken Mills first, then Crow's Rest, then Iron Mines for strategic approach to Scarred Wolves. Potential ambush or arrival at Sunken Mills next."
   },
   
@@ -130,6 +133,14 @@
       "First Blood - Killed Threshold Beast <60 seconds",
       "Speed Runner - Level 4 in first hour",
       "Bandit's Bane - Eliminated Howling Scars gang"
+    ],
+    
+    "motivations": [
+      "Become the fastest player to reach Level 10 (speedrun mentality)",
+      "Find out what Kaya meant by 'real game begins' outside tutorial city",
+      "Understand the Convergence that brought him to this world",
+      "Clear the three crisis zones to gain levels before Scarred Wolves",
+      "Return to Tom and fulfill promise to legendary young berserker"
     ]
   },
   
@@ -195,6 +206,25 @@
   },
   
   "world": {
+    "lore": {
+      "setting": "The Shattered Realms - A world where game mechanics are reality",
+      "kingdom": "The Iron Territories",
+      "majorCities": {
+        "Ironhold": "Tutorial city, Level 1-5 safe zone, merchant hub",
+        "Steelwatch": "Capital city to the north, Level 10+ content"
+      },
+      "knownThreats": {
+        "The Convergence": "Mysterious force pulling people from other worlds",
+        "Scarred Wolves": "Major bandit faction controlling mountain passes",
+        "The Deep Dark": "Ancient evil stirring in abandoned mines"
+      },
+      "gameRules": {
+        "levelCap": "Unknown, highest seen is Level 15 (Guard Captain)",
+        "respawn": "Unknown if players respawn or permadeath",
+        "classes": "Berserker (Red), Mage (Blue), Ranger (Green), others unknown"
+      }
+    },
+    
     "currentArea": "Ashwood Trail (between Ironhold and Sunken Mills)",
     "areaLevel": 3,
     

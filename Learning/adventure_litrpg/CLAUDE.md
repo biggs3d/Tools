@@ -16,12 +16,10 @@ You are a storyteller, not a system administrator. The tools exist to serve the 
 
 The current active story. Steve "The Immediate" - a coffee shop normie turned physics-exploiting berserker.
 
-**To run this story, read these files IN ORDER:**
-
-1. `story/speedrun_berserker/STARTUP_INSTRUCTIONS.md` - Complete checklist
-2. `story/speedrun_berserker/session.json` - All game state
-3. `story/speedrun_berserker/DM_GUIDE.md` - Philosophy and mechanics
-4. Other guides as listed in STARTUP_INSTRUCTIONS
+**To run this story:**
+1. Read `story/speedrun_berserker/session.json` - ALL game state lives here
+2. Read all `story/speedrun_berserker/*.md` files - Your guides for DMing
+3. Skim latest `story/speedrun_berserker/raw/*.md` - For voice calibration
 
 ## Shared Tools
 

@@ -1,39 +1,28 @@
 # 🎮 LitRPG Session Startup Instructions
 
-## For Claude/AI Agent: READ THIS FIRST!
+## Quick Reference for Running This Story
 
-### Required Reading at Session Start (IN THIS ORDER)
+### What to Read at Session Start
 
-1. **session.json** - Contains EVERYTHING:
-   - Current character stats, inventory, equipment
-   - Story state, plot threads, session history  
-   - Character personalities with speech patterns
-   - World state, flags, relationships
+**Simple approach: Read everything!**
 
-2. **DM_GUIDE.md** - Your philosophy and mechanics guide:
-   - Core principles (narrative > numbers)
-   - Game loops and mechanics
-   - How to handle combat, checks, progression
+1. **session.json** - Single source of truth for ALL game state:
+   - Character stats, inventory, motivations
+   - World lore, current scene, plot threads
+   - Character personalities and speech patterns
+   - Faction standings, relationships
 
-3. **CHARACTER_VOICE_GUIDE.md** - How everyone speaks:
-   - Speech patterns for each character
-   - Verbal tics and quirks
-   - Example dialogue
+2. **All *.md guide files** in this folder:
+   - DM_PHILOSOPHY.md - Core principles and game loops
+   - CHARACTER_VOICE_GUIDE.md - Speech patterns
+   - MECHANICS_GUIDE.md - Combat and enemy creation
+   - SESSION_CONTINUITY.md - Consistency maintenance
+   - This file (STARTUP_INSTRUCTIONS.md)
 
-4. **ENEMY_HANDLING.md** - Creating enemies on the fly:
-   - Quick stat guidelines by level
-   - No need for monster manual
-   - Track only what matters
-
-5. **SESSION_CONTINUITY.md** - Maintaining consistency:
-   - What lives where
-   - How to preserve voice
-   - Red flags to avoid
-
-6. **Latest raw/*.md file** - Recent verbatim narrative:
-   - Actual dialogue for voice calibration
-   - Combat choreography style
-   - Pacing and emotional beats
+3. **Latest raw/*.md file** - Recent narrative for voice:
+   - Skim for dialogue style
+   - Combat choreography patterns
+   - Pacing reference
 
 ## Quick Start Process
 
@@ -85,12 +74,12 @@ You're telling a story, not running a spreadsheet. The tools exist to serve the 
 
 ```
 story/speedrun_berserker/
-├── session.json              # ALL game state (READ FIRST!)
+├── session.json              # ALL game state (single source of truth)
 ├── STARTUP_INSTRUCTIONS.md   # This file
-├── DM_GUIDE.md              # Philosophy & mechanics
+├── DM_PHILOSOPHY.md         # Core philosophy & game loops
 ├── CHARACTER_VOICE_GUIDE.md # Speech patterns
-├── SESSION_CONTINUITY.md    # Consistency guide
-├── ENEMY_HANDLING.md        # Enemy creation guide
+├── MECHANICS_GUIDE.md       # Combat, enemies, game systems
+├── SESSION_CONTINUITY.md    # Consistency maintenance
 └── raw/                     # Full narrative archive
     ├── session_001_coffee_to_carnage.md
     ├── session_002_ironhold_arrival.md

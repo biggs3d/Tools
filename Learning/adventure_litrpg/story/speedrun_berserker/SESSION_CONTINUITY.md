@@ -42,12 +42,12 @@ The `raw/` folder contains **verbatim narrative** - this preserves:
 - Internal monologues
 - Emotional nuance
 
-### CHARACTER_VOICE_GUIDE.md
-**Purpose**: Speech pattern reference
-- Core patterns per character
-- Verbal tics and quirks
-- Example dialogues
-- Evolution notes
+### Guide Files (*.md)
+**Purpose**: DM guidance
+- DM_PHILOSOPHY.md - Core philosophy and game loops
+- CHARACTER_VOICE_GUIDE.md - Speech patterns
+- MECHANICS_GUIDE.md - Combat and system rules
+- This file - Consistency maintenance
 
 ## Maintaining Consistency
 
