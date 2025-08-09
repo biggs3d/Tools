@@ -1,167 +1,137 @@
 # LitRPG Adventure System 🎲⚔️
 
-A narrative-first LitRPG framework for Claude Code that balances compelling storytelling with meaningful progression mechanics. Live your own progression fantasy adventure!
+A simplified, narrative-first LitRPG framework for Claude Code. One JSON file, endless adventures.
 
 ## Quick Start
 
 ```bash
-# Option 1: Interactive setup
-python3 quickstart.py
+# Tell Claude to start your adventure
+"Let's play the speedrun berserker story!"
 
-# Option 2: Direct to Claude
+# Or create a new adventure
 "Start a new LitRPG adventure. I want to be a [character concept]"
 ```
 
 ## What Is This?
 
-This system lets you play immersive, narrative-driven RPG adventures with Claude as your Dungeon Master. Unlike traditional tabletop systems:
+A radically simplified RPG system where Claude is your Dungeon Master.
+We threw out 789 lines of complex procedures for one simple principle:
 
-- **Story drives everything** - No rigid movement or action rules
-- **Numbers that matter** - HP, damage, and XP create real tension
-- **Living world** - NPCs have lives, time passes, consequences ripple
-- **Your choices shape the narrative** - No predetermined path
-- **Cinematic combat** - Visceral descriptions, not just dice rolls
+**"Numbers for impact, narrative for everything else."**
 
-Think less "D&D with strict rules" and more "living inside a Cradle or Dungeon Crawler Carl novel."
+- **One file tracks everything** - session.json contains all state
+- **Direct editing** - Claude edits files directly, no complex commands
+- **Pure storytelling** - Create enemies, items, and NPCs on the fly
+- **Minimal automation** - Just dice rolling and XP math
 
-## Core Philosophy
+Think "living inside a Cradle novel" not "spreadsheet simulator."
 
-- **Numbers for Impact**: Python handles HP, damage, XP, skill checks
-- **Narrative for Everything Else**: Movement, time, and interactions flow naturally
-- **Creative Freedom First**: Every adventure can be unique
-- **Collaborative Storytelling**: Claude enhances your ideas, doesn't restrict them
-
-## Project Structure
+## Structure
 
 ```
 adventure_litrpg/
-├── system/                 # Core game files (don't modify during play)
-│   ├── game_engine.py     # Handles all numerical calculations
-│   ├── dm_instructions.md # Narrative guidelines for Claude
-│   ├── session_zero.md    # Character creation guide
-│   └── first_session_guide.md # Example play flows
-├── content/               # Optional reference content
-│   ├── adventure_starts.json # Opening scenarios
-│   ├── bestiary.json     # Enemy templates
-│   ├── items.json        # Equipment examples
-│   └── spells.json       # Magic templates
-├── session/              # Your active game (git-ignored)
-│   ├── state/           # Character stats and flags
-│   ├── narrative/       # Story tracking
-│   ├── world/          # NPC relationships and world state
-│   └── meta/           # Player preferences
-├── quickstart.py        # Interactive session starter
-├── CLAUDE.md           # Instructions for Claude Code
-└── QUICK_REFERENCE.md  # Player command reference
+├── story/                    # Your adventures
+│   └── speedrun_berserker/   # Active story
+│       ├── session.json      # ALL game state (edit directly)
+│       ├── DM_GUIDE.md       # Philosophy & mechanics
+│       ├── STARTUP_INSTRUCTIONS.md  # Session checklist
+│       └── raw/              # Verbatim narratives for book editing
+├── tools/                    # Shared utilities
+│   ├── dice.py              # Dice rolling
+│   └── xp.py                # Level calculations
+└── CLAUDE.md                # Instructions for Claude
 ```
 
-## Player Commands
+## The Speedrun Berserker Story
 
-During your adventure, you can say:
+Currently playing: **Steve "The Immediate"** - a coffee shop normie turned physics-exploiting rage machine.
 
-- **STATUS** - View your character sheet
-- **INVENTORY** - Check your items  
-- **JOURNAL** - Review recent events
-- **REST** - Recover resources
-- **SAVE POINT** - Create a checkpoint
+- Level 4 Berserker
+- Left Ironhold with Garrett, hunting Scarred Wolves
+- Three crisis zones await
+
+## Creating New Stories
+
+1. Copy `story/speedrun_berserker/` as template
+2. Clear the `raw/` folder
+3. Reset `session.json` with new character
+4. Customize the guides
+5. Start playing!
+
+## Core Philosophy
+
+### What We Keep
+
+- Health points for real danger
+- Damage rolls for combat impact
+- XP/levels for progression feel
+- Inventory that matters
+
+### What We Dropped
+
+- Complex command systems
+- Rigid turn structures
+- Preset content libraries
+- Movement/time tracking
+- 30+ specialized tools
+
+### What We Gained
+
+- Creative freedom
+- Faster gameplay
+- Better narrative flow
+- Character voice consistency
+- Direct file editing
 
 ## How It Works
 
-1. **You describe** what you want to do
-2. **Claude narrates** the world's response cinematically
-3. **Python calculates** any numerical outcomes (damage, healing, XP)
-4. **The story continues** based on consequences
+1. **Claude reads** session.json to know current state
+2. **You describe** what you want to do
+3. **Claude narrates** cinematically
+4. **Numbers update** directly in JSON when needed
+5. **Story continues** with consequences
 
-## Features
+## Example Play
 
-### Narrative First
-- Rich, immersive descriptions
-- NPCs with personalities and motivations
-- Environmental storytelling
-- Meaningful choices with consequences
+> *The drowned villagers rise from the murky water, flesh bloated and gray. One still clutches a child's doll.*
 
-### Progression That Matters
-- Level up and grow stronger
-- Earn new abilities
-- Find powerful items
-- Build reputation and relationships
+**You**: "I'll use my momentum to slam through them with my axe!"
 
-### Living World
-- Time passes when you're away
-- NPCs have their own lives
-- Your actions ripple outward
-- The world exists beyond you
-
-### Flexible System
-- Create any character concept
-- Adapt to any fantasy setting
-- Support for various play styles
-- No "wrong" way to play
-
-## Example Opening
-
-> *The autumn rain pounds against the tavern windows as you nurse your third ale. The Rusty Tankard isn't much, but it's dry. Your fingers unconsciously check your daggers - old habits from the thieves' guild you'd rather forget.*
+> *You explode forward, axe leading. Physics meets fury as you CLEAVE through the first one - the blade doesn't stop at
+flesh, it goes THROUGH. The body splits, top half splashing back into the water.*
 >
-> *Before you can order another drink, the tavern door SLAMS open. A young woman stumbles in, blood seeping through her fingers pressed against her side. "Please," she gasps, "they took my brother to the old mine. The cultists... they're going to..."*
+> *[Damage: 47! Drowned Villager destroyed]*
 >
-> *She collapses.*
->
-> **[HP: 80/80 | MP: 50/50 | Stamina: 120/120]**
->
-> What do you do?
+> *But there are two more, and they're reaching for you with waterlogged hands...*
 
-## Tips for Best Experience
+## Key Features
+
+- **Single source of truth** - One JSON file per story
+- **Character voices** - Speech patterns saved with NPCs
+- **Narrative archive** - Full sessions saved to raw/ for book editing
+- **Physics-based combat** - Creative solutions always work
+- **Living world** - NPCs have lives beyond you
+
+## Tips
 
 ✅ **DO:**
-- Describe your intentions clearly
-- Try creative solutions
-- Interact with NPCs as real people
-- Tell Claude your preferences
-- Embrace both success and failure
+
+- Let Claude edit files directly
+- Focus on story over mechanics
+- Try creative physics-based solutions
+- Save memorable quotes in character entries
 
 ❌ **DON'T:**
-- Worry about "optimal" choices
-- Try to break the system
-- Rush through scenes
-- Forget this is collaborative
 
-## Customization
-
-The `content/` directory contains starter templates, but Claude can:
-- Create unique enemies on the fly
-- Invent new items and spells
-- Design original scenarios
-- Adapt to any character concept
-
-## Session Management
-
-- **Starting**: Use `quickstart.py` or ask Claude directly
-- **Continuing**: Sessions auto-save, just ask to continue
-- **Checkpoints**: Create save points for important moments
-- **Archives**: Completed adventures are preserved
-
-## Requirements
-
-- Python 3.6+ (for the game engine)
-- Claude Code (for the DM/narrator)
-- Imagination and a sense of adventure!
-
-## Contributing
-
-Feel free to:
-- Share your adventure logs
-- Contribute new content templates
-- Suggest system improvements
-- Create themed expansion packs
+- Worry about "optimal" builds
+- Get bogged down in rules
+- Forget this is collaborative storytelling
 
 ## Philosophy
 
-Every session should feel like you're living inside your favorite LitRPG novel. The numbers create tension and progression, but the story is what you'll remember.
-
-## License
-
-MIT - Share, modify, and adventure freely!
+Every response should feel like living inside your favorite LitRPG novel. Make it visceral. Make it memorable. Make them
+feel like a legend.
 
 ---
 
-*"May your adventures be epic, your loot be legendary, and your stories worth telling!"* 🗡️✨
+*"Numbers for impact, narrative for everything else."* ¡Dale candela! 🔥

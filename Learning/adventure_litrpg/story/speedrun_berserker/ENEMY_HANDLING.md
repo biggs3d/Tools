@@ -116,11 +116,10 @@ Fisherman: 3d6+6 = 22 HP
 
 ## Reference (Optional)
 
-The old content/bestiary.json exists at the main level if you want inspiration, but remember:
-- It's optional reference only
-- Modify freely (triple HP for bosses!)
-- Create new enemies instead
-- Each adventure is its own world
+If you need inspiration, there's an archived bestiary.json, but remember:
+- Create enemies on the fly that fit your narrative
+- Each adventure is its own unique world
+- Stats serve the story, not vice versa
 
 ## For Next Session
 
