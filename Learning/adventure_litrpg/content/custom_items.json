@@ -96,6 +96,43 @@
     }
   },
   
+  "hedda_specials": {
+    "phoenix_tears": {
+      "type": "consumable",
+      "name": "Phoenix Tears",
+      "value": 300,
+      "description": "Crystal vial of golden liquid. Automatically activates upon death.",
+      "special_properties": {
+        "auto_revive": "Triggers at 0 HP, restores 25% health",
+        "single_use": true
+      },
+      "lore": "Distilled from phoenix ashes during their rebirth cycle"
+    },
+    "scarred_wolves_map": {
+      "type": "special",
+      "name": "Map of Scarred Wolves Territory",
+      "value": 150,
+      "description": "Detailed tactical map showing patrol routes, caches, and back entrances",
+      "special_properties": {
+        "tactical_advantage": "+3 to planning and ambush checks against Scarred Wolves",
+        "reveals_secrets": "Shows hidden supply caches and escape routes"
+      },
+      "condition": "recent",
+      "lore": "Purchased from a deserter who fled Viktor's increasing paranoia"
+    },
+    "smoke_pellet": {
+      "type": "consumable",
+      "name": "Smoke Pellet",
+      "value": 8,
+      "description": "Small black sphere that creates instant smoke cloud",
+      "special_properties": {
+        "instant_escape": "Creates heavy smoke in 10ft radius",
+        "ambush_setup": "Grants advantage on stealth attacks"
+      },
+      "quantity": 3
+    }
+  },
+  
   "template": {
     "_comment": "Use this template for adding new unique items during play",
     "item_id": {

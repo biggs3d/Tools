@@ -35,9 +35,14 @@
       "marcus_coat",
       "basic_shirt",
       "basic_shirt",
-      "basic_shirt"
+      "basic_shirt",
+      "phoenix_tears",
+      "scarred_wolves_map",
+      "smoke_pellet",
+      "smoke_pellet",
+      "smoke_pellet"
     ],
-    "gold": 496
+    "gold": 371
   },
   "current_area": "ironhold",
   "status_effects": {},

@@ -19,9 +19,9 @@
 - Achieved Level 4 in first hour (world record pace)
 
 ## Current Situation
-**Location**: Ironhold Back Alleys, heading to East Gate  
-**Immediate Context**: Slipping away from the Drunken Griffin after strategy session with Garrett  
-**Tension Point**: One hour until departure on the Ashwood Trail to level up before facing Scarred Wolves
+**Location**: Ashwood Trail, 10 minutes outside Ironhold's East Gate  
+**Immediate Context**: Successfully ghosted out of the city, riding Henrik's vegetable wagon toward Sunken Mills  
+**Tension Point**: Four-hour journey to first combat zone, darkness falling, creatures will be active
 
 ## Character Status
 **Narrative State**:
@@ -30,10 +30,12 @@
 - Notable: Known as "Speedrun Berserker" thanks to Kaya's memory crystals
 
 **Notable Inventory Events**:
-- Collected 370 gold bounty from Merchants' Guild (total: 496g)
-- Purchased complete berserker outfit from Marcus (70g)
-- Still carrying Greataxe of First Blood
-- Left note for young Tom at the Drunken Griffin
+- Sold bandit trophies to Lord Pemberton's son via Hedda (+350g)
+- Purchased Phoenix Tears (auto-revive at 25% HP)
+- Acquired Scarred Wolves territory map (tactical advantage)
+- Carrying smoke pellets x3 for escape/ambush
+- Current gold: 371g
+- Still wielding Greataxe of First Blood
 
 ## Active Narrative Threads
 ### Main Quest
@@ -53,11 +55,16 @@
 - What caused the "Convergence" that brought him here?
 
 ## NPCs to Remember
+### Currently With
+- **Garrett**: Level 4 ex-Captain - Allied - Hidden in wagon, ready for combat
+- **Henrik**: Wagon driver - Nervous but well-paid - Providing transport to Sunken Mills
+
 ### Recently Met
-- **Garrett**: Level 4 ex-Captain - Allied - Planning Ashwood Trail campaign together
+- **Hedda Grimstone**: Sharp-eyed rarity dealer - Professional/Impressed - Sold Phoenix Tears and tactical gear
+- **Lord Pemberton Jr.**: Noble's son - Starstruck - Bought bandit trophies for 350g
 - **Kaya**: Mysterious guide - Cryptic/Amused - Spreading Steve's reputation via memory crystals
-- **Tom**: 13-year-old aspiring berserker - Hero worship - Works for Marcus
-- **Sara**: Drunken Griffin owner - Protective/Discrete - Providing cover story
+- **Tom**: 13-year-old aspiring berserker - Hero worship - Has Steve's note and promise
+- **Sara**: Drunken Griffin owner - Protective/Discrete - Provided cover story
 - **Marcus**: Clothier - Professional/Friendly - Supplied berserker outfit
 - **Cromwell**: Merchants' Guild Master - Intrigued/Calculating - Wants Steve under contract
 
@@ -95,14 +102,14 @@
 
 ## Opening Options for Next Session
 
-### Option A: Continue at East Gate
-"The East Gate is quieter than the main entrances, mostly used by farmers and local merchants. You spot Henrik's weathered produce wagon, and there's Garrett, casually inspecting cabbages while Henrik complains loudly about his back. No one's paying attention to either of you—perfect."
+### Option A: Ambush on the Road
+"Two hours into the journey, Henrik suddenly reins in the horses. 'Roadblock ahead.' Three trees lie across the path—too convenient to be natural. Garrett's already rolling out of the wagon, warhammer ready. 'Scarred Wolves scouts, maybe? Or just opportunists?' The forest is too quiet..."
 
-### Option B: Quick Travel Montage
-"The first hour on the road passes in tense silence, both of you listening for pursuit. But there's nothing—just the creak of wagon wheels and distant bird calls. 'We did it,' Garrett grins. 'Ghosted out of Ironhold like smoke. Now the real work begins...'"
+### Option B: Sunken Mills Approach
+"The smell hits first—rot and stagnant water. Through the wagon's slats, you see the Sunken Mills in the dying light. Half the village is underwater, rooftops poking through like grave markers. Henrik stops well back. 'This is as far as I go.' Something large disturbs the water's surface, sending ripples toward shore..."
 
-### Option C: Sunken Mills Arrival
-"The Sunken Mills loom before you in the dying light, half-drowned buildings jutting from murky water like broken teeth. Something moves beneath the surface—several somethings. Garrett hefts his warhammer. 'Well, hermano, ready to start building that legend?'"
+### Option C: Strategic Planning Session
+"Garrett spreads your new map across the wagon bed, using a hooded lantern for light. 'Alright, with this intel we can hit their supply caches after clearing the Mills. But look here—' he points to a mark near the mines. 'Secondary entrance to their fort. We clear all three crisis points, we'll have a back door to Viktor himself...'"
 
 ## Important Reminders
 - **Tone**: Fast-paced, visceral combat, humor through culture shock
