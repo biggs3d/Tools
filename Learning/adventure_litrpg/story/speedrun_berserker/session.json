@@ -1,24 +1,24 @@
 {
   "meta": {
     "schemaVersion": 2,
-    "sessionNumber": 4,
-    "lastUpdated": "2025-08-09T10:00:00Z",
+    "sessionNumber": 5,
+    "lastUpdated": "2025-08-09T14:30:00Z",
     "gameStyle": "Speedrun Berserker - Physics meets Fury",
-    "currentTurn": 0,
-    "currentSceneId": "ashwood_trail_departure",
-    "quickSummary": "Steve (Lvl 4) and Garrett heading to Sunken Mills on wagon, strategic leveling before Scarred Wolves confrontation.",
-    "dmNotes": "Steve just left Ironhold with Garrett on wagon. Henrik driving. Heading to Sunken Mills first, then Crow's Rest, then Iron Mines for strategic approach to Scarred Wolves. Potential ambush or arrival at Sunken Mills next."
+    "currentTurn": 1,
+    "currentSceneId": "sunken_mills_threshold",
+    "quickSummary": "Steve (Lvl 4) defeated Cave Burrower, reached Sunken Mills edge at dusk, facing flooded town with undead threats.",
+    "dmNotes": "At Sunken Mills entrance. Henrik won't go further. Water everywhere, drowned villagers lurking. Steve at 163/180 HP. Has harvested materials (13 plates, 8 shells). About to enter first crisis zone. Remember: drowned villagers don't feel pain, water-based attacks, tragic backstories."
   },
   
   "character": {
     "name": "Steve",
     "class": "Berserker",
     "level": 4,
-    "xp": 315,
-    "xpToNext": 485,
+    "xp": 430,
+    "xpToNext": 370,
     
     "health": {
-      "current": 167,
+      "current": 163,
       "max": 180
     },
     "mana": {
@@ -43,7 +43,9 @@
       "damageBonus": 6,
       "armor": 2,
       "critChance": 0.1,
-      "dodgeChance": 0.17
+      "dodgeChance": 0.17,
+      "rage_meter": 0,
+      "rage_description": "0-100%, builds from combat, releases for massive damage"
     },
     
     "equipment": {
@@ -86,6 +88,14 @@
         "antidote": {
           "qty": 1,
           "desc": "Cures poison"
+        },
+        "burrower_plates": {
+          "qty": 13,
+          "desc": "Armor plates from Cave Burrower, 15-45g each"
+        },
+        "burrower_eggs": {
+          "qty": 8,
+          "desc": "Intact egg shells for alchemists, 5-10g each"
         }
       }
     },
@@ -263,7 +273,17 @@
         "disposition": 90,
         "tags": ["Devoted Ally", "Ex-Captain", "Level 4"],
         "status": "Active Companion - Hidden in wagon",
-        "bio": "Former Third Legion captain who rediscovered combat spirit fighting alongside Steve. Wields warhammer.",
+        "bio": "Former Third Legion captain who rediscovered combat spirit fighting alongside Steve. Skilled swordsman.",
+        "equipment": {
+          "weapon": "Legion Sword (1d8+2 damage)",
+          "armor": "Worn plate armor (AC 16)",
+          "shield": "Third Legion shield (damaged but functional)"
+        },
+        "stats": {
+          "hp": "56/56",
+          "strength": 16,
+          "combat_skill": "Veteran - precise strikes, tactical positioning"
+        },
         "speech": {
           "pattern": "Military professional with dry humor, occasional soldier's curse",
           "quirks": ["Says 'Seven hells', practical observations, battle assessments"],
@@ -304,6 +324,17 @@
         "tags": ["Main Antagonist", "Level 7", "Bandit Leader"],
         "status": "At Howling Ridge - Unaware of Howling Scars defeat",
         "bio": "Leader of Scarred Wolves, 40+ bandits under command. Will learn about subsidiary gang's destruction by nightfall.",
+        "equipment": {
+          "weapon": "Twin serrated daggers (2d6+4 combined)",
+          "armor": "Scarred wolf pelt armor (AC 15, intimidation bonus)",
+          "special": "Blood Wolf Howl - rallies bandits, causes fear"
+        },
+        "stats": {
+          "hp": "120/120",
+          "strength": 14,
+          "dexterity": 18,
+          "combat_skill": "Assassin - bleeds, poisons, dirty tricks"
+        },
         "notes": [
           "More tactical than typical bandits",
           "Controls mountain fortress",

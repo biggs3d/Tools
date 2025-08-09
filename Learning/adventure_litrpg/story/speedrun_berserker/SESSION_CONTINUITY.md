@@ -2,13 +2,8 @@
 
 ## How to Start a New Session
 
-### 1. Load Context (Required Reading)
-```python
-# Read in this order:
-1. session.json          # Current state + character summaries
-2. CHARACTER_VOICE_GUIDE.md # Speech patterns
-3. Last raw/*.md file    # Recent verbatim narrative for voice
-```
+### 1. Context is Auto-Loaded
+The start_session.sh script loads everything. Focus on the narrative flow.
 
 ### 2. Voice Calibration
 Before starting, refresh character voices by reading their `speech` entries in session.json:
@@ -123,6 +118,8 @@ Watch out for:
 - ❌ Steve overthinking in combat (he acts on instinct now)
 - ❌ Tom speaking like an adult
 - ❌ Generic NPC dialogue without class markers
+- ❌ **REPEATING RANDOM ENCOUNTERS** (save bandits for the stronghold climax!)
+- ❌ **RECYCLING SIMILAR SCENES** (vary threats between destinations)
 
 ## Quick Continuity Test
 

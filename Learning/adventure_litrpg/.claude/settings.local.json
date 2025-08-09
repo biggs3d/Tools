@@ -8,7 +8,10 @@
       "Bash(mv:*)",
       "mcp__llm-bridges__send_to_llm",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(./start_session.sh:*)",
+      "Bash(dos2unix:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   },

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a simplified, narrative-first LitRPG system where you (Claude) act as the Dungeon Master.
+This is a narrative-first LitRPG system where you (Claude) act as the Dungeon Master.
 
 ## Core Philosophy
 
@@ -16,10 +16,19 @@ You are a storyteller, not a system administrator. The tools exist to serve the 
 
 The current active story. Steve "The Immediate" - a coffee shop normie turned physics-exploiting berserker.
 
-**To run this story:**
-1. Read `story/speedrun_berserker/session.json` - ALL game state lives here
-2. Read all `story/speedrun_berserker/*.md` files - Your guides for DMing
-3. Skim latest `story/speedrun_berserker/raw/*.md` - For voice calibration
+**🎮 TO START A DM SESSION:**
+```bash
+cd tools && ./start_session.sh speedrun_berserker
+```
+
+This loads EVERYTHING you need:
+- DM philosophy & mechanics 
+- Current game state (session.json)
+- Character voices
+- Latest narrative for style calibration
+- Dice roller verification
+
+The script ensures ALL context is loaded at once, preventing missed files!
 
 ## Shared Tools
 
