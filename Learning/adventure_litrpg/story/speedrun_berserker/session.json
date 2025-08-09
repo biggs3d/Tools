@@ -1,0 +1,352 @@
+{
+  "meta": {
+    "schemaVersion": 1,
+    "sessionNumber": 4,
+    "lastUpdated": "2025-08-09T10:00:00Z",
+    "gameStyle": "Speedrun Berserker - Physics meets Fury",
+    "dmNotes": "Steve just left Ironhold with Garrett on wagon. Henrik driving. Heading to Sunken Mills first, then Crow's Rest, then Iron Mines for strategic approach to Scarred Wolves. Potential ambush or arrival at Sunken Mills next."
+  },
+  
+  "character": {
+    "name": "Steve",
+    "class": "Berserker",
+    "level": 4,
+    "xp": 315,
+    "xpToNext": 485,
+    
+    "health": {
+      "current": 167,
+      "max": 180
+    },
+    "mana": {
+      "current": 30,
+      "max": 30
+    },
+    "stamina": {
+      "current": 125,
+      "max": 130
+    },
+    
+    "stats": {
+      "strength": 18,
+      "dexterity": 17,
+      "intelligence": 11,
+      "constitution": 16,
+      "wisdom": 11,
+      "charisma": 10
+    },
+    
+    "combat": {
+      "damageBonus": 6,
+      "armor": 2,
+      "critChance": 0.1,
+      "dodgeChance": 0.17
+    },
+    
+    "equipment": {
+      "weapon": "Greataxe of First Blood",
+      "armor": {
+        "chest": "Dark leather coat (Marcus's shop)",
+        "legs": "Reinforced pants (Marcus's shop)",  
+        "torso": "Padded vest (Marcus's shop)"
+      },
+      "accessory": null
+    },
+    
+    "inventory": {
+      "gold": 371,
+      "items": {
+        "health_potion": {
+          "qty": 2,
+          "desc": "Restores 2d4+2 HP"
+        },
+        "phoenix_tears": {
+          "qty": 1,
+          "desc": "Auto-revive at 25% HP once"
+        },
+        "scarred_wolves_map": {
+          "qty": 1,
+          "desc": "Tactical intel on bandit territory"
+        },
+        "smoke_pellet": {
+          "qty": 3,
+          "desc": "Creates obscuring cloud for escape/ambush"
+        },
+        "stamina_draught": {
+          "qty": 1,
+          "desc": "Restores stamina"
+        },
+        "rage_elixir": {
+          "qty": 1,
+          "desc": "Triggers rage state"
+        },
+        "antidote": {
+          "qty": 1,
+          "desc": "Cures poison"
+        }
+      }
+    },
+    
+    "skills": {
+      "active": {
+        "rampage": {
+          "rank": 1,
+          "desc": "3x speed when below 50% HP"
+        },
+        "intimidating_presence": {
+          "rank": 2,
+          "desc": "Can convert enemies mid-fight"
+        },
+        "unstoppable": {
+          "rank": 1,
+          "desc": "Immunity to control once per battle"
+        }
+      },
+      "passive": {
+        "berserkers_recovery": {
+          "rank": 1,
+          "desc": "2 HP/turn regeneration in combat"
+        }
+      },
+      "skillPoints": {
+        "spent": 5,
+        "available": 0
+      },
+      "statPoints": {
+        "spent": 8,
+        "available": 0
+      }
+    },
+    
+    "activeEffects": [],
+    
+    "titles": [
+      "The Immediate",
+      "Threshold Slayer",
+      "Speedrun Berserker"
+    ],
+    
+    "achievements": [
+      "First Blood - Killed Threshold Beast <60 seconds",
+      "Speed Runner - Level 4 in first hour",
+      "Bandit's Bane - Eliminated Howling Scars gang"
+    ]
+  },
+  
+  "story": {
+    "currentAct": 1,
+    "acts": [
+      {
+        "number": 1,
+        "title": "Coffee to Carnage",
+        "summary": "Steve isekai'd from coffee shop via Convergence, chose Berserker class, speedran to Level 4 in one hour.",
+        "chapters": [
+          {
+            "number": 1,
+            "title": "The Last Normal Moment",
+            "summary": "Reality distorted in coffee shop, Kaya appeared, Steve pulled into game world."
+          },
+          {
+            "number": 2,
+            "title": "Blood Calls to Blood",
+            "summary": "Steve chose Red/Berserker path over intellectual Blue, gained Greataxe of First Blood."
+          },
+          {
+            "number": 3,
+            "title": "The Immediate",
+            "summary": "Defeated Threshold Beast in <60 seconds, jumped from Level 1 to 3, earned legendary title."
+          },
+          {
+            "number": 4,
+            "title": "Bandit Purge",
+            "summary": "Teamed with Garrett, eliminated entire Howling Scars gang, reached Level 4 in first hour."
+          }
+        ]
+      }
+    ],
+    
+    "currentScene": {
+      "location": "Ashwood Trail - 10 minutes outside Ironhold's East Gate",
+      "description": "Riding Henrik's vegetable wagon with Garrett hidden in back. Four-hour journey to Sunken Mills ahead. Darkness falling, creatures will be active.",
+      "time": "Late afternoon, shadows lengthening"
+    },
+    
+    "plotThreads": {
+      "active": [
+        "Strategic Leveling: Clear three crisis zones (Sunken Mills, Crow's Rest, Iron Mines) before confronting Scarred Wolves",
+        "Scarred Wolves Main Quest: Viktor 'The Red Wolf' (Level 7) leads 40+ bandits at Howling Ridge",
+        "Kaya's Mystery: 'Real game begins when you leave tutorial city' - what is she really?",
+        "The Convergence: What pulled Steve from coffee shop to this world? Are there others?",
+        "Tom's Hero Worship: Young aspiring berserker awaits Steve's return"
+      ],
+      "resolved": [
+        "Howling Scars Eliminated: Subsidiary gang destroyed, ears collected for bounty"
+      ]
+    },
+    
+    "sessionHistory": [
+      "Session 1: Coffee shop → Berserker transformation → Threshold Beast speedkill → Level 3",
+      "Session 1 cont: Met Garrett → Howling Scars ambush → Eliminated gang with Garrett → Level 4",
+      "Session 2: Arrived Ironhold → Collected 370g bounty → Met Tom (fanboy) → Got equipment from Marcus",
+      "Session 2 cont: Drunken Griffin planning → Left note for Tom → Kaya's 'tutorial ending' message",
+      "Session 3: Hedda's shop → Sold trophies to noble's son → Acquired Phoenix Tears and map",
+      "Session 3 cont: Ghost departure from East Gate → On wagon to Sunken Mills with Garrett and Henrik"
+    ]
+  },
+  
+  "world": {
+    "currentArea": "Ashwood Trail (between Ironhold and Sunken Mills)",
+    "areaLevel": 3,
+    
+    "flags": {
+      "tutorial_complete": true,
+      "threshold_beast_killed": true,
+      "howling_scars_defeated": true,
+      "garrett_allied": true,
+      "kaya_introduced": true,
+      "ironhold_knows_speedrun_berserker": true,
+      "scarred_wolves_unaware": true
+    },
+    
+    "upcomingAreas": {
+      "sunken_mills": {
+        "level": "3-5",
+        "threat": "Flooded ruins, creatures dragging travelers off road",
+        "reward": "XP, possible unique loot"
+      },
+      "crows_rest": {
+        "level": "4-6", 
+        "threat": "Giant ravens terrorizing grain shipments",
+        "reward": "200g bounty from village"
+      },
+      "iron_mines": {
+        "level": "5-7",
+        "threat": "Something awakened in deep tunnels",
+        "reward": "Secret mountain approach to Howling Ridge"
+      }
+    }
+  },
+  
+  "characters": {
+    "major": {
+      "Garrett": {
+        "disposition": 90,
+        "tags": ["Devoted Ally", "Ex-Captain", "Level 4"],
+        "status": "Active Companion - Hidden in wagon",
+        "bio": "Former Third Legion captain who rediscovered combat spirit fighting alongside Steve. Wields warhammer.",
+        "speech": {
+          "pattern": "Military professional with dry humor, occasional soldier's curse",
+          "quirks": ["Says 'Seven hells', practical observations, battle assessments"],
+          "examples": [
+            "Seven hells... I've seen Level 10 Paladins do less damage.",
+            "Come on, Immediate. Let's make you rich and famous. Then we get you pants that don't show your ass when you spin.",
+            "Haven't felt this alive in years. We make a good team."
+          ]
+        },
+        "notes": [
+          "Rediscovered purpose through Steve",
+          "Professional soldier turned merchant",
+          "Appreciates Steve's direct approach"
+        ]
+      },
+      "Kaya": {
+        "disposition": 75,
+        "tags": ["Mysterious Guide", "Golden Eyes", "Spanish Phrases"],
+        "status": "Unknown Location - Appears at will",
+        "bio": "Tutorial guide who knows about the Convergence. Has memory crystals of Steve's fights. True nature unknown.",
+        "speech": {
+          "pattern": "Casual modern with Spanish flair, knowing/amused tone",
+          "quirks": ["Uses 'mijo', 'guerrero', 'coño', '¡Qué bárbaro!'"],
+          "examples": [
+            "Storm's coming, *guerrero*. Question is - you drinking that coffee?",
+            "Berserker. *Coño*, that's rare for a first pick.",
+            "*Mijo*, you're speedrunning this world."
+          ]
+        },
+        "notes": [
+          "Said 'real game begins when you leave tutorial city'",
+          "Appears/disappears without explanation",
+          "Always watching Steve's major moments"
+        ]
+      },
+      "Viktor 'The Red Wolf'": {
+        "disposition": -100,
+        "tags": ["Main Antagonist", "Level 7", "Bandit Leader"],
+        "status": "At Howling Ridge - Unaware of Howling Scars defeat",
+        "bio": "Leader of Scarred Wolves, 40+ bandits under command. Will learn about subsidiary gang's destruction by nightfall.",
+        "notes": [
+          "More tactical than typical bandits",
+          "Controls mountain fortress",
+          "1000g bounty on his head"
+        ]
+      }
+    },
+    
+    "minor": {
+      "Henrik": {
+        "disposition": 50,
+        "tags": ["Wagon Driver", "Nervous", "Well-Paid"],
+        "note": "Currently driving wagon to Sunken Mills"
+      },
+      "Tom": {
+        "disposition": 100,
+        "tags": ["Hero Worship", "Aspiring Berserker", "13 years old"],
+        "note": "Has Steve's note and promise to return"
+      },
+      "Hedda Grimstone": {
+        "disposition": 70,
+        "tags": ["Rarity Dealer", "Professional"],
+        "note": "Sold Phoenix Tears and tactical gear"
+      },
+      "Lord Pemberton Jr": {
+        "disposition": 80,
+        "tags": ["Noble's Son", "Starstruck"],
+        "note": "Bought bandit trophies for 350g"
+      },
+      "Sara": {
+        "disposition": 60,
+        "tags": ["Drunken Griffin Owner", "Discrete"],
+        "note": "Provided cover story for leaving city"
+      },
+      "Marcus": {
+        "disposition": 65,
+        "tags": ["Clothier", "Professional"],
+        "note": "Supplied berserker outfit"
+      },
+      "Cromwell": {
+        "disposition": 55,
+        "tags": ["Guild Master", "Intrigued"],
+        "note": "Wants Steve under contract, investigating background"
+      }
+    }
+  },
+  
+  "factions": {
+    "Merchants Guild": {
+      "standing": 25,
+      "status": "Favorable",
+      "reason": "Eliminated major bandit threat"
+    },
+    "Scarred Wolves": {
+      "standing": -10,
+      "status": "Unknown Hostility",
+      "reason": "Will become hostile once they learn about Howling Scars"
+    },
+    "Ironhold Guard": {
+      "standing": 15,
+      "status": "Appreciative",
+      "reason": "Cleared road threats"
+    }
+  },
+  
+  "personality": {
+    "coffeShopSteve": "Cautious, intellectual, normal guy from modern world",
+    "berserkerSteve": "Direct, confident, thrives on physics-based combat",
+    "quirks": [
+      "Uses physics knowledge for creative combat",
+      "Speedrun mentality - always pushing for records",
+      "Coffee shop references in bizarre situations",
+      "Actually enjoys the berserker rage despite initial shock"
+    ]
+  }
+}
