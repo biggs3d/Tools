@@ -2,16 +2,14 @@
 
 ## ⚠️ IMPORTANT DISCLAIMER ⚠️
 
-**These examples are taken from Steve's ACTUAL adventure (Sessions 1-3) to demonstrate narrative techniques.**
+**These examples show ACTUAL events from Steve's adventure to demonstrate narrative techniques.**
 
-**They show CANON events that ACTUALLY HAPPENED:**
-- ✅ The Threshold Beast fight (Session 1)
-- ✅ The Howling Scars ambush with Garrett (Session 1)  
-- ✅ Meeting Tom at the Drunken Griffin (Session 2)
+**Canon Events Shown Below:**
+- The Threshold Beast fight (Session 1)
+- The Howling Scars ambush with Garrett (Session 1)  
+- Meeting Tom at Marcus's Clothier Shop (Session 2)
 
-**These are NOT generic examples - they are REAL events from Steve's story to show the narrative style that worked well.**
-
-**If creating new content, always check session.json and raw files for what ACTUALLY happened vs what's just an example.**
+**For any new content, always check session.json for current facts and raw/ files for narrative continuity.**
 
 ---
 
@@ -127,59 +125,49 @@ Steve and Garrett's first team-up against the subsidiary gang. This established 
 
 ---
 
-## Example 3: Meeting Tom at the Drunken Griffin (Session 2 - CANON)
+## Example 3: Meeting Tom at Marcus's Clothier (Session 2 - ACTUAL CANON)
 
 ### Context
-Steve's first real social interaction in Ironhold, establishing his growing reputation and Tom's hero worship.
+Steve's first real fan encounter in Ironhold, establishing his growing reputation and Tom's hero worship. This happened at the clothing shop, NOT at the Drunken Griffin.
 
 ### Player Says:
-"I'll sit at the bar and try to keep a low profile while getting information."
+"I need to get some proper clothes that won't fall apart in combat."
 
-### DM Response (Actual Scene):
+### DM Response (What ACTUALLY Happened):
 
-*The Drunken Griffin is exactly what you'd expect from a guard tavern - weapon racks by the door, practice dummy in the corner, and a clientele that looks like they could bench press you. The smell of ale, sweat, and leather oil hits you immediately.*
+*Marcus's Clothier was supposed to be a quick stop. Get pants that didn't show ass-crack during combat spins. Get a shirt that wasn't mostly holes and blood. Simple.*
 
-*You slide onto a barstool, trying to look inconspicuous. Which is hilarious, considering you're still splattered with dried bandit blood and wearing a greataxe that's almost as tall as you.*
+*The bell above the door hadn't finished chiming when a young voice exploded with excitement.*
 
-*The bartender - a woman who looks like she could arm-wrestle an ogre - eyes you skeptically.* "We don't serve Level 1s here, kid."
+"IT'S HIM! IT'S REALLY HIM!"
 
-"I'm Level 4."
+*A thirteen-year-old boy practically vibrated with excitement, bouncing on his heels. Scrawny, with the kind of desperate hero worship that only young teens could manage. His guard trainee uniform was too big, hand-me-down from someone else.*
 
-*She snorts.* "Right. And I'm the Queen of—"
+"You're Steve! The Speedrun Berserker! I saw it - Kaya's been showing memory crystals all over the city! You killed the Threshold Beast in under a minute! Nobody's EVER done that!"
 
-"HE IS!" *The voice cracks with pubescent excitement. A boy, maybe thirteen, practically falls off his stool rushing over.* "That's Steve the Immediate! He killed the Threshold Beast in fifty-three seconds! Then he took out the entire Howling Scars gang!"
+*Marcus, the shopkeeper, sighed.* "Tom, let the man shop in peace."
 
-*Every conversation in the tavern stops. Twenty pairs of guard eyes turn your way. Someone's mug pauses halfway to their mouth.*
+*But Tom was already circling you like an excited puppy.* "Is it true you went from coffee to Level 4 in one hour? Is it true you killed a Level 7 brute? Can I... can I see your axe?"
 
-*The kid continues, words tumbling over each other:* "My friend's cousin's partner was at the gate! They saw you come in with Captain Garrett! Is it true you split the beast in HALF? Did you really make bandits run just by laughing at them?"
+*You look at the kid. See yourself at that age, before life beat the enthusiasm out of you. Before coffee shops and mortgages and mundane reality. Tom's father, you learn, had been a guard. Died of sickness, not battle. The kid wants to be a berserker now, wants to be like you.*
 
-*The bartender's expression shifts from skepticism to interest.* "You're the speedrunner? The one who hit Level 4 in an hour?"
+"Here," *you say, carefully handing over the Greataxe of First Blood.* "Careful, it's—"
 
-*Before you can answer, the boy plops down next to you, eyes shining with hero worship.* "I'm Tom! I'm going to be a berserker too! My dad was a guard but he... but I'm going to be like you! Can you teach me? Please?"
+*Tom's arms immediately drop. The axe head hits the floor with a THUNK. The kid's face goes red as he struggles to lift it, manages to get it maybe six inches up before his arms start shaking.*
 
-*His enthusiasm is painful. You remember being that age, thinking the world was full of heroes and adventure. Before coffee shops. Before customer service killed your soul.*
+"How... how do you swing this like it's nothing?"
 
-"Kid—Tom. Being a berserker isn't—"
+"Physics," *you say, taking it back one-handed.* "And a little bit of rage."
 
-"I know it's dangerous!" *He interrupts.* "But you make it look so EASY! The physics thing you do - using momentum and angles - I've been practicing with sticks!"
+*Marcus fits you with a proper berserker's outfit - reinforced pants that could handle combat acrobatics, a padded vest for some protection, and a dark leather coat that looks badass while being practical. Seventy gold, but worth it to not flash the entire city during fights.*
 
-*He pulls out a notebook. It's full of sketches. Drawings of your fight with the beast, complete with trajectory calculations. This kid literally took notes on your combat style.*
+*Tom chatters the entire time, explaining how Kaya had been showing the memory crystal recordings everywhere, how people were calling you the "Speedrun Berserker," how the other guards were taking bets on how fast you'd reach Level 10.*
 
-*The bartender slides you an ale.* "On the house. Anyone who clears the roads gets free drinks. Plus," *she lowers her voice,* "Tom's been talking about you non-stop since you arrived. His dad died last winter. Seeing you... it's the first time he's smiled in months."
+"Do you know somewhere quiet to eat?" *you ask.* "Somewhere people won't stare?"
 
-*Tom doesn't hear, too busy explaining his "berserker training regimen" which seems to involve a lot of running at trees with sticks.*
+*Tom's face lights up.* "The Drunken Griffin! My mom's friend Sara runs it. She doesn't care about levels or nothing. Plus she makes the best shepherd's pie in the lower district. I can show you the back alleys - nobody uses them but locals!"
 
-*Garrett's voice comes from behind:* "Making friends already, Immediate?"
-
-*The guards all straighten slightly. Even retired, Garrett commands respect.*
-
-"Captain," *several nod.*
-
-"Just a merchant now," *Garrett says, but there's warmth in it.* "Though after today's adventure, maybe not as retired as I thought."
-
-*Tom's eyes somehow get WIDER.* "You fought together?! What was it like?! Did you use formations?!"
-
-*This kid is going to explode from excitement.*
+*Later, after you've left Tom behind with just a note, you know the kid will be crushed. But where you're going - the crisis zones, the real monsters - it's no place for a Level 1 with dreams bigger than his sword arm.*
 
 ### What Made This Work:
 - **Reputation ripples**: Steve's deeds spread fast
