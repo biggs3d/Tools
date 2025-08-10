@@ -1,13 +1,13 @@
 {
   "meta": {
     "schemaVersion": 2,
-    "sessionNumber": 5,
+    "sessionNumber": 4,
     "lastUpdated": "2025-08-09T14:30:00Z",
     "gameStyle": "Speedrun Berserker - Physics meets Fury",
     "currentTurn": 1,
-    "currentSceneId": "sunken_mills_threshold",
-    "quickSummary": "Steve (Lvl 4) defeated Cave Burrower, reached Sunken Mills edge at dusk, facing flooded town with undead threats.",
-    "dmNotes": "At Sunken Mills entrance. Henrik won't go further. Water everywhere, drowned villagers lurking. Steve at 163/180 HP. Has harvested materials (13 plates, 8 shells). About to enter first crisis zone. Remember: drowned villagers don't feel pain, water-based attacks, tragic backstories."
+    "currentSceneId": "ashwood_trail_journey",
+    "quickSummary": "Steve (Lvl 4) and Garrett left Ironhold secretly via vegetable wagon, heading to clear crisis zones before confronting Scarred Wolves.",
+    "dmNotes": "On wagon with Garrett and Henrik, heading to Sunken Mills. Four-hour journey ahead. Darkness falling, creatures will be active. Strategic plan: hit three crisis zones to level up before main bandit stronghold."
   },
   
   "character": {
@@ -18,7 +18,7 @@
     "xpToNext": 370,
     
     "health": {
-      "current": 163,
+      "current": 180,
       "max": 180
     },
     "mana": {
@@ -88,14 +88,6 @@
         "antidote": {
           "qty": 1,
           "desc": "Cures poison"
-        },
-        "burrower_plates": {
-          "qty": 13,
-          "desc": "Armor plates from Cave Burrower, 15-45g each"
-        },
-        "burrower_eggs": {
-          "qty": 8,
-          "desc": "Intact egg shells for alchemists, 5-10g each"
         }
       }
     },
