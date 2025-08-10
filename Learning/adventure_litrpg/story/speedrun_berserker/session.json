@@ -67,7 +67,7 @@
         },
         "phoenix_tears": {
           "qty": 1,
-          "desc": "Auto-revive at 25% HP once"
+          "desc": "Auto-revive from 0% back up to 25% HP once"
         },
         "scarred_wolves_map": {
           "qty": 1,
@@ -179,9 +179,9 @@
     ],
     
     "currentScene": {
-      "location": "Ashwood Trail - 10 minutes outside Ironhold's East Gate",
-      "description": "Riding Henrik's vegetable wagon with Garrett hidden in back. Four-hour journey to Sunken Mills ahead. Darkness falling, creatures will be active.",
-      "time": "Late afternoon, shadows lengthening"
+      "location": "Sunken Mills Approach - Half mile from the drowned village",
+      "description": "Standing at the valley's edge with Garrett, looking down at the flooded ruins. Black water covers everything. A waterwheel turns impossibly in still water. Henrik has departed. Something is deeply wrong here.",
+      "time": "Dusk - orange light making the black water look like blood"
     },
     
     "plotThreads": {
@@ -263,9 +263,9 @@
     "major": {
       "Garrett": {
         "disposition": 90,
-        "tags": ["Devoted Ally", "Ex-Captain", "Level 4"],
-        "status": "Active Companion - Hidden in wagon",
-        "bio": "Former Third Legion captain who rediscovered combat spirit fighting alongside Steve. Skilled swordsman.",
+        "tags": ["Devoted Ally", "Ex-Soldier", "Level 4"],
+        "status": "Active Companion - With Steve at Sunken Mills",
+        "bio": "Former soldier turned merchant who rediscovered his combat spirit fighting alongside Steve. Was running mobile supply operation before joining quest.",
         "equipment": {
           "weapon": "Legion Sword (1d8+2 damage)",
           "armor": "Worn plate armor (AC 16)",
