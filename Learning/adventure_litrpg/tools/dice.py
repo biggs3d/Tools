@@ -140,14 +140,27 @@ def check(stat_bonus: int, dc: int, advantage: bool = False, disadvantage: bool 
 
 
 if __name__ == "__main__":
-    # Test examples
-    print("Testing dice roller...")
-    print(f"2d6+3: {roll('2d6+3')}")
-    print(f"1d20: {roll('1d20')}")
-    print(f"3d4: {roll('3d4')}")
-    print(f"hp-15: {roll('hp-15')}")
-    print(f"Simple 10: {roll('10')}")
-    print()
-    print("Testing skill check...")
-    print(f"Check with +5 vs DC 15: {check(5, 15)}")
-    print(f"Check with advantage: {check(3, 12, advantage=True)}")
+    import sys
+    import json
+    
+    if len(sys.argv) > 1:
+        # CLI mode - roll the dice passed as argument
+        expression = sys.argv[1]
+        result = roll(expression)
+        print(f"Roll: {expression}")
+        print(f"Result: {result['result']}")
+        print(f"Details: {result['breakdown']}")
+        if result.get('critical'):
+            print("CRITICAL!")
+    else:
+        # Test examples
+        print("Testing dice roller...")
+        print(f"2d6+3: {roll('2d6+3')}")
+        print(f"1d20: {roll('1d20')}")
+        print(f"3d4: {roll('3d4')}")
+        print(f"hp-15: {roll('hp-15')}")
+        print(f"Simple 10: {roll('10')}")
+        print()
+        print("Testing skill check...")
+        print(f"Check with +5 vs DC 15: {check(5, 15)}")
+        print(f"Check with advantage: {check(3, 12, advantage=True)}")

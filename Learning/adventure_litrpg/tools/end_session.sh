@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# End Session Script - Checklist for closing a DM session properly
+# Ensures nothing is lost when the Claude session ends
+
+echo "==============================================="
+echo "SESSION ENDING CHECKLIST"
+echo "==============================================="
+echo ""
+echo "Before closing this session, verify:"
+echo ""
+echo "✓ SESSION.JSON UPDATES:"
+echo "  □ Current HP accurate?"
+echo "  □ Inventory changes tracked? (items gained/lost)"
+echo "  □ Equipment status? (destroyed/damaged items)"
+echo "  □ XP and level current?"
+echo "  □ Gold amount correct?"
+echo "  □ Current location updated?"
+echo "  □ Plot threads advanced?"
+echo "  □ NPC dispositions/relationships/inventories changed?"
+echo "  □ Rage meter reset to 0?"
+echo ""
+echo "✓ RAW NARRATIVE FILE:"
+echo "  □ Full session saved to raw/session_XXX.md?"
+echo "  □ All dialogue included verbatim?"
+echo "  □ Combat scenes fully detailed?"
+echo "  □ Character voices preserved?"
+echo "  □ No summaries - full novel-style text?"
+echo ""
+echo "✓ SESSION METADATA:"
+echo "  □ session.json currentScene has good cliffhanger?"
+echo "  □ sessionHistory updated with 1-2 line summary?"
+echo "  □ dmNotes updated for next session?"
+echo ""
+echo "✓ CRITICAL ITEMS TO REMEMBER:"
+echo "  □ Who has what items? (Steve vs Garrett)"
+echo "  □ What clothing/armor needs replacing?"
+echo "  □ Any unspent skill/stat points?"
+echo "  □ Any unresolved combat/scenes?"
+echo ""
+echo "==============================================="
+echo "FINAL REMINDER:"
+echo "The raw/ narrative is the ONLY complete record!"
+echo "When this session closes, only those files remain."
+echo "==============================================="
+echo ""
+echo "Type 'done' when checklist is complete, or Ctrl+C to go back:"
+read confirmation
+
+if [ "$confirmation" = "done" ]; then
+    echo ""
+    echo "✅ Session properly closed!"
+    echo "Ready for next adventure. ¡Dale candela! 🔥"
+    echo ""
+    echo "Next session: Run ./start_session.sh speedrun_berserker"
+else
+    echo "Going back to complete checklist..."
+fi

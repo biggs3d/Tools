@@ -91,19 +91,46 @@ Based on raw narrative, maintain:
 - Physics explanations
 - Modern sports/activity analogies
 
+## CRITICAL: Live Session Management
+
+### During EVERY Scene/Action Loop
+**UPDATE session.json IMMEDIATELY when:**
+- HP changes (damage taken/healed)
+- Items gained/lost (loot, destroyed equipment)
+- Gold changes (spending, rewards)
+- XP gained (combat, quest completion)
+- Equipment changes (armor destroyed, weapons acquired)
+- Rage meter changes
+- Location changes
+- Time progression
+- NPC disposition shifts
+- Plot threads advance
+
+**Example**: Steve's shirt was destroyed, gained Miller's Crystal, Garrett took the journal - these should be updated RIGHT AFTER they happen, not at session end!
+
+### Save to raw/ CONTINUOUSLY
+**After EVERY major scene:**
+- Append the FULL NARRATIVE to the current session file
+- Include ALL dialogue EXACTLY as spoken
+- Include ALL action descriptions and combat choreography
+- NEVER summarize - write it like you're writing a novel
+- Include internal thoughts, reactions, expressions
+- **THIS IS THE ONLY RECORD** - when session closes, memory is gone!
+
 ## Session Ending Protocol
 
-### 1. Update session.json
-- Increment sessionNumber
+### 1. Final session.json check
+- Verify all inventory changes tracked
+- Confirm current HP/stats accurate
 - Update currentScene with cliffhanger
 - Add to sessionHistory (1-2 sentences)
-- Modify any changed stats/inventory
+- Double-check equipment status (what's destroyed?)
 
-### 2. Save to raw/
-- Copy full session narrative
-- Include all dialogue verbatim
-- Preserve combat choreography
-- Keep environmental details
+### 2. Complete raw/ narrative
+- Ensure ENTIRE session is saved
+- Verify dialogue is verbatim
+- Check combat scenes are fully detailed
+- Confirm character moments preserved
 
 ### 3. Update Voice Notes
 - Add any new speech patterns discovered

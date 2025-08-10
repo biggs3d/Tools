@@ -13,13 +13,13 @@
   "character": {
     "name": "Steve",
     "class": "Berserker",
-    "level": 4,
-    "xp": 430,
-    "xpToNext": 370,
+    "level": 5,
+    "xp": 890,
+    "xpToNext": 610,
     
     "health": {
-      "current": 180,
-      "max": 180
+      "current": 151,
+      "max": 183
     },
     "mana": {
       "current": 30,
@@ -31,10 +31,10 @@
     },
     
     "stats": {
-      "strength": 18,
-      "dexterity": 17,
+      "strength": 21,
+      "dexterity": 18,
       "intelligence": 11,
-      "constitution": 16,
+      "constitution": 18,
       "wisdom": 11,
       "charisma": 10
     },
@@ -51,9 +51,9 @@
     "equipment": {
       "weapon": "Greataxe of First Blood",
       "armor": {
-        "chest": "Dark leather coat (Marcus's shop)",
-        "legs": "Reinforced pants (Marcus's shop)",  
-        "torso": "Padded vest (Marcus's shop)"
+        "chest": "DESTROYED - X-slashed by Miller",
+        "legs": "Reinforced pants (Marcus's shop) - waterlogged but intact",  
+        "torso": "DESTROYED - shredded in combat"
       },
       "accessory": null
     },
@@ -85,6 +85,14 @@
           "qty": 1,
           "desc": "Triggers rage state"
         },
+        "millers_crystal": {
+          "qty": 1,
+          "desc": "Pulses with eerie blue light. Water-affiliated magic item (unidentified)"
+        },
+        "waterlogged_journal": {
+          "qty": 0,
+          "desc": "Garrett has this - The Drowned Miller's journal detailing his corruption"
+        },
         "antidote": {
           "qty": 1,
           "desc": "Cures poison"
@@ -115,10 +123,10 @@
       },
       "skillPoints": {
         "spent": 5,
-        "available": 0
+        "available": 1
       },
       "statPoints": {
-        "spent": 8,
+        "spent": 14,
         "available": 0
       }
     },
@@ -179,9 +187,9 @@
     ],
     
     "currentScene": {
-      "location": "Sunken Mills Approach - Half mile from the drowned village",
-      "description": "Standing at the valley's edge with Garrett, looking down at the flooded ruins. Black water covers everything. A waterwheel turns impossibly in still water. Henrik has departed. Something is deeply wrong here.",
-      "time": "Dusk - orange light making the black water look like blood"
+      "location": "Waystation - One hour north of Sunken Mills",
+      "description": "Resting at roadside waystation with fire pit and lean-to. Henrik sleeping in wagon, Garrett on watch. Steve drying off by fire, ruined shirt testament to boss battle. Planning assault on Crow's Rest at dawn.",
+      "time": "Past midnight, peaceful night"
     },
     
     "plotThreads": {

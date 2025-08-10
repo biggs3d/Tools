@@ -11,7 +11,8 @@
       "Bash(grep:*)",
       "Bash(./start_session.sh:*)",
       "Bash(dos2unix:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(./end_session.sh:*)"
     ],
     "deny": []
   },
