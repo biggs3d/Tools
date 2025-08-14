@@ -232,6 +232,12 @@ Questions: Steve Biggs
             transform: scale(1.1);
         }
 
+        label {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
         .size-input-container {
             display: flex;
             gap: 10px;
@@ -538,7 +544,7 @@ Questions: Steve Biggs
             document.getElementById('resizedPreview').style.backgroundColor = color;
         }
 
-        const DEFAULT_SIZE = 32;
+        const DEFAULT_SIZE = 20;
 
         function convertSVG() {
             const input = document.getElementById('input').value;
@@ -548,35 +554,93 @@ Questions: Steve Biggs
             const targetXOffset = parseInt(document.getElementById('xOffset').value) || 0;
             const targetYOffset = parseInt(document.getElementById('yOffset').value) || 0;
 
+            if (!input) {
+                alert('Please paste an SVG first');
+                return;
+            }
+
             const resizedSVG = resizeSVG(input, targetWidth, targetHeight, targetXOffset, targetYOffset);
 
             const parser = new DOMParser();
             const svgDoc = parser.parseFromString(resizedSVG, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
 
-            const attributes = Array.prototype.map.call(svgElement.attributes, function(attr) {
-                const name = attr.name.replace(/-([a-z])/g, function(g) {
-                    return g[1].toUpperCase();
-                });
-                return name + '="' + attr.value + '"';
-            }).join(' ');
+            // Get viewBox
+            let viewBox = svgElement.getAttribute('viewBox');
+            if (!viewBox) {
+                viewBox = `0 0 ${targetWidth} ${targetHeight}`;
+            }
 
-            const children = Array.prototype.map.call(svgElement.children, function(child) {
-                return child.outerHTML.replace(/-([a-z])/g, function(_, letter) {
-                    return letter.toUpperCase();
-                });
-            }).join('\n');
+            // Process child elements
+            function processElement(element, indent = '        ') {
+                const tagName = element.tagName;
+                const attributes = [];
+                
+                for (let attr of element.attributes) {
+                    let name = attr.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+                    let value = attr.value;
+                    
+                    // Handle fill attribute specially
+                    if (name === 'fill' && value !== 'none') {
+                        attributes.push(`${name}={fill}`);
+                    } else if (name === 'stroke' && value !== 'none' && value !== 'currentColor') {
+                        attributes.push(`${name}={fill}`);
+                    } else if (name === 'strokeWidth') {
+                        // strokeWidth should be a number, not a string
+                        attributes.push(`${name}={${value}}`);
+                    } else if ((name === 'strokeLinecap' || name === 'strokeLinejoin') && value) {
+                        attributes.push(`${name}="${value}"`);
+                    } else if (name !== 'xmlns' && name !== 'width' && name !== 'height' && name !== 'viewBox') {
+                        attributes.push(`${name}="${value}"`);
+                    }
+                }
+                
+                const attrString = attributes.length > 0 ? '\n' + indent + '    ' + attributes.join('\n' + indent + '    ') : '';
+                
+                if (element.children.length === 0) {
+                    if (attrString) {
+                        return `${indent}<${tagName}${attrString}\n${indent}/>`;
+                    } else {
+                        return `${indent}<${tagName} />`;
+                    }
+                } else {
+                    const childrenString = Array.from(element.children)
+                        .map(child => processElement(child, indent + '    '))
+                        .join('\n');
+                    return `${indent}<${tagName}${attrString}>\n${childrenString}\n${indent}</${tagName}>`;
+                }
+            }
 
-            const reactComponent = 'import React from \'react\';\n\n' +
-                'export const ' + componentName + ' = (props: React.SVGAttributes<SVGSVGElement>) => (\n' +
-                '    <svg ' + attributes + ' {...props}>\n' +
-                '        ' + children + '\n' +
-                '    </svg>\n' +
-                ');';
+            const children = Array.from(svgElement.children)
+                .map(child => processElement(child))
+                .join('\n');
+
+            // Create the React TSX component with interface
+            const reactComponent = `import React from 'react';
+
+interface ${componentName}Props {
+    width?: number;
+    height?: number;
+    fill?: string;
+}
+
+export const ${componentName}: React.FC<${componentName}Props> = ({ width = ${targetWidth}, height = ${targetHeight}, fill = 'currentColor' }) => (
+    <svg
+        xmlns='http://www.w3.org/2000/svg'
+        viewBox='${viewBox}'
+        width={width}
+        height={height}
+        fill="none">
+${children}
+    </svg>
+);`;
 
             const formattedOutput = prettier.format(reactComponent, {
                 parser: 'typescript',
-                plugins: prettierPlugins
+                plugins: prettierPlugins,
+                singleQuote: true,
+                tabWidth: 4,
+                printWidth: 120
             });
 
             document.getElementById('output').value = formattedOutput;
@@ -595,14 +659,7 @@ Questions: Steve Biggs
             }, 2000);
         }
 
-        document.getElementById('targetWidth').addEventListener('input', updatePreviews);
-        document.getElementById('targetHeight').addEventListener('input', updatePreviews);
-
-        document.getElementById('xOffset').addEventListener('input', updatePreviews);
-        document.getElementById('yOffset').addEventListener('input', updatePreviews);
-
-        // Initialize previews
-        updatePreviews();
+        // Event listeners are set up in setupEventListeners() function
 
     </script>
 
@@ -624,15 +681,25 @@ Questions: Steve Biggs
         </div>
         <textarea id="input" placeholder="Paste your SVG copied from Figma here" oninput="updatePreviews()"></textarea>
         <input type="text" id="componentName" placeholder="Enter component name (ex. IconNameSVG)">
+        <div class="size-input-container">
+            <label>Width:</label>
+            <input type="number" id="targetWidth" class="size-input" value="32" min="1">
+            <label>Height:</label>
+            <input type="number" id="targetHeight" class="size-input" value="32" min="1">
+        </div>
+        <div class="size-input-container" style="display:none;">
+            <label>X Offset:</label>
+            <input type="number" id="xOffset" class="size-input" value="0">
+            <label>Y Offset:</label>
+            <input type="number" id="yOffset" class="size-input" value="0">
+        </div>
         <div class="button-group">
             <button onclick="convertSVG()">Convert to React</button>
             <button class="convert-json" onclick="convertToJson()">Convert to JSON</button>
         </div>
-        <div id="inputPreview" class="preview"></div>
-        <div class="color-options">
-            <div class="color-option" style="background-color: white;" onclick="changePreviewBackground('white')"></div>
-            <div class="color-option" style="background-color: grey;" onclick="changePreviewBackground('grey')"></div>
-            <div class="color-option" style="background-color: black;" onclick="changePreviewBackground('black')"></div>
+        <div class="preview-container">
+            <h3>Resized Preview</h3>
+            <div id="resizedPreview" class="preview"></div>
         </div>
     </div>
     <div class="column">
@@ -684,46 +751,7 @@ Questions: Steve Biggs
         document.getElementById('outputJson').value = jsonString;
     }
 
-    function convertSVG() {
-        var input = document.getElementById('input').value;
-        var componentName = document.getElementById('componentName').value || 'IconNameSVG';
-
-        // Parse the SVG
-        var parser = new DOMParser();
-        var svgDoc = parser.parseFromString(input, 'image/svg+xml');
-        var svgElement = svgDoc.documentElement;
-
-        // Convert attributes
-        var attributes = Array.prototype.map.call(svgElement.attributes, function(attr) {
-            var name = attr.name.replace(/-([a-z])/g, function(g) {
-                return g[1].toUpperCase();
-            });
-            return name + '="' + attr.value + '"';
-        }).join(' ');
-
-        // Convert child elements
-        var children = Array.prototype.map.call(svgElement.children, function(child) {
-            return child.outerHTML.replace(/-([a-z])/g, function(_, letter) {
-                return letter.toUpperCase();
-            });
-        }).join('\n');
-
-        // Create the React component
-        var reactComponent = 'import React from \'react\';\n\n' +
-            'export const ' + componentName + ' = (props: React.SVGAttributes<SVGSVGElement>) => (\n' +
-            '    <svg ' + attributes + ' {...props}>\n' +
-            '        ' + children + '\n' +
-            '    </svg>\n' +
-            ');';
-
-        // Format the output using Prettier
-        var formattedOutput = prettier.format(reactComponent, {
-            parser: 'typescript',
-            plugins: prettierPlugins
-        });
-
-        document.getElementById('output').value = formattedOutput;
-    }
+    // convertSVG function is already defined above, removing duplicate
 
     function copyOutput(elementId, buttonId) {
         var output = document.getElementById(elementId);
