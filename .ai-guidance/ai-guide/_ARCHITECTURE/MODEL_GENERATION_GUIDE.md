@@ -39,30 +39,31 @@ npm run generate-model
 Enums must follow a specific metadata format for the generator:
 
 ```typescript
-// File: /model/cwmi.model/src/trackQualityType.ts
+// File: /model/project_name.model/src/trackQualityType.ts
 /**
  * @description {
  *      "clazz" : {
- *         "enum": "HIGH,MEDIUM,LOW,UNKNOWN",
+ *         "enum": "EXCELLENT,GOOD,FAIR,POOR,DEGRADED",
  *         "title":"TrackQualityType"
- *      },
- *      "package":"example"
+ *      }
  * }
  * @type integer
  */
 export enum TrackQualityType {
-    HIGH,
-    MEDIUM,
-    LOW,
-    UNKNOWN
+    EXCELLENT = 0,
+    GOOD = 1,
+    FAIR = 2,
+    POOR = 3,
+    DEGRADED = 4
 }
 ```
 
 **Key Requirements:**
 - The `@description` comment is MANDATORY
 - List all enum values in the `"enum"` field
-- Enum values are automatically assigned integer values (0, 1, 2, ...)
-- Don't manually assign values in the enum body
+- Use `@type integer` for integer-based enums
+- Explicitly assign integer values starting from 0
+- Values should increment sequentially
 
 ### Class/Entity Types
 
@@ -79,15 +80,14 @@ import { TrackQualityType } from "./trackQualityType";
  *      "clazz" : {
  *           "extends" : ["Platform"],
  *           "members" : ["class","trackId","trackQuality","reasoning"]
- *      },
- *      "package":"example"
+ *      }
  * }
  */
 export class AlphaTrack extends Platform {
     /**
-     * @default quicktype.example.AlphaTrack
+     * @default quicktype.AlphaTrack
      */
-    public static class: string = "quicktype.example.AlphaTrack";
+    public static class: string = "quicktype.AlphaTrack";
     trackId?: ValueProperty<string>;
     trackQuality?: ValueProperty<TrackQualityType>;
     reasoning?: ValueProperty<string[]>;  // Arrays are supported
@@ -119,15 +119,14 @@ import { Entity, ValueProperty } from "@tektonux/model.core";
  *      "clazz" : {
  *          "extends" : ["Entity"],
  *          "members" : ["class", "red", "green", "blue", "opacity"]
- *      },
- *      "package":"example"
+ *      }
  * }
  */
 export class Color extends Entity {
     /**
-     * @default quicktype.example.Color
+     * @default quicktype.Color
      */
-    public static class: string = "quicktype.example.Color";
+    public static class: string = "quicktype.Color";
     red?: ValueProperty<number>;
     green?: ValueProperty<number>;
     blue?: ValueProperty<number>;

@@ -1,10 +1,10 @@
 # Phoenix Framework - AI Guide
 
-Welcome to the Phoenix framework documentation! This guide is designed to help AI assistants understand and contribute effectively to the codebase.
+Welcome to the Phoenix framework documentation! This guide is organized by usage frequency to help you find information efficiently.
 
-## Quick Overview
+## 🎯 Quick Overview
 
-The Phoenix framework is a **React/MobX/TypeScript** application built using **MVVM (Model-View-ViewModel)** architecture for tactical/military applications. It features:
+The framework is a **React/MobX/TypeScript** application built using **MVVM (Model-View-ViewModel)** architecture for tactical applications. It features:
 
 - **Reactive state management** with MobX
 - **Strong typing** with TypeScript  
@@ -12,36 +12,53 @@ The Phoenix framework is a **React/MobX/TypeScript** application built using **M
 - **Entity-driven data models** with property ViewModels
 - **Sophisticated theming** using Radix UI colors
 
-## How to Use This Guide
+## 📚 Documentation Organization
 
-This documentation is organized for quick reference and progressive learning:
+### 🔥 _DAILY/ - Frequently Referenced (Start Here!)
+Documents you'll use every day during active development:
 
-### 🚀 **Getting Started** (Start Here)
-- **[PROJECT_CONVENTIONS.md](PROJECT_CONVENTIONS.md)** - Project structure, naming, testing, and development workflow
-- **[FRAMEWORK_GUIDE.md](FRAMEWORK_GUIDE.md)** - Core MVVM concepts and architecture
+- **[COOKBOOK_PATTERNS_ENHANCED.md](_DAILY/COOKBOOK_PATTERNS_ENHANCED.md)** - Complete copy-paste templates combining multiple patterns
+- **[COMMON_PITFALLS.md](_DAILY/COMMON_PITFALLS.md)** - Mistakes to avoid and their fixes
+- **[PROPERTY_VIEWMODEL_GUIDE.md](_DAILY/PROPERTY_VIEWMODEL_GUIDE.md)** - When to use `value()`, `actual()`, `commanded()`, etc.
 
-### 📚 **Core Concepts** (Essential Reading)
-- **[ENTITY_ARCHITECTURE.md](ENTITY_ARCHITECTURE.md)** - Deep dive into the data layer and entity system
-- **[PROPERTY_VIEWMODEL_GUIDE.md](PROPERTY_VIEWMODEL_GUIDE.md)** - **Critical**: When to use `value()`, `actual()`, `commanded()`, etc.
+### 🏗️ _ARCHITECTURE/ - Deep Dives
+For understanding the system architecture and complex tasks:
 
-### 🔧 **Practical Development** (Daily Reference)
-- **[COOKBOOK_PATTERNS.md](COOKBOOK_PATTERNS.md)** - Copy-pasteable code patterns for common tasks
-- **[COMMON_PITFALLS.md](COMMON_PITFALLS.md)** - **NEW**: Common mistakes and how to avoid them
-- **[PHOENIX_UI_LIBRARY.md](PHOENIX_UI_LIBRARY.md)** - Component library reference with examples
-- **[THEMING_GUIDE.md](THEMING_GUIDE.md)** - Complete theming system with Radix UI colors
-- **[CSS_GUIDANCE.md](CSS_GUIDANCE.md)** - Styling conventions and utility classes
-- **[CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md)** - How to configure components and services (includes runtime configuration)
+- **[FRAMEWORK_GUIDE.md](_ARCHITECTURE/FRAMEWORK_GUIDE.md)** - Core MVVM concepts and architecture
+- **[ENTITY_ARCHITECTURE.md](_ARCHITECTURE/ENTITY_ARCHITECTURE.md)** - Data layer and entity system details
+- **[MODEL_GENERATION_GUIDE.md](_ARCHITECTURE/MODEL_GENERATION_GUIDE.md)** - How to modify data models
+- **[SAMPLE_DATA_MODEL.md](_ARCHITECTURE/SAMPLE_DATA_MODEL.md)** - Real model examples from the codebase
 
-### 📊 **Advanced Topics**
-- **[MODEL_GENERATION_GUIDE.md](MODEL_GENERATION_GUIDE.md)** - **CRITICAL**: How to modify data models and run generation
-- **[SAMPLE_DATA_MODEL.md](SAMPLE_DATA_MODEL.md)** - Real data model examples from the codebase
-- **[MAP_TROUBLESHOOTING.md](MAP_TROUBLESHOOTING.md)** - Debug 3D map and terrain issues
+### 📖 _REFERENCE/ - Lookup as Needed
+Reference documentation for specific topics:
 
-## Quick Reference Cheatsheet
+- **[PHOENIX_UI_LIBRARY.md](_REFERENCE/PHOENIX_UI_LIBRARY.md)** - Component library with examples
+- **[THEMING_GUIDE.md](_REFERENCE/THEMING_GUIDE.md)** - Theming system with Radix UI colors
+- **[CSS_GUIDANCE.md](_REFERENCE/CSS_GUIDANCE.md)** - Styling conventions and utilities
+- **[CONFIGURATION_GUIDE.md](_REFERENCE/CONFIGURATION_GUIDE.md)** - Component and service configuration
+- **[DISPLAY_REGISTRATION_GUIDE.md](_REFERENCE/DISPLAY_REGISTRATION_GUIDE.md)** - Display and panel registration
+- **[PROJECT_CONVENTIONS.md](_REFERENCE/PROJECT_CONVENTIONS.md)** - Project structure and naming
+- **[FYI_PERSONNEL.md](_REFERENCE/FYI_PERSONNEL.md)** - Team information and contacts
 
-### Most Common Patterns
+## 🚀 Quick Start Path
 
-#### ✅ **Form Input Binding** (Most Common)
+1. **First Time?** 
+   - Read this file completely
+   - Review [COOKBOOK_PATTERNS_ENHANCED.md](_DAILY/COOKBOOK_PATTERNS_ENHANCED.md) for complete examples
+
+2. **Creating a Feature?**
+   - Start with templates in [COOKBOOK_PATTERNS_ENHANCED.md](_DAILY/COOKBOOK_PATTERNS_ENHANCED.md)
+   - Check [COMMON_PITFALLS.md](_DAILY/COMMON_PITFALLS.md) to avoid mistakes
+
+3. **Working with Properties?**
+   - Reference [PROPERTY_VIEWMODEL_GUIDE.md](_DAILY/PROPERTY_VIEWMODEL_GUIDE.md)
+
+4. **Need Architecture Info?**
+   - See _ARCHITECTURE/ folder for deep dives
+
+## 💡 Key Patterns at a Glance
+
+### Form Input Binding (Most Common)
 ```tsx
 <TextInput
     value={viewModel.nameVM.localOrCommanded()}
@@ -49,100 +66,80 @@ This documentation is organized for quick reference and progressive learning:
 />
 ```
 
-#### ✅ **Display Current State**
-```tsx
-<div>Speed: {platform.speedVM.actualFormatted()}</div>
-```
-
-#### ✅ **Business Logic Decisions**
-```tsx
-if (platform.speedVM.actual() > 200) {
-    enableHighSpeedMode();
-}
-```
-
-### Property ViewModel Quick Reference
-
-| Method | Use When | Example |
-|--------|----------|---------|
-| `.localOrCommanded()` | **Form inputs** (most common) | `<input value={vm.localOrCommanded()} />` |
-| `.actualFormatted()` | **Display text** | `<span>{vm.actualFormatted()}</span>` |
-| `.actual()` | **Business logic** | `if (vm.actual() > threshold)` |
-| `.commanded()` | **Show pending changes** | `Pending: ${vm.commanded()}` |
-| `.onCommandedUpdate()` | **Handle form changes** | `onChange={vm.onCommandedUpdate}` |
-
-### Component Creation Pattern
-
+### MobX Essentials
 ```typescript
-// 1. ViewModel
-export class FeatureViewModel extends BaseViewModel {
-    constructor(services: IFrameworkServices) {
-        super(services);
-        makeObservable(this);
-    }
+constructor(services: IFrameworkServices) {
+    super(services);
+    makeObservable(this);  // CRITICAL: Enables reactivity
 }
-
-// 2. View
-export const FeatureView = observer(({ viewModel }: { viewModel: FeatureViewModel }) => {
-    return <div>Feature content</div>;
-});
-
-// 3. Test
-describe('FeatureViewModel', () => {
-    // Test cases
-});
 ```
 
-## AI Assistant Workflow
+### Property ViewModel Methods
+| Method | Use For | Returns |
+|--------|---------|---------|
+| `value()` | ValueProperty only | Raw value |
+| `actual()` | Business logic, computations | Current state |
+| `commanded()` | Showing pending changes | Desired state |
+| `localOrCommanded()` | **Form inputs** | Commanded if set, else actual |
+| `actualFormatted()` | Display text | Formatted string |
 
-When contributing to this codebase:
-
-1. **📁 Check project structure** - Use `PROJECT_CONVENTIONS.md` for file organization
-2. **🧠 Understand the domain** - Read `ENTITY_ARCHITECTURE.md` for data concepts  
-3. **⚡ Use property methods correctly** - Reference `PROPERTY_VIEWMODEL_GUIDE.md` 
-4. **🎨 Follow UI patterns** - Use `PHOENIX_UI_LIBRARY.md` for components
-5. **📝 Copy proven patterns** - Use `COOKBOOK_PATTERNS.md` for implementations
-6. **🧪 Write tests** - Follow testing conventions in `PROJECT_CONVENTIONS.md`
-
-## Key Success Factors
-
-### ✅ **DO**
-- Use `makeObservable(this)` in ViewModel constructors
-- Use `@observer` on React components that consume MobX observables
-- Use `localOrCommanded()` for form inputs
-- Use `actualFormatted()` for display text
-- Use `actual()` for business logic decisions
-- Follow naming conventions: `*ViewModel.ts`, `*View.tsx`
-- Write tests for ViewModels and components
-
-### ❌ **DON'T**
-- Use `any` types - always use proper TypeScript typing
-- Use `actual()` for form inputs (use `localOrCommanded()`)
-- Use `commanded()` for business logic (use `actual()`)
-- Forget `runInAction()` after `await` in async methods
-- Create files without following the established patterns
-
-## Need Help?
-
-- **Quick lookup**: Use the search function in your editor across all `.md` files
-- **Property methods**: `PROPERTY_VIEWMODEL_GUIDE.md` has detailed examples and troubleshooting
-- **Component usage**: `PHOENIX_UI_LIBRARY.md` shows props and examples for all UI components
-- **Code patterns**: `COOKBOOK_PATTERNS.md` has copy-pasteable solutions for common tasks
-
-## Development Commands
-
-```bash
-# Start development
-npm run dev
-
-# Run tests  
-npm test
-
-# Type checking
-npx tsc --noEmit
-
-# Build project
-npm run build
+### Display Registration
+```typescript
+registerDisplayInfo({
+    id: DisplayTypes.MyView,
+    tags: [],
+    visible: true,
+    ordinal: 100,
+    Renderer: props => {
+        return <MyView viewModel={useViewModel(MyViewModel)} />;
+    },
+});
+export default {};  // Required!
 ```
 
-Happy coding! 🚀
+## 📋 Common Tasks → Documentation Map
+
+| Task | Primary Doc | Folder |
+|------|------------|--------|
+| Create new component | COOKBOOK_PATTERNS_ENHANCED | _DAILY |
+| Fix TypeScript error | COMMON_PITFALLS | _DAILY |
+| Work with properties | PROPERTY_VIEWMODEL_GUIDE | _DAILY |
+| Modify data model | MODEL_GENERATION_GUIDE | _ARCHITECTURE |
+| Understand architecture | FRAMEWORK_GUIDE | _ARCHITECTURE |
+| Find UI component | PHOENIX_UI_LIBRARY | _REFERENCE |
+| Apply styling | THEMING_GUIDE, CSS_GUIDANCE | _REFERENCE |
+
+## 🔧 Development Tips
+
+1. **The enhanced cookbook has complete examples** - Each template demonstrates multiple concepts together
+2. **Check pitfalls first when debugging** - Most errors have known solutions
+3. **Use _QUICK_REF.md in repo root** - For commands, paths, and quick lookups
+4. **Read CLAUDE.md for AI guidance** - Session protocols and collaboration strategies
+
+## 🎓 Learning Path
+
+### Beginner
+1. This file (_START_HERE.md)
+2. COOKBOOK_PATTERNS_ENHANCED - See complete working examples
+3. COMMON_PITFALLS - Learn what to avoid
+
+### Intermediate
+1. PROPERTY_VIEWMODEL_GUIDE - Master property handling
+2. FRAMEWORK_GUIDE - Understand MVVM architecture
+3. PHOENIX_UI_LIBRARY - Explore available components
+
+### Advanced
+1. ENTITY_ARCHITECTURE - Deep dive into data layer
+2. MODEL_GENERATION_GUIDE - Modify core data models
+3. All _REFERENCE docs - Master the framework
+
+## 🔍 Need Help?
+
+- **Quick commands?** → See `_QUICK_REF.md` in repo root
+- **AI guidance?** → See `CLAUDE.md` in repo root
+- **Can't find something?** → Check the folder that matches your task complexity:
+  - Simple/daily tasks → _DAILY/
+  - Architecture questions → _ARCHITECTURE/
+  - Specific lookups → _REFERENCE/
+
+Remember: The enhanced cookbook patterns in _DAILY/ provide complete, working examples that demonstrate multiple concepts together - start there for most tasks!

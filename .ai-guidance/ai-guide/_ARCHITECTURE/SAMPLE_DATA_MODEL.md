@@ -21,13 +21,12 @@ import { GeoPoint } from "@tektonux/model.geospatial";
  *          "members": [
  *              "class"
  *          ]
- *      },
- *      "package":"platform.uvc"
+ *      }
  * }
  */
 export declare class MarshalPoint extends GeoPoint {
     /**
-     * @default quicktype.platform.uvc.MarshalPoint
+     * @default quicktype.MarshalPoint
      */
     static class: string;
     constructor(id: string);
@@ -79,8 +78,7 @@ import { AntennaType } from "./types/AntennaType";
  *              "targetLongitude",
  *              "targetAltitude"
  *          ]
- *      },
- *      "package":"platform.uvc"
+ *      }
  * }
  */
 export declare class Rover extends GeoEntity {
@@ -116,8 +114,7 @@ import { UvcNotification } from "./UvcNotification";
  *              "class",
  *              "level"
  *          ]
- *      },
- *      "package":"platform.uvc"
+ *      }
  * }
  */
 export declare class WcaNotification extends UvcNotification {
@@ -167,8 +164,7 @@ import { PlatformHistory } from "@tektonux/model.platform/dist";
  *      "clazz" : {
  *          "extends": ["PlatformHistory"],
  *          "members": ["class","eventType"]
- *      },
- *      "package":"platform.uvc"
+ *      }
  * }
  */
 export declare class UvcPlatformHistory extends PlatformHistory {
@@ -264,7 +260,7 @@ export abstract class UvcPlatformBaseVM<T extends UvcPlatform> extends PlatformB
 ### Metadata-Driven Generation
 
 All data models include rich metadata comments:
-- **Package information**: `"package":"platform.uvc"`
+- **No package field needed**: The package field is not used in the current model generator
 - **Inheritance chain**: `"extends": ["GeoEntity"]`
 - **Member properties**: Lists all properties for code generation
 - **Default values**: Static class identifiers for framework registration

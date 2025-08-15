@@ -47,8 +47,7 @@ import { GeoPoint } from "@tektonux/model.geospatial";
  *      "clazz" : {
  *          "extends": ["GeoPoint"],
  *          "members": ["class"]
- *      },
- *      "package":"platform.uvc"
+ *      }
  * }
  */
 export declare class MarshalPoint extends GeoPoint {
@@ -66,8 +65,7 @@ import { UvcNotification } from "./UvcNotification";
  *      "clazz" : {
  *          "extends" :  ["UvcNotification"],
  *          "members" :  ["class", "level"]
- *      },
- *      "package":"platform.uvc"
+ *      }
  * }
  */
 export declare class WcaNotification extends UvcNotification {
