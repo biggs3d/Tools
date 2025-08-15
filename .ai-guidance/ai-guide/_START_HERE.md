@@ -33,6 +33,7 @@ This documentation is organized for quick reference and progressive learning:
 - **[CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md)** - How to configure components and services (includes runtime configuration)
 
 ### 📊 **Advanced Topics**
+- **[MODEL_GENERATION_GUIDE.md](MODEL_GENERATION_GUIDE.md)** - **CRITICAL**: How to modify data models and run generation
 - **[SAMPLE_DATA_MODEL.md](SAMPLE_DATA_MODEL.md)** - Real data model examples from the codebase
 - **[MAP_TROUBLESHOOTING.md](MAP_TROUBLESHOOTING.md)** - Debug 3D map and terrain issues
 

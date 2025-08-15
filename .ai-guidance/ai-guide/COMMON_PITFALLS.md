@@ -12,6 +12,7 @@ This document highlights common mistakes and misunderstandings when working with
 6. [Form Binding Mistakes](#form-binding-mistakes)
 7. [Collection Management](#collection-management)
 8. [Memory Leaks](#memory-leaks)
+9. [Model Package Imports](#model-package-imports)
 
 ## Property ViewModel Method Confusion
 
@@ -378,5 +379,51 @@ useEffect(() => {
 8. **Always filter enum values for numeric types only**
 9. **Always clean up resources in `stop()` method**
 10. **Use `GeoEntityBaseVM` for geo-located entities only**
+
+## Model Package Imports
+
+### ❌ Common Mistake: Importing from Internal Paths
+
+Generated model packages (like `@tektonux/cwmi-model`, `@tektonux/alpha-model`, etc.) have a nested `src/src/` structure internally, but you should NOT import from these internal paths.
+
+```typescript
+// WRONG: Importing from internal file paths
+import { AlphaTrack } from '@tektonux/cwmi-model/src/alphaTrack';
+import { TrackQualityType } from '@tektonux/cwmi-model/src/trackQualityType';
+import { UnitModeType } from '@tektonux/cwmi-model/src/unitModeType';
+```
+
+This will cause TypeScript compilation errors like:
+```
+Cannot find module '@tektonux/cwmi-model/src/alphaTrack' or its corresponding type declarations.
+```
+
+### ✅ Correct Usage: Import from Package Root
+
+Always import from the package root, which uses barrel exports from the package's `index.ts`:
+
+```typescript
+// CORRECT: Import from package root
+import { AlphaTrack, TrackQualityType, UnitModeType } from '@tektonux/cwmi-model';
+
+// Also correct: Separate imports from package root
+import { AlphaTrack } from '@tektonux/cwmi-model';
+import { TrackQualityType, UnitModeType } from '@tektonux/cwmi-model';
+```
+
+### Why This Happens
+
+Model packages are auto-generated with this structure:
+```
+libs/cwmi/cwmi.model/
+├── src/
+│   ├── index.ts      # Barrel exports: export * from "./src/alphaTrack"
+│   └── src/          # Actual model files
+│       ├── alphaTrack.ts
+│       ├── trackQualityType.ts
+│       └── unitModeType.ts
+```
+
+The package's `index.ts` re-exports everything, so you should always import from the package root (`@tektonux/cwmi-model`) rather than trying to access the internal file structure.
 
 Following these guidelines will help you avoid the most common pitfalls and write more robust, maintainable code in the Phoenix framework.

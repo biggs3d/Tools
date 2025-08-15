@@ -4,11 +4,15 @@
 
 - **IMPORTANT**: Let me know if you need any missing files/content/context for data objects & types, or arch. background info!
 - **SESSION ENDING PROTOCOL**: Always run the Improvement Stage retrospective when user indicates session is ending (see "After Each Task" section)
+- **MODEL CHANGES**: All data model changes must be made in the `/model/cwmi.model/src/` or `/model/phoenix.model/src/` directories first, then run `npm run generate-model` to propagate changes to the client and server. Do NOT edit files directly in `client/libs/cwmi/cwmi.model/` or `client/libs/phoenix/phoenix.model/` as they will be overwritten during generation. See `./ai-guide/MODEL_GENERATION_GUIDE.md` for detailed instructions on model format and troubleshooting
+
+### Path Context Note
+**IMPORTANT**: When the user mentions relative paths (e.g., `./ai-guide`, `./tools`, `CLAUDE.md`), these are almost always relative to the **repository root** (`/workspaces/cwmi-hmi-v2/`), NOT the current working directory (`client/`). The user typically thinks in terms of the repo structure.
 
 ### Documentation Hierarchy
 1. **General Coding Standards**: See `CODING_STANDARDS.md` for universal principles
 2. **AI Collaboration**: See `AI_COLLABORATION_GUIDE.md` for AI-human collaboration strategies
-3. **Framework Patterns**: See `./ai-guide/` folder for React/MobX/TypeScript guidance  
+3. **Framework Patterns**: See `./ai-guide/` folder for framework-specific React/MobX/TypeScript guidance  
 4. **Project-Specific**: This file (CLAUDE.md) for project-unique patterns
 
 ### Before Each Task
@@ -144,6 +148,20 @@ const context: ProjectContext = {
 - Entity ViewModels wrap entities to provide functionality
 - Services provided through IFrameworkServices
 - Read all the documents in the ./ai-guide folder for detailed guidance!
+
+### Component Organization
+- **Entity ViewModels**: Located in `{lib}.core/src/lib/viewModels/`
+- **UI ViewModels**: Co-located with their Views in `{lib}.components/src/lib/{feature}/`
+- **Label Converters**: Located in `{lib}.core/src/lib/adapters/` (e.g., `trackTypes.ts`)
+- **UI Concern Enums**: Located in adapters alongside label converters
+- **Model Enums**: Generated in `{lib}.model/src/` - DO NOT modify these directly
+
+### Adapters Pattern
+The `adapters/` folder contains:
+- Label converters for enum display values (e.g., `TrackQualityTypeLabel`)
+- UI-specific enums and types (e.g., `ThreatCategory`, `PlatformType`)
+- Bridge implementations between layers
+- Service adapters and suppliers
 
 ## Common Tools
 - MobX for state management
