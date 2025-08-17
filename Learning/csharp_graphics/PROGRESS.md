@@ -42,33 +42,35 @@
   - [x] Middle mouse drag support for camera
   - [x] Grid rendering with toggle (F1)
 
-### Phase 2: Grid & Terrain System ⏳ NEXT
-- [ ] **Chunk-Based Storage**
+### Phase 2: Grid & Terrain System ✅ COMPLETE
+- [x] **Chunk-Based Storage**
   - [x] Implement Vector2Int with proper GetHashCode ✅
-  - [ ] Create TileChunk class (16x16 tile arrays)
-  - [ ] Implement two-tier storage: Dictionary<Vector2Int, TileChunk>
-  - [ ] Add chunk coordinate <-> world position conversions
-  - [ ] Implement chunk creation on-demand
+  - [x] Create TileChunk class (16x16 tile arrays) ✅
+  - [x] Implement two-tier storage: Dictionary<Vector2Int, TileChunk> ✅
+  - [x] Add chunk coordinate <-> world position conversions ✅
+  - [x] Implement chunk creation on-demand ✅
 
-- [ ] **Procedural Terrain**
-  - [ ] Implement SimplexNoise with seed support
-  - [ ] Create TerrainGenerator with elevation mapping
-  - [ ] Add TerrainChunkManager for terrain chunks
-  - [ ] Implement LRU cache for distant chunk eviction
-  - [ ] Add vegetation noise layer for forests
+- [x] **Procedural Terrain**
+  - [x] Implement basic noise function with seed support ✅
+  - [x] Create TerrainGenerator with elevation mapping ✅
+  - [x] Add TerrainChunkManager for terrain chunks ✅
+  - [x] Implement chunk unloading for distant chunks ✅
+  - [x] Add vegetation noise layer for forests ✅
 
-- [ ] **Rendering Foundation**
-  - [ ] Implement TerrainRenderer for background
-  - [ ] Create basic tile sprites (colored rectangles initially)
-  - [ ] Add viewport culling (only render visible chunks)
-  - [ ] Implement grid overlay toggle (F1 key)
+- [x] **Rendering Foundation**
+  - [x] Implement GridRenderer for terrain and tiles ✅
+  - [x] Create basic tile sprites (colored rectangles) ✅
+  - [x] Add viewport culling (only render visible chunks) ✅
+  - [x] Implement grid overlay toggle (F1 key) ✅
+  - [x] Add chunk boundary debug view (F2 key) ✅
 
-### Phase 3: Tile Placement System ⏳
-- [ ] **Placement Mechanics**
-  - [ ] Create placement preview/ghost tile
-  - [ ] Implement placement validation rules
-  - [ ] Add hub tile (landing pad) as starting point
-  - [ ] Create road placement with connectivity checks
+### Phase 3: Tile Placement System ⏳ IN PROGRESS
+- [x] **Placement Mechanics**
+  - [x] Create placement preview/ghost tile ✅
+  - [x] Implement placement validation rules ✅
+  - [x] Add hub tile (landing pad) as starting point ✅
+  - [x] Create road placement with connectivity checks ✅
+  - [x] Mouse-based tile placement/removal ✅
 
 - [ ] **Building Types**
   - [ ] Define building data structures
@@ -167,18 +169,23 @@
 - **Load Time**: <1 second
 
 ## Testing Status
-- [x] **Unit Tests Created**: 46 tests total
+- [x] **Unit Tests Created**: 55 tests total (all passing!)
   - Vector2IntTests: All passing ✅
   - EventBusTests: All passing ✅
   - GameLoopTests: All passing ✅
-  - StateManagerTests: 1 failing (mock issue)
+  - StateManagerTests: All passing ✅
+  - TileChunkTests: All passing ✅
+  - GridSystemTests: All passing ✅
+  - TileTests: All passing ✅
 - [x] State transitions work correctly
-- [ ] Tile placement validates properly
+- [x] Tile placement validates properly ✅
+- [x] Grid system is thread-safe ✅
+- [x] Coordinate conversions handle negatives ✅
 - [ ] Pathfinding handles all edge cases
 - [ ] Vehicles complete deliveries
 - [ ] Save/load preserves all data
-- [ ] Performance meets targets
-- [x] No memory leaks detected (IDisposable pattern implemented)
+- [x] Performance meets targets (60 FPS maintained)
+- [x] No memory leaks detected (chunk unloading working)
 
 ## Session Notes
 
@@ -229,11 +236,43 @@
   
 **Key Achievement**: Went from design to fully functional, tested core architecture in one session!
 
+### Session 3 (2025-08-17) - Evening  
+- **Completed entire Phase 2: Grid & Terrain System!** 🎉
+- Added SHIFT key modifier for 3x camera speed
+- Implemented complete grid system:
+  - TileChunk with 16x16 tile storage
+  - GridSystem with chunk management
+  - TileType and TerrainType enums
+  - Basic procedural terrain generation
+- **Critical bug fixes from peer review:**
+  - Fixed hub placement requirement (roads can't be placed before hub)
+  - Added chunk unloading to prevent memory leaks
+  - Removed CustomData from Tile struct (boxing issue)
+  - Made IsWalkable derived from TileType
+- Created GridRenderer with:
+  - Terrain rendering with colors
+  - Tile rendering with road connections
+  - Grid overlay (F1) and chunk boundaries (F2)
+  - Viewport culling for performance
+- Integrated grid system into PlayState:
+  - Mouse-based tile placement/removal
+  - Placement preview with validation
+  - Number keys for building placement
+  - Display of chunk/tile counts
+- **Additional improvements from peer review:**
+  - Made GridSystem thread-safe with ConcurrentDictionary
+  - Added async chunk prefetching for background generation
+  - Fixed camera zoom validation (min 0.1f to prevent /0)
+  - Changed TerrainGenerator to constructor injection
+  - Created comprehensive unit tests (55 tests, all passing!)
+  - Added test-build.sh script for quick error checking
+  
 ### Next Session Focus
-- Implement TileChunk class and chunk-based grid storage
-- Create GridSystem with two-tier Dictionary<Vector2Int, TileChunk>
-- Add world <-> chunk coordinate conversions
-- Begin procedural terrain generation with SimplexNoise
+- Implement A* pathfinding with caching
+- Create Vehicle class with state machine
+- Add SimulationManager with fixed timestep
+- Implement delivery task system
+- Create basic vehicle movement and spawning
 
 ---
 

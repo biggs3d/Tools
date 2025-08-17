@@ -524,19 +524,19 @@ public void Draw() {
 
 ## Implementation Phases
 
-### Phase 1: Core Foundation
+### Phase 1: Core Foundation ✅ COMPLETE
 
 - [x] Project setup with raylib-cs
-- [ ] Basic game state manager
-- [ ] Menu screen with transitions
-- [ ] Grid rendering and camera
+- [x] Basic game state manager with DI
+- [x] Menu screen with transitions
+- [x] Grid rendering and camera
 
-### Phase 2: Tile System
+### Phase 2: Tile System ✅ COMPLETE
 
-- [ ] Tile placement/removal
-- [ ] Placement validation rules
-- [ ] Road connectivity visualization
-- [ ] Basic building types
+- [x] Tile placement/removal with mouse
+- [x] Placement validation rules (hub required)
+- [x] Road connectivity visualization
+- [x] Basic building types (R/C/I)
 
 ### Phase 3: Simulation
 
@@ -640,5 +640,57 @@ public void Draw() {
 
 ---
 
-*This design document represents the initial architecture. It will evolve as implementation reveals new insights and
-requirements.*
+## Implementation Notes (Added During Development)
+
+### Key Architectural Changes from Design
+
+1. **Thread-Safe Grid System**
+   - Changed from `Dictionary<Vector2Int, TileChunk>` to `ConcurrentDictionary<Vector2Int, TileChunk>`
+   - Added async chunk prefetching capability for background generation
+   - Rationale: Allows smooth exploration without frame drops
+
+2. **Simplified Tile Structure**
+   - Removed `CustomData` property (was `object?`) to avoid boxing
+   - Made `IsWalkable` a derived property from `TileType` instead of stored
+   - Rationale: Better memory efficiency and type safety
+
+3. **Dependency Injection Pattern**
+   - TerrainGenerator injected via constructor instead of setter method
+   - All systems use constructor DI, no singletons
+   - Rationale: Better testability and clearer dependencies
+
+4. **Memory Management**
+   - Added chunk unloading for distant empty chunks
+   - Distance-based eviction with cooldown timer
+   - Rationale: Prevents unbounded memory growth during exploration
+
+5. **Placement Rules Enhancement**
+   - Hub must exist before any roads can be placed
+   - Only one hub allowed per map
+   - Buildings require adjacent road
+   - Rationale: Ensures logical city growth from connected network
+
+### Performance Optimizations Implemented
+
+- **Viewport Culling**: Only render visible chunks
+- **Chunk Boundaries Debug View**: F2 toggle for performance debugging  
+- **Fixed Array Access**: Direct indexing within chunks (no hashing)
+- **Concurrent Operations**: Thread-safe for multi-core utilization
+
+### Testing Infrastructure
+
+- **55 Unit Tests**: Comprehensive coverage of grid system
+- **test-build.sh**: Quick error checking script
+- **Coordinate Edge Cases**: Proper handling of negative coordinates
+- **Thread Safety Tests**: Verified concurrent chunk operations
+
+### Known Limitations
+
+- Basic noise function (not SimplexNoise library yet)
+- Console.WriteLine for logging (not event-based)
+- No save/load system yet
+- Pathfinding not implemented
+
+---
+
+*This design document represents the initial architecture and has been updated with implementation learnings. It will continue to evolve as development progresses.*

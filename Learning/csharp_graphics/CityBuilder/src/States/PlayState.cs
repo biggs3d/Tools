@@ -1,5 +1,7 @@
 using Raylib_cs;
 using CityBuilder.Core;
+using CityBuilder.Grid;
+using CityBuilder.Rendering;
 using System.Numerics;
 
 namespace CityBuilder.States;
@@ -9,14 +11,15 @@ namespace CityBuilder.States;
 /// </summary>
 public class PlayState : BaseGameState
 {
-    
     private Camera2D _camera;
     private bool _showGrid = true;
+    private bool _showChunkBounds = false;
     private bool _isPaused = false;
     
-    // Temporary grid visualization
-    private const int TILE_SIZE = 32;
-    private const int GRID_SIZE = 50;
+    // Grid system
+    private GridSystem _gridSystem = null!;
+    private GridRenderer _gridRenderer = null!;
+    private TerrainGenerator _terrainGenerator = null!;
     
     public PlayState(EventBus eventBus, AssetManager assetManager)
         : base(eventBus, assetManager)
@@ -36,8 +39,18 @@ public class PlayState : BaseGameState
             Zoom = 1f
         };
         
+        // Initialize grid system with terrain generator
+        _terrainGenerator = new TerrainGenerator(seed: 42);
+        _gridSystem = new GridSystem(EventBus, _terrainGenerator);
+        _gridRenderer = new GridRenderer(_gridSystem);
+        
+        // Place initial hub at origin
+        _gridSystem.PlaceTileAt(new Vector2Int(0, 0), TileType.LandingPad);
+        Console.WriteLine("Hub placed at origin");
+        
         _isPaused = false;
         _showGrid = true;
+        _showChunkBounds = false;
     }
     
     public override void Update(float deltaTime)
@@ -45,6 +58,12 @@ public class PlayState : BaseGameState
         if (!_isPaused)
         {
             HandleCameraInput(deltaTime);
+            HandlePlacementInput();
+            
+            // Unload distant chunks periodically
+            _gridSystem.UnloadDistantChunks(_camera, 
+                Raylib.GetScreenWidth(), 
+                Raylib.GetScreenHeight());
         }
         
         HandleGameInput();
@@ -65,10 +84,22 @@ public class PlayState : BaseGameState
         // Begin world-space rendering
         Raylib.BeginMode2D(_camera);
         
-        DrawGrid();
-        DrawPlaceholderTerrain();
+        // Draw the grid system
+        _gridRenderer.Draw(_camera, 
+            Raylib.GetScreenWidth(), 
+            Raylib.GetScreenHeight(), 
+            _showGrid);
         
-        // Future: Draw tiles, vehicles, effects
+        // Debug: Show chunk boundaries
+        if (_showChunkBounds)
+        {
+            _gridRenderer.DrawChunkBoundaries(_camera,
+                Raylib.GetScreenWidth(),
+                Raylib.GetScreenHeight());
+        }
+        
+        // Draw placement preview
+        DrawPlacementPreview();
         
         Raylib.EndMode2D();
         
@@ -79,12 +110,17 @@ public class PlayState : BaseGameState
     public override void Exit()
     {
         base.Exit(); // Handles event cleanup
+        _gridSystem?.Dispose();
         Console.WriteLine("Exited Play State");
     }
     
     private void HandleCameraInput(float deltaTime)
     {
-        float moveSpeed = 300f * deltaTime / _camera.Zoom;
+        float baseSpeed = 300f * deltaTime / _camera.Zoom;
+        
+        // Check for SHIFT key to triple the speed
+        float speedMultiplier = (Raylib.IsKeyDown(KeyboardKey.LeftShift) || Raylib.IsKeyDown(KeyboardKey.RightShift)) ? 3f : 1f;
+        float moveSpeed = baseSpeed * speedMultiplier;
         
         // WASD or Arrow keys for camera movement
         if (Raylib.IsKeyDown(KeyboardKey.W) || Raylib.IsKeyDown(KeyboardKey.Up))
@@ -96,12 +132,13 @@ public class PlayState : BaseGameState
         if (Raylib.IsKeyDown(KeyboardKey.D) || Raylib.IsKeyDown(KeyboardKey.Right))
             _camera.Target.X += moveSpeed;
         
-        // Mouse wheel zoom
+        // Mouse wheel zoom with safety validation
         float wheel = Raylib.GetMouseWheelMove();
         if (wheel != 0)
         {
             _camera.Zoom += wheel * 0.1f;
-            _camera.Zoom = Math.Clamp(_camera.Zoom, 0.25f, 4f);
+            // Ensure zoom never goes below a safe minimum to prevent division by zero
+            _camera.Zoom = Math.Clamp(_camera.Zoom, 0.1f, 4f);
         }
         
         // Middle mouse drag
@@ -122,6 +159,13 @@ public class PlayState : BaseGameState
             Console.WriteLine($"Grid display: {_showGrid}");
         }
         
+        // Toggle chunk boundaries (debug)
+        if (Raylib.IsKeyPressed(KeyboardKey.F2))
+        {
+            _showChunkBounds = !_showChunkBounds;
+            Console.WriteLine($"Chunk boundaries: {_showChunkBounds}");
+        }
+        
         // Pause
         if (Raylib.IsKeyPressed(KeyboardKey.P) || Raylib.IsKeyPressed(KeyboardKey.Space))
         {
@@ -137,60 +181,79 @@ public class PlayState : BaseGameState
         }
     }
     
-    private void DrawGrid()
+    private void HandlePlacementInput()
     {
-        if (!_showGrid) return;
+        // Get mouse position in world space
+        var mousePos = Raylib.GetMousePosition();
+        var worldPos = Raylib.GetScreenToWorld2D(mousePos, _camera);
+        var tilePos = GridSystem.WorldToTile(worldPos);
         
-        Color gridColor = new Color(50, 50, 60, 100);
-        
-        int startX = -GRID_SIZE * TILE_SIZE / 2;
-        int endX = GRID_SIZE * TILE_SIZE / 2;
-        int startY = -GRID_SIZE * TILE_SIZE / 2;
-        int endY = GRID_SIZE * TILE_SIZE / 2;
-        
-        // Vertical lines
-        for (int x = startX; x <= endX; x += TILE_SIZE)
+        // Left click to place road
+        if (Raylib.IsMouseButtonPressed(MouseButton.Left))
         {
-            Raylib.DrawLine(x, startY, x, endY, gridColor);
-        }
-        
-        // Horizontal lines
-        for (int y = startY; y <= endY; y += TILE_SIZE)
-        {
-            Raylib.DrawLine(startX, y, endX, y, gridColor);
-        }
-        
-        // Draw origin marker
-        Raylib.DrawCircle(0, 0, 5, Color.Red);
-    }
-    
-    private void DrawPlaceholderTerrain()
-    {
-        // Draw a checkerboard pattern as placeholder terrain
-        int startTileX = -GRID_SIZE / 2;
-        int endTileX = GRID_SIZE / 2;
-        int startTileY = -GRID_SIZE / 2;
-        int endTileY = GRID_SIZE / 2;
-        
-        for (int x = startTileX; x < endTileX; x++)
-        {
-            for (int y = startTileY; y < endTileY; y++)
+            if (_gridSystem.PlaceTileAt(tilePos, TileType.Road))
             {
-                Rectangle rect = new Rectangle(
-                    x * TILE_SIZE,
-                    y * TILE_SIZE,
-                    TILE_SIZE,
-                    TILE_SIZE
-                );
-                
-                // Checkerboard pattern
-                Color color = ((x + y) % 2 == 0) 
-                    ? new Color(40, 60, 40, 255)  // Dark green
-                    : new Color(50, 70, 50, 255); // Light green
-                    
-                Raylib.DrawRectangleRec(rect, color);
+                Console.WriteLine($"Placed road at {tilePos}");
             }
         }
+        
+        // Right click to remove tile
+        if (Raylib.IsMouseButtonPressed(MouseButton.Right))
+        {
+            if (_gridSystem.RemoveTileAt(tilePos))
+            {
+                Console.WriteLine($"Removed tile at {tilePos}");
+            }
+        }
+        
+        // Number keys for building placement
+        if (Raylib.IsKeyPressed(KeyboardKey.One))
+        {
+            if (_gridSystem.PlaceTileAt(tilePos, TileType.Residential))
+            {
+                Console.WriteLine($"Placed residential at {tilePos}");
+            }
+        }
+        else if (Raylib.IsKeyPressed(KeyboardKey.Two))
+        {
+            if (_gridSystem.PlaceTileAt(tilePos, TileType.Commercial))
+            {
+                Console.WriteLine($"Placed commercial at {tilePos}");
+            }
+        }
+        else if (Raylib.IsKeyPressed(KeyboardKey.Three))
+        {
+            if (_gridSystem.PlaceTileAt(tilePos, TileType.Industrial))
+            {
+                Console.WriteLine($"Placed industrial at {tilePos}");
+            }
+        }
+    }
+    
+    private void DrawPlacementPreview()
+    {
+        // Get mouse position in world space
+        var mousePos = Raylib.GetMousePosition();
+        var worldPos = Raylib.GetScreenToWorld2D(mousePos, _camera);
+        var tilePos = GridSystem.WorldToTile(worldPos);
+        
+        // Draw preview rectangle
+        var worldTilePos = GridSystem.TileToWorld(tilePos);
+        var rect = new Rectangle(
+            worldTilePos.X - GridSystem.TileSize / 2f,
+            worldTilePos.Y - GridSystem.TileSize / 2f,
+            GridSystem.TileSize,
+            GridSystem.TileSize
+        );
+        
+        // Check if placement would be valid
+        var existingTile = _gridSystem.GetTileAt(tilePos);
+        var previewColor = existingTile.Type == TileType.Empty 
+            ? new Color(100, 255, 100, 100)  // Green for valid
+            : new Color(255, 100, 100, 100); // Red for occupied
+        
+        Raylib.DrawRectangleRec(rect, previewColor);
+        Raylib.DrawRectangleLinesEx(rect, 2, Color.White);
     }
     
     private void DrawUI()
@@ -206,11 +269,13 @@ public class PlayState : BaseGameState
         Raylib.DrawText($"FPS: {Raylib.GetFPS()}", 10, 10, 20, Color.Green);
         Raylib.DrawText($"Zoom: {_camera.Zoom:F2}x", 100, 10, 20, Color.White);
         Raylib.DrawText($"Camera: ({_camera.Target.X:F0}, {_camera.Target.Y:F0})", 200, 10, 20, Color.White);
+        Raylib.DrawText($"Chunks: {_gridSystem.ChunkCount}", 380, 10, 20, Color.White);
+        Raylib.DrawText($"Tiles: {_gridSystem.TotalTilesPlaced}", 480, 10, 20, Color.White);
         
         // Controls help
-        string controls = "WASD: Move Camera | Scroll: Zoom | F1: Toggle Grid | P: Pause | ESC: Menu";
-        int controlsWidth = Raylib.MeasureText(controls, 16);
-        Raylib.DrawText(controls, screenWidth / 2 - controlsWidth / 2, screenHeight - 30, 16, Color.Gray);
+        string controls = "WASD/SHIFT: Move | Click: Place Road | Right-Click: Remove | 1-3: Buildings | F1: Grid | F2: Chunks | ESC: Menu";
+        int controlsWidth = Raylib.MeasureText(controls, 14);
+        Raylib.DrawText(controls, screenWidth / 2 - controlsWidth / 2, screenHeight - 30, 14, Color.Gray);
         
         // Pause overlay
         if (_isPaused)
