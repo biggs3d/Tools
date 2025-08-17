@@ -1,3 +1,4 @@
+using System;
 using Raylib_cs;
 using CityBuilder.Core;
 using CityBuilder.Grid;
@@ -13,7 +14,7 @@ namespace CityBuilder.States;
 public class PlayState : BaseGameState
 {
     private Camera2D _camera;
-    private bool _showGrid = true;
+    private bool _showGrid = false;
     private bool _showChunkBounds = false;
     private bool _isPaused = false;
     
@@ -25,9 +26,13 @@ public class PlayState : BaseGameState
     // Simulation
     private SimulationManager _simulationManager = null!;
     
-    public PlayState(EventBus eventBus, AssetManager assetManager)
+    // Settings
+    private readonly GameSettings _gameSettings;
+    
+    public PlayState(EventBus eventBus, AssetManager assetManager, GameSettings gameSettings)
         : base(eventBus, assetManager)
     {
+        _gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
     }
     
     public override void Enter()
@@ -48,8 +53,8 @@ public class PlayState : BaseGameState
         _gridSystem = new GridSystem(EventBus, _terrainGenerator);
         _gridRenderer = new GridRenderer(_gridSystem);
         
-        // Initialize simulation
-        _simulationManager = new SimulationManager(_gridSystem, EventBus);
+        // Initialize simulation with settings
+        _simulationManager = new SimulationManager(_gridSystem, EventBus, _gameSettings);
         
         // Place initial hub at origin
         _gridSystem.PlaceTileAt(new Vector2Int(0, 0), TileType.LandingPad);
@@ -59,7 +64,7 @@ public class PlayState : BaseGameState
         // Vehicle will spawn when first task is generated
         
         _isPaused = false;
-        _showGrid = true;
+        _showGrid = false;
         _showChunkBounds = false;
     }
     

@@ -15,7 +15,8 @@ namespace CityBuilder.Tests.Integration
             // Arrange - Create the world
             var eventBus = new EventBus();
             var gridSystem = new GridSystem(eventBus);
-            var simulationManager = new SimulationManager(gridSystem, eventBus);
+            var gameSettings = new GameSettings();
+            var simulationManager = new SimulationManager(gridSystem, eventBus, gameSettings);
             
             Console.WriteLine("=== E2E Simulation Test Starting ===");
             
@@ -128,7 +129,8 @@ namespace CityBuilder.Tests.Integration
         [Fact]
         public void E2E_VehiclePool_AcquireAndInitialize()
         {
-            var pool = new VehiclePool(5, 20);
+            var gameSettings = new GameSettings();
+            var pool = new VehiclePool(5, 20, gameSettings);
             var vehicle = pool.Acquire();
             
             Assert.NotNull(vehicle);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CityBuilder.Core;
 
 namespace CityBuilder.Simulation
 {
@@ -7,6 +8,7 @@ namespace CityBuilder.Simulation
     {
         private readonly Queue<Vehicle> _availableVehicles;
         private readonly List<Vehicle> _activeVehicles;
+        private readonly GameSettings _gameSettings;
         private int _nextId;
         private readonly int _maxPoolSize;
         
@@ -15,16 +17,17 @@ namespace CityBuilder.Simulation
         public int ActiveCount => _activeVehicles.Count;
         public int TotalCount => AvailableCount + ActiveCount;
         
-        public VehiclePool(int initialSize = 10, int maxSize = 100)
+        public VehiclePool(int initialSize = 10, int maxSize = 100, GameSettings? gameSettings = null)
         {
             _maxPoolSize = maxSize;
+            _gameSettings = gameSettings ?? new GameSettings(); // Use defaults if not provided
             _availableVehicles = new Queue<Vehicle>(initialSize);
             _activeVehicles = new List<Vehicle>(initialSize);
             _nextId = 0;
             
             for (int i = 0; i < initialSize; i++)
             {
-                var vehicle = new Vehicle(_nextId++);
+                var vehicle = new Vehicle(_nextId++, _gameSettings);
                 _availableVehicles.Enqueue(vehicle);
             }
         }
@@ -39,7 +42,7 @@ namespace CityBuilder.Simulation
             }
             else if (TotalCount < _maxPoolSize)
             {
-                vehicle = new Vehicle(_nextId++);
+                vehicle = new Vehicle(_nextId++, _gameSettings);
             }
             
             if (vehicle != null)

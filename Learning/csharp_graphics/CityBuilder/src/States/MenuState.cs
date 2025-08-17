@@ -146,7 +146,8 @@ public class MenuState : BaseGameState
                 EventBus.Publish(new StateChangeRequest(typeof(PlayState)));
                 break;
             case 1: // Settings
-                Console.WriteLine("Settings selected (not implemented)");
+                Console.WriteLine("Settings selected");
+                EventBus.Publish(new StateChangeRequest(typeof(SettingsState)));
                 break;
             case 2: // Credits
                 Console.WriteLine("Credits selected (not implemented)");

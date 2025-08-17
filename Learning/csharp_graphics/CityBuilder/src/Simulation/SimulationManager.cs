@@ -15,6 +15,7 @@ namespace CityBuilder.Simulation
         private readonly List<DeliveryTask> _activeTasks;
         private readonly List<Vector2Int> _buildingLocations;
         private readonly EventBus _eventBus;
+        private readonly GameSettings _gameSettings;
         private readonly Random _random;
         
         private float _accumulator;
@@ -28,13 +29,14 @@ namespace CityBuilder.Simulation
         public int ActiveTaskCount => _activeTasks.Count;
         public bool IsPaused { get; set; }
         
-        public SimulationManager(GridSystem gridSystem, EventBus eventBus)
+        public SimulationManager(GridSystem gridSystem, EventBus eventBus, GameSettings gameSettings)
         {
             _gridSystem = gridSystem ?? throw new ArgumentNullException(nameof(gridSystem));
             _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+            _gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
             
             _pathfindingService = new PathfindingService(gridSystem);
-            _vehiclePool = new VehiclePool(GameConstants.VehiclePoolInitialSize, GameConstants.MaxVehicles);
+            _vehiclePool = new VehiclePool(GameConstants.VehiclePoolInitialSize, GameConstants.MaxVehicles, gameSettings);
             _pendingTasks = new Queue<DeliveryTask>();
             _activeTasks = new List<DeliveryTask>();
             _buildingLocations = new List<Vector2Int>();

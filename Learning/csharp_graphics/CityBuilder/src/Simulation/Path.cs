@@ -15,6 +15,8 @@ namespace CityBuilder.Simulation
         public Vector2Int? NextNode => _currentIndex + 1 < _nodes.Count ? _nodes[_currentIndex + 1] : null;
         public float TotalLength { get; }
         
+        public Vector2Int? PeekNext() => NextNode;
+        
         public Path(List<Vector2Int> nodes)
         {
             _nodes = nodes ?? new List<Vector2Int>();

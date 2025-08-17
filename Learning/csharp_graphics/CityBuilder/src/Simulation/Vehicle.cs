@@ -6,6 +6,7 @@ namespace CityBuilder.Simulation
 {
     public class Vehicle
     {
+        private readonly GameSettings _gameSettings;
         
         public int Id { get; }
         public Vector2 Position { get; private set; }
@@ -24,9 +25,10 @@ namespace CityBuilder.Simulation
         
         public Vector2Int? HomeHub { get; set; }
         
-        public Vehicle(int id)
+        public Vehicle(int id, GameSettings gameSettings)
         {
             Id = id;
+            _gameSettings = gameSettings ?? throw new ArgumentNullException(nameof(gameSettings));
             Speed = GameConstants.DefaultVehicleSpeed;
             State = VehicleState.Idle;
             Position = Vector2.Zero;
@@ -128,10 +130,14 @@ namespace CityBuilder.Simulation
             if (!currentNode.HasValue)
                 return;
             
+            // Calculate base target position (center of tile)
             var targetWorldPos = new Vector2(
                 currentNode.Value.X * GameConstants.TileSize + GameConstants.TileCenterOffset,
                 currentNode.Value.Y * GameConstants.TileSize + GameConstants.TileCenterOffset
             );
+            
+            // Apply lane offset based on driving direction and movement direction
+            targetWorldPos = ApplyLaneOffset(targetWorldPos, currentNode.Value, CurrentPath.PeekNext());
             
             var direction = targetWorldPos - Position;
             var distance = direction.Length();
@@ -207,6 +213,39 @@ namespace CityBuilder.Simulation
                 PreviousPosition = worldPos;
                 InterpolatedPosition = worldPos;
             }
+        }
+        
+        private Vector2 ApplyLaneOffset(Vector2 basePosition, Vector2Int currentTile, Vector2Int? nextTile)
+        {
+            if (!nextTile.HasValue)
+                return basePosition;
+            
+            // Calculate movement direction
+            var dx = nextTile.Value.X - currentTile.X;
+            var dy = nextTile.Value.Y - currentTile.Y;
+            
+            // Lane offset amount (1/4 of tile size for clear separation)
+            float laneOffset = GameConstants.TileSize * 0.25f;
+            
+            // Apply offset perpendicular to movement direction
+            // Right-hand driving: vehicles on left side of road (from their perspective)
+            // Left-hand driving: vehicles on right side of road (from their perspective)
+            Vector2 offset = Vector2.Zero;
+            
+            if (dx != 0) // Moving horizontally
+            {
+                // For horizontal movement, offset vertically
+                float offsetDir = _gameSettings.IsRightHandDriving ? -1f : 1f;
+                offset.Y = dx * offsetDir * laneOffset;
+            }
+            else if (dy != 0) // Moving vertically
+            {
+                // For vertical movement, offset horizontally
+                float offsetDir = _gameSettings.IsRightHandDriving ? 1f : -1f;
+                offset.X = dy * offsetDir * laneOffset;
+            }
+            
+            return basePosition + offset;
         }
     }
 }

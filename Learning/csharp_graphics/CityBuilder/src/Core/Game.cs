@@ -16,6 +16,7 @@ public class Game : IDisposable
     private EventBus? _eventBus;
     private AssetManager? _assetManager;
     private StateManager? _stateManager;
+    private GameSettings? _gameSettings;
     
     private bool _disposed;
     private bool _shouldExit;
@@ -36,6 +37,9 @@ public class Game : IDisposable
         Raylib.InitWindow(_screenWidth, _screenHeight, _title);
         Raylib.SetTargetFPS(60);
         
+        // Load settings
+        _gameSettings = GameSettings.Load();
+        
         // Create core systems
         _eventBus = new EventBus();
         _assetManager = new AssetManager();
@@ -47,7 +51,8 @@ public class Game : IDisposable
         
         // Register states with factory methods
         _stateManager.RegisterState(() => new MenuState(_eventBus, _assetManager));
-        _stateManager.RegisterState(() => new PlayState(_eventBus, _assetManager));
+        _stateManager.RegisterState(() => new PlayState(_eventBus, _assetManager, _gameSettings));
+        _stateManager.RegisterState(() => new SettingsState(_eventBus, _assetManager, _gameSettings));
         
         // Start with menu
         _stateManager.ChangeState<MenuState>();
