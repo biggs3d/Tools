@@ -59,7 +59,10 @@
       "mcp__llm-bridges__send_to_llm",
       "mcp__llm-bridges__estimate_context_size",
       "Bash(python:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(dotnet build)",
+      "Bash(dotnet test)",
+      "Bash(dotnet test:*)"
     ],
     "deny": []
   },
