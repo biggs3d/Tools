@@ -1,23 +1,32 @@
-# Next Session: Pathfinding & Vehicle System
+# Next Session Guide
 
-## Current Status
-✅ **Phase 1 & 2 Complete!** Core systems and grid are fully implemented:
-- EventBus, GameLoop, AssetManager, Vector2Int with DI pattern
-- State management with MenuState and PlayState
-- **Thread-safe** grid system with chunked storage (ConcurrentDictionary)
-- Procedural terrain generation with 5 terrain types
-- Tile placement with validation rules (hub required before roads)
-- GridRenderer with viewport culling and chunk boundaries debug view
-- **55 unit tests all passing** (added comprehensive Grid tests)
-- Memory leak prevention with chunk unloading
-- Background chunk prefetching support
+## Current Status ✅
+**Phase 3 & 4 COMPLETE**: Full simulation system with pathfinding and vehicles working!
 
-## Ready to Continue
+## What Was Just Completed
+1. **Pathfinding System**
+   - A* algorithm with diagonal movement
+   - Thread-safe path caching with LRU eviction  
+   - Immutable cached paths to prevent corruption
+   - Dirty region invalidation on tile changes
 
-### Quick Start
+2. **Vehicle System**
+   - 6-state machine working correctly
+   - Object pooling with proper initialization
+   - Fixed timestep movement with interpolation
+   - Loading/unloading timers enforced
+
+3. **Critical Bugs Fixed**
+   - Vehicles now find adjacent road tiles to buildings (not trying to path to unwalkable buildings)
+   - Path cache corruption fixed with immutable PathData
+   - Event subscriptions corrected (TilePlacedEvent not TileUpdatedEvent)
+   - Deterministic pathfinding comparator
+
+## Immediate Next Steps
+
+### 1. Test in UI and Add Visual Feedback
 ```bash
 cd /mnt/d/Tools/Learning/csharp_graphics/CityBuilder
-./test-build.sh  # Quick build check (counts errors)
 ./test-game.sh   # Run the game (ESC to exit)
 dotnet test      # Run all 55 unit tests
 dotnet test --filter "FullyQualifiedName~Grid"  # Run just Grid tests

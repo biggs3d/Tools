@@ -2,6 +2,7 @@ using Raylib_cs;
 using CityBuilder.Core;
 using CityBuilder.Grid;
 using CityBuilder.Rendering;
+using CityBuilder.Simulation;
 using System.Numerics;
 
 namespace CityBuilder.States;
@@ -20,6 +21,9 @@ public class PlayState : BaseGameState
     private GridSystem _gridSystem = null!;
     private GridRenderer _gridRenderer = null!;
     private TerrainGenerator _terrainGenerator = null!;
+    
+    // Simulation
+    private SimulationManager _simulationManager = null!;
     
     public PlayState(EventBus eventBus, AssetManager assetManager)
         : base(eventBus, assetManager)
@@ -44,9 +48,15 @@ public class PlayState : BaseGameState
         _gridSystem = new GridSystem(EventBus, _terrainGenerator);
         _gridRenderer = new GridRenderer(_gridSystem);
         
+        // Initialize simulation
+        _simulationManager = new SimulationManager(_gridSystem, EventBus);
+        
         // Place initial hub at origin
         _gridSystem.PlaceTileAt(new Vector2Int(0, 0), TileType.LandingPad);
         Console.WriteLine("Hub placed at origin");
+        
+        // Don't spawn vehicle here - hub location not set yet in SimulationManager
+        // Vehicle will spawn when first task is generated
         
         _isPaused = false;
         _showGrid = true;
@@ -59,6 +69,9 @@ public class PlayState : BaseGameState
         {
             HandleCameraInput(deltaTime);
             HandlePlacementInput();
+            
+            // Update simulation
+            _simulationManager.Update(deltaTime);
             
             // Unload distant chunks periodically
             _gridSystem.UnloadDistantChunks(_camera, 
@@ -100,6 +113,9 @@ public class PlayState : BaseGameState
         
         // Draw placement preview
         DrawPlacementPreview();
+        
+        // Draw vehicles
+        DrawVehicles();
         
         Raylib.EndMode2D();
         
@@ -170,8 +186,16 @@ public class PlayState : BaseGameState
         if (Raylib.IsKeyPressed(KeyboardKey.P) || Raylib.IsKeyPressed(KeyboardKey.Space))
         {
             _isPaused = !_isPaused;
+            _simulationManager.IsPaused = _isPaused;
             EventBus.Publish(new PauseToggleEvent { IsPaused = _isPaused });
             Console.WriteLine($"Game paused: {_isPaused}");
+        }
+        
+        // Spawn vehicle (V key for testing)
+        if (Raylib.IsKeyPressed(KeyboardKey.V))
+        {
+            _simulationManager.SpawnVehicle();
+            Console.WriteLine($"Spawn vehicle requested. Active vehicles: {_simulationManager.ActiveVehicles.Count}");
         }
         
         // Return to menu
@@ -239,7 +263,7 @@ public class PlayState : BaseGameState
         
         // Draw preview rectangle
         var worldTilePos = GridSystem.TileToWorld(tilePos);
-        var rect = new Rectangle(
+        var rect = new Raylib_cs.Rectangle(
             worldTilePos.X - GridSystem.TileSize / 2f,
             worldTilePos.Y - GridSystem.TileSize / 2f,
             GridSystem.TileSize,
@@ -256,6 +280,33 @@ public class PlayState : BaseGameState
         Raylib.DrawRectangleLinesEx(rect, 2, Color.White);
     }
     
+    private void DrawVehicles()
+    {
+        foreach (var vehicle in _simulationManager.ActiveVehicles)
+        {
+            // Draw vehicle as a colored circle
+            Color vehicleColor = vehicle.State switch
+            {
+                VehicleState.Idle => Color.Gray,
+                VehicleState.MovingToPickup => Color.Blue,
+                VehicleState.Loading => Color.Yellow,
+                VehicleState.MovingToDelivery => Color.Green,
+                VehicleState.Unloading => Color.Orange,
+                VehicleState.ReturningToHub => Color.Purple,
+                _ => Color.White
+            };
+            
+            Raylib.DrawCircleV(vehicle.InterpolatedPosition, 8, vehicleColor);
+            Raylib.DrawCircleLinesV(vehicle.InterpolatedPosition, 8, Color.Black);
+            
+            // Draw vehicle ID for debugging
+            Raylib.DrawText($"V{vehicle.Id}", 
+                (int)vehicle.InterpolatedPosition.X - 8, 
+                (int)vehicle.InterpolatedPosition.Y - 20, 
+                10, Color.White);
+        }
+    }
+    
     private void DrawUI()
     {
         // Draw HUD
@@ -263,17 +314,22 @@ public class PlayState : BaseGameState
         int screenHeight = Raylib.GetScreenHeight();
         
         // Top bar background
-        Raylib.DrawRectangle(0, 0, screenWidth, 40, new Color(0, 0, 0, 180));
+        Raylib.DrawRectangle(0, 0, screenWidth, 60, new Color(0, 0, 0, 180));
         
-        // Game info
+        // Game info - First row
         Raylib.DrawText($"FPS: {Raylib.GetFPS()}", 10, 10, 20, Color.Green);
         Raylib.DrawText($"Zoom: {_camera.Zoom:F2}x", 100, 10, 20, Color.White);
         Raylib.DrawText($"Camera: ({_camera.Target.X:F0}, {_camera.Target.Y:F0})", 200, 10, 20, Color.White);
         Raylib.DrawText($"Chunks: {_gridSystem.ChunkCount}", 380, 10, 20, Color.White);
         Raylib.DrawText($"Tiles: {_gridSystem.TotalTilesPlaced}", 480, 10, 20, Color.White);
         
+        // Simulation info - Second row
+        Raylib.DrawText($"Vehicles: {_simulationManager.ActiveVehicles.Count}", 10, 35, 20, Color.SkyBlue);
+        Raylib.DrawText($"Tasks: {_simulationManager.PendingTaskCount} pending, {_simulationManager.ActiveTaskCount} active", 
+            150, 35, 20, Color.SkyBlue);
+        
         // Controls help
-        string controls = "WASD/SHIFT: Move | Click: Place Road | Right-Click: Remove | 1-3: Buildings | F1: Grid | F2: Chunks | ESC: Menu";
+        string controls = "WASD/SHIFT: Move | Click: Place Road | Right-Click: Remove | 1-3: Buildings | V: Spawn Vehicle | F1: Grid | F2: Chunks | ESC: Menu";
         int controlsWidth = Raylib.MeasureText(controls, 14);
         Raylib.DrawText(controls, screenWidth / 2 - controlsWidth / 2, screenHeight - 30, 14, Color.Gray);
         
