@@ -1,30 +1,35 @@
 # Next Session Guide
 
 ## Current Status ✅
-**Phase 3 & 4 COMPLETE**: Full simulation system with pathfinding and vehicles working!
+**Phase 3 & 4 COMPLETE + Visual Integration**: Full simulation with vehicles rendering and moving in UI!
 
-## What Was Just Completed
-1. **Pathfinding System**
-   - A* algorithm with diagonal movement
-   - Thread-safe path caching with LRU eviction  
-   - Immutable cached paths to prevent corruption
-   - Dirty region invalidation on tile changes
+## What Was Just Completed (Session 5 - 2025-08-18)
+1. **Visual Vehicle Integration**
+   - Vehicles render as colored circles with state-based colors
+   - Vehicle IDs displayed for debugging (V0, V1, etc.)
+   - Smooth interpolated movement at 60 FPS
 
-2. **Vehicle System**
-   - 6-state machine working correctly
-   - Object pooling with proper initialization
-   - Fixed timestep movement with interpolation
-   - Loading/unloading timers enforced
+2. **Delivery Task Visualization**
+   - Pickup markers (blue diamonds with "P") appear during pickup phase
+   - Delivery markers (green diamonds with "D") appear during delivery phase
+   - Path lines drawn from vehicle to current target
+   - Markers only show for relevant vehicle states
 
-3. **Critical Bugs Fixed**
-   - Vehicles now find adjacent road tiles to buildings (not trying to path to unwalkable buildings)
-   - Path cache corruption fixed with immutable PathData
-   - Event subscriptions corrected (TilePlacedEvent not TileUpdatedEvent)
-   - Deterministic pathfinding comparator
+3. **Performance Monitoring**
+   - Average path length display when >10 vehicles
+   - FPS warning when drops below 60
+   - Stress test keys: T (spawn 10), Shift+T (spawn 100)
+   - Real-time vehicle and task counts in HUD
+
+4. **Enhanced Controls**
+   - V key: Spawn single test vehicle
+   - T key: Spawn 10 vehicles (stress test)
+   - Shift+T: Spawn 100 vehicles (super stress test)
+   - Updated help text with new controls
 
 ## Immediate Next Steps
 
-### 1. Test in UI and Add Visual Feedback
+### Phase 5: Polish & UX
 ```bash
 cd /mnt/d/Tools/Learning/csharp_graphics/CityBuilder
 ./test-game.sh   # Run the game (ESC to exit)
@@ -43,9 +48,20 @@ dotnet test --filter "FullyQualifiedName~Grid"  # Run just Grid tests
 - **P/Space** - Pause
 - **ESC** - Return to menu
 
-### Immediate Next Steps: Phase 3 - Pathfinding & Vehicles
+## Tests Fixed This Session
+- ✅ Fixed all PathfindingServiceTests (9 tests passing)
+  - Corrected hub placement for road connectivity requirements
+  - Updated test coordinates to work with validation rules
+  - Fixed path caching tests to expect immutable path instances
 
-1. **Create PathfindingService class:**
+- ✅ Fixed most StateManagerTests (6/7 passing) 
+  - Created proper test interfaces (ITestState1, ITestState2)
+  - Fixed state registration with unique types
+  - One event-based test still failing (complex mock interaction)
+
+### What To Do Next Session
+
+1. **Visual Polish:**
 ```csharp
 public class PathfindingService
 {

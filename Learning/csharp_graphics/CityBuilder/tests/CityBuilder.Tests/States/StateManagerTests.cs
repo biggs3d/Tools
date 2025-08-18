@@ -5,21 +5,25 @@ using CityBuilder.Core;
 
 namespace CityBuilder.Tests.States;
 
+// Test interfaces to allow different state types
+public interface ITestState1 : IGameState { }
+public interface ITestState2 : IGameState { }
+
 public class StateManagerTests : IDisposable
 {
     private readonly EventBus _eventBus;
     private readonly GameLoop _gameLoop;
     private readonly StateManager _stateManager;
-    private readonly Mock<IGameState> _mockState1;
-    private readonly Mock<IGameState> _mockState2;
+    private readonly Mock<ITestState1> _mockState1;
+    private readonly Mock<ITestState2> _mockState2;
     
     public StateManagerTests()
     {
         _eventBus = new EventBus();
         _gameLoop = new GameLoop();
         _stateManager = new StateManager(_eventBus, _gameLoop);
-        _mockState1 = new Mock<IGameState>();
-        _mockState2 = new Mock<IGameState>();
+        _mockState1 = new Mock<ITestState1>();
+        _mockState2 = new Mock<ITestState2>();
     }
     
     [Fact]
@@ -28,7 +32,7 @@ public class StateManagerTests : IDisposable
         _stateManager.RegisterState(() => _mockState1.Object);
         
         // Should not throw when changing to registered state
-        var exception = Record.Exception(() => _stateManager.ChangeState<IGameState>());
+        var exception = Record.Exception(() => _stateManager.ChangeState<ITestState1>());
         Assert.Null(exception);
     }
     
@@ -44,8 +48,8 @@ public class StateManagerTests : IDisposable
         _stateManager.RegisterState(() => _mockState1.Object);
         _stateManager.RegisterState(() => _mockState2.Object);
         
-        _stateManager.ChangeState<IGameState>();
-        _stateManager.ChangeState<IGameState>();
+        _stateManager.ChangeState<ITestState1>();
+        _stateManager.ChangeState<ITestState2>();
         
         _mockState1.Verify(s => s.Exit(), Times.Once);
     }
@@ -54,7 +58,7 @@ public class StateManagerTests : IDisposable
     public void ChangeState_CallsEnterOnNewState()
     {
         _stateManager.RegisterState(() => _mockState1.Object);
-        _stateManager.ChangeState<IGameState>();
+        _stateManager.ChangeState<ITestState1>();
         
         _mockState1.Verify(s => s.Enter(), Times.Once);
     }
@@ -63,7 +67,7 @@ public class StateManagerTests : IDisposable
     public void CurrentState_ReturnsActiveState()
     {
         _stateManager.RegisterState(() => _mockState1.Object);
-        _stateManager.ChangeState<IGameState>();
+        _stateManager.ChangeState<ITestState1>();
         
         Assert.Equal(_mockState1.Object, _stateManager.CurrentState);
     }
@@ -82,7 +86,10 @@ public class StateManagerTests : IDisposable
     {
         _stateManager.RegisterState(() => _mockState1.Object);
         
-        _eventBus.Publish(new StateChangeRequest(typeof(IGameState)));
+        _eventBus.Publish(new StateChangeRequest(typeof(ITestState1)));
+        
+        // Give the game loop a chance to process the state change
+        _gameLoop.Update(0.016f);
         
         Assert.Equal(_mockState1.Object, _stateManager.CurrentState);
     }

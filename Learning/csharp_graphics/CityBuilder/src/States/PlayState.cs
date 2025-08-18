@@ -203,6 +203,27 @@ public class PlayState : BaseGameState
             Console.WriteLine($"Spawn vehicle requested. Active vehicles: {_simulationManager.ActiveVehicles.Count}");
         }
         
+        // Stress test: Spawn 10 vehicles (T key)
+        if (Raylib.IsKeyPressed(KeyboardKey.T))
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                _simulationManager.SpawnVehicle();
+            }
+            Console.WriteLine($"Spawned 10 vehicles for stress test. Total: {_simulationManager.ActiveVehicles.Count}");
+        }
+        
+        // Super stress test: Spawn 100 vehicles (Shift+T)
+        if (Raylib.IsKeyPressed(KeyboardKey.T) && 
+            (Raylib.IsKeyDown(KeyboardKey.LeftShift) || Raylib.IsKeyDown(KeyboardKey.RightShift)))
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                _simulationManager.SpawnVehicle();
+            }
+            Console.WriteLine($"Spawned 100 vehicles for SUPER stress test! Total: {_simulationManager.ActiveVehicles.Count}");
+        }
+        
         // Return to menu
         if (Raylib.IsKeyPressed(KeyboardKey.Escape))
         {
@@ -287,6 +308,10 @@ public class PlayState : BaseGameState
     
     private void DrawVehicles()
     {
+        // First draw all delivery task markers
+        DrawDeliveryTaskMarkers();
+        
+        // Then draw vehicles on top
         foreach (var vehicle in _simulationManager.ActiveVehicles)
         {
             // Draw vehicle as a colored circle
@@ -312,6 +337,82 @@ public class PlayState : BaseGameState
         }
     }
     
+    private void DrawDeliveryTaskMarkers()
+    {
+        // Draw pickup/dropoff markers for active vehicles with tasks
+        foreach (var vehicle in _simulationManager.ActiveVehicles)
+        {
+            if (vehicle.CurrentTask != null)
+            {
+                var pickupWorld = GridSystem.TileToWorld(vehicle.CurrentTask.PickupLocation);
+                var deliveryWorld = GridSystem.TileToWorld(vehicle.CurrentTask.DeliveryLocation);
+                
+                // Draw pickup marker (blue diamond)
+                if (vehicle.State == VehicleState.MovingToPickup || vehicle.State == VehicleState.Loading)
+                {
+                    DrawDiamond(pickupWorld + new Vector2(16, 16), 12, Color.Blue);
+                    Raylib.DrawText("P", (int)(pickupWorld.X + 12), (int)(pickupWorld.Y + 10), 12, Color.White);
+                }
+                
+                // Draw delivery marker (green diamond)
+                if (vehicle.State == VehicleState.MovingToDelivery || vehicle.State == VehicleState.Unloading)
+                {
+                    DrawDiamond(deliveryWorld + new Vector2(16, 16), 12, Color.Green);
+                    Raylib.DrawText("D", (int)(deliveryWorld.X + 12), (int)(deliveryWorld.Y + 10), 12, Color.White);
+                }
+                
+                // Draw path line from vehicle to target
+                if (vehicle.State == VehicleState.MovingToPickup)
+                {
+                    Raylib.DrawLineEx(vehicle.InterpolatedPosition, pickupWorld + new Vector2(16, 16), 2, new Color(0, 0, 255, 100));
+                }
+                else if (vehicle.State == VehicleState.MovingToDelivery)
+                {
+                    Raylib.DrawLineEx(vehicle.InterpolatedPosition, deliveryWorld + new Vector2(16, 16), 2, new Color(0, 255, 0, 100));
+                }
+            }
+        }
+    }
+    
+    private void DrawDiamond(Vector2 center, float size, Color color)
+    {
+        // Draw a diamond shape (rotated square)
+        Vector2[] points = new Vector2[]
+        {
+            new Vector2(center.X, center.Y - size),      // Top
+            new Vector2(center.X + size, center.Y),      // Right
+            new Vector2(center.X, center.Y + size),      // Bottom
+            new Vector2(center.X - size, center.Y)       // Left
+        };
+        
+        // Draw filled diamond
+        Raylib.DrawTriangle(points[0], points[1], points[2], color);
+        Raylib.DrawTriangle(points[0], points[2], points[3], color);
+        
+        // Draw outline
+        for (int i = 0; i < 4; i++)
+        {
+            Raylib.DrawLineEx(points[i], points[(i + 1) % 4], 2, Color.Black);
+        }
+    }
+    
+    private float CalculateAveragePathLength()
+    {
+        int totalNodes = 0;
+        int vehiclesWithPaths = 0;
+        
+        foreach (var vehicle in _simulationManager.ActiveVehicles)
+        {
+            if (vehicle.CurrentPath != null && vehicle.CurrentPath.Nodes.Count > 0)
+            {
+                totalNodes += vehicle.CurrentPath.Nodes.Count;
+                vehiclesWithPaths++;
+            }
+        }
+        
+        return vehiclesWithPaths > 0 ? (float)totalNodes / vehiclesWithPaths : 0f;
+    }
+    
     private void DrawUI()
     {
         // Draw HUD
@@ -333,8 +434,21 @@ public class PlayState : BaseGameState
         Raylib.DrawText($"Tasks: {_simulationManager.PendingTaskCount} pending, {_simulationManager.ActiveTaskCount} active", 
             150, 35, 20, Color.SkyBlue);
         
+        // Performance info when > 10 vehicles
+        if (_simulationManager.ActiveVehicles.Count > 10)
+        {
+            float avgPathLength = CalculateAveragePathLength();
+            Raylib.DrawText($"Avg Path: {avgPathLength:F1} nodes", 500, 35, 20, Color.Yellow);
+            
+            // FPS warning if drops below 60
+            if (Raylib.GetFPS() < 60)
+            {
+                Raylib.DrawText("PERFORMANCE WARNING", screenWidth - 200, 10, 20, Color.Red);
+            }
+        }
+        
         // Controls help
-        string controls = "WASD/SHIFT: Move | Click: Place Road | Right-Click: Remove | 1-3: Buildings | V: Spawn Vehicle | F1: Grid | F2: Chunks | ESC: Menu";
+        string controls = "WASD/SHIFT: Move | Click: Place Road | 1-3: Buildings | V: Vehicle | T: 10 Vehicles | Shift+T: 100 Vehicles | F1: Grid | ESC: Menu";
         int controlsWidth = Raylib.MeasureText(controls, 14);
         Raylib.DrawText(controls, screenWidth / 2 - controlsWidth / 2, screenHeight - 30, 14, Color.Gray);
         
