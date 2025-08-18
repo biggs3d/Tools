@@ -316,6 +316,244 @@ class Vehicle {
 - Path recalculation on grid changes
 - Visual feedback for active deliveries
 
+### 4.5 Supply Chain System (NEW)
+
+**Overview:**
+Transform the simple hub-to-building delivery system into a dynamic supply chain where buildings produce, consume, and transform resources, creating realistic traffic patterns and economic dependencies.
+
+```
+Resource Flow:
+Industrial → Commercial → Residential → Hub (tax/export)
+     ↓            ↓           ↓
+  Raw Mats      Goods      Waste
+```
+
+**Resource Types:**
+```csharp
+enum ResourceType {
+    RawMaterials,    // Produced by Industrial
+    Goods,           // Produced by Commercial, consumed by Residential
+    Waste,           // Produced by all, collected to Hub
+    Energy,          // Future: power plant → all buildings
+    Water,           // Future: water treatment → all buildings
+}
+```
+
+**Building Production Model (UPDATED):**
+```csharp
+// Fixed-size array for performance (no dictionaries, no boxing)
+struct InventorySlot {
+    public float Current;
+    public float Max;
+    public float InTransit;  // Reserved for pending deliveries
+    public float ProductionRate;
+    public float ConsumptionRate;
+}
+
+class BuildingData {
+    public TileType Type { get; set; }
+    public Vector2Int Location { get; set; }
+    
+    // Fixed-size array indexed by ResourceType enum - MUCH faster than dictionaries
+    public InventorySlot[] Inventory = new InventorySlot[(int)ResourceType.Count];
+    
+    // Hysteresis thresholds to prevent flickering
+    public float RequestThreshold = 0.3f;      // Create request when below this
+    public float RequestCancelThreshold = 0.5f; // Cancel request when above this
+    public float OfferThreshold = 0.7f;        // Create offer when above this  
+    public float OfferCancelThreshold = 0.5f;  // Cancel offer when below this
+    
+    // Track update frequency (not every tick for performance)
+    public float LastUpdateTime;
+    public const float UpdateInterval = 1.0f; // Update at 1Hz, not 30Hz
+    
+    public float GetEffectiveInventory(ResourceType resource) {
+        var slot = Inventory[(int)resource];
+        // For consumers: Current + InTransit (what's coming)
+        // For producers: Current - InTransit (what's leaving)
+        return slot.ConsumptionRate > 0 
+            ? slot.Current + slot.InTransit
+            : slot.Current - slot.InTransit;
+    }
+}
+```
+
+**Production Configuration:**
+```csharp
+// Industrial: Produces raw materials
+Industrial = new BuildingData {
+    ProductionRates = { [RawMaterials] = 1.0f },  // units per second
+    ConsumptionRates = { },  // Consumes nothing (for now)
+    MaxInventory = { [RawMaterials] = 100 }
+}
+
+// Commercial: Transforms raw materials to goods
+Commercial = new BuildingData {
+    ProductionRates = { [Goods] = 0.5f, [Waste] = 0.1f },
+    ConsumptionRates = { [RawMaterials] = 1.0f },
+    MaxInventory = { [RawMaterials] = 50, [Goods] = 50, [Waste] = 20 }
+}
+
+// Residential: Consumes goods, produces waste
+Residential = new BuildingData {
+    ProductionRates = { [Waste] = 0.2f },
+    ConsumptionRates = { [Goods] = 0.3f },
+    MaxInventory = { [Goods] = 30, [Waste] = 20 }
+}
+```
+
+**Task Generation System:**
+```csharp
+class BuildingTaskGenerator {
+    public void Update(BuildingData building, float deltaTime) {
+        // Update production
+        foreach (var (resource, rate) in building.ProductionRates) {
+            building.Inventory[resource] += rate * deltaTime;
+            building.Inventory[resource] = Min(building.Inventory[resource], 
+                                               building.MaxInventory[resource]);
+        }
+        
+        // Update consumption
+        foreach (var (resource, rate) in building.ConsumptionRates) {
+            building.Inventory[resource] -= rate * deltaTime;
+            building.Inventory[resource] = Max(building.Inventory[resource], 0);
+        }
+        
+        // Generate tasks based on inventory levels
+        foreach (var (resource, amount) in building.Inventory) {
+            float ratio = amount / building.MaxInventory[resource];
+            
+            if (ratio < building.RequestThreshold && 
+                building.ConsumptionRates.ContainsKey(resource)) {
+                // Need delivery - create pickup task
+                CreatePickupTask(resource, building);
+            }
+            else if (ratio > building.OfferThreshold && 
+                     building.ProductionRates.ContainsKey(resource)) {
+                // Have excess - create delivery offer
+                CreateDeliveryOffer(resource, building);
+            }
+        }
+    }
+}
+```
+
+**Task Matching System (OPTIMIZED):**
+```csharp
+class TaskMatcher {
+    // O(1) lookup by resource type - MUCH faster than linear search
+    Dictionary<ResourceType, Queue<PickupRequest>> _requestsByResource;
+    Dictionary<ResourceType, Queue<DeliveryOffer>> _offersByResource;
+    
+    public DeliveryTask? MatchTasks(Vehicle vehicle) {
+        // 1. Try to match producer → consumer (most efficient)
+        foreach (var resourceType in _offersByResource.Keys) {
+            if (_requestsByResource.TryGetValue(resourceType, out var requests) && 
+                requests.Count > 0 && _offersByResource[resourceType].Count > 0) {
+                
+                var offer = _offersByResource[resourceType].Dequeue();
+                var request = requests.Dequeue();
+                
+                // Handle vehicle capacity limits
+                float amount = Math.Min(offer.Amount, Math.Min(request.Amount, vehicle.Capacity));
+                
+                // Reserve the resources
+                offer.Building.Inventory[(int)resourceType].InTransit += amount;
+                request.Building.Inventory[(int)resourceType].InTransit += amount;
+                
+                // Re-queue partial tasks if needed
+                if (offer.Amount > amount) {
+                    offer.Amount -= amount;
+                    _offersByResource[resourceType].Enqueue(offer);
+                }
+                if (request.Amount > amount) {
+                    request.Amount -= amount;
+                    requests.Enqueue(request);
+                }
+                
+                return new DeliveryTask {
+                    Id = Guid.NewGuid(),
+                    PickupLocation = offer.Building.Location,
+                    DeliveryLocation = request.Building.Location,
+                    Resource = resourceType,
+                    Amount = amount
+                };
+            }
+        }
+        
+        // 2. No direct match - try hub export (producer → hub)
+        foreach (var (resource, offers) in _offersByResource) {
+            if (offers.Count > 0) {
+                var offer = offers.Dequeue();
+                float amount = Math.Min(offer.Amount, vehicle.Capacity);
+                
+                offer.Building.Inventory[(int)resource].InTransit += amount;
+                
+                if (offer.Amount > amount) {
+                    offer.Amount -= amount;
+                    offers.Enqueue(offer);
+                }
+                
+                return new DeliveryTask {
+                    Id = Guid.NewGuid(),
+                    PickupLocation = offer.Building.Location,
+                    DeliveryLocation = HubLocation,
+                    Resource = resource,
+                    Amount = amount,
+                    IsExport = true
+                };
+            }
+        }
+        
+        // 3. Still nothing - try hub import (hub → consumer)
+        foreach (var (resource, requests) in _requestsByResource) {
+            if (requests.Count > 0 && requests.Peek().WaitTime > 5.0f) { // Import after 5s wait
+                var request = requests.Dequeue();
+                float amount = Math.Min(request.Amount, vehicle.Capacity);
+                
+                request.Building.Inventory[(int)resource].InTransit += amount;
+                
+                if (request.Amount > amount) {
+                    request.Amount -= amount;
+                    requests.Enqueue(request);
+                }
+                
+                return new DeliveryTask {
+                    Id = Guid.NewGuid(),
+                    PickupLocation = HubLocation,
+                    DeliveryLocation = request.Building.Location,
+                    Resource = resource,
+                    Amount = amount,
+                    IsImport = true
+                };
+            }
+        }
+        
+        return null; // No tasks available
+    }
+    
+    // Call when task completes or cancels
+    public void ReleaseReservation(DeliveryTask task) {
+        // Return InTransit amounts to available inventory
+        // This prevents permanent resource lock if vehicle breaks down
+    }
+}
+```
+
+**Benefits of Supply Chain System:**
+1. **Realistic Traffic**: Vehicles move between all building types, not just hub→building
+2. **Economic Balance**: Production and consumption create natural supply/demand
+3. **Emergent Behavior**: Traffic patterns emerge from actual needs
+4. **Scalability**: More buildings = more tasks, naturally
+5. **Future Extensions**: Easy to add power, water, specialized goods
+
+**Implementation Phases:**
+1. **Phase 1**: Basic resources (Raw, Goods, Waste)
+2. **Phase 2**: Building inventories and production rates
+3. **Phase 3**: Task matching system
+4. **Phase 4**: Visual indicators (inventory bars, resource icons)
+5. **Phase 5**: Economic balance tuning
+
 ### 5. Procedural Terrain System
 
 ```

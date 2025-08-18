@@ -25,6 +25,11 @@ namespace CityBuilder.Simulation
         
         public Vector2Int? HomeHub { get; set; }
         
+        // Cargo information for supply chain
+        public ResourceType CargoType { get; private set; } = ResourceType.None;
+        public float CargoAmount { get; private set; } = 0;
+        public float CargoCapacity { get; set; } = 20.0f; // Default capacity
+        
         public Vehicle(int id, GameSettings gameSettings)
         {
             Id = id;
@@ -171,12 +176,18 @@ namespace CityBuilder.Simulation
                     State = VehicleState.Loading;
                     StateTimer = 0;
                     CurrentPath = null;
+                    // Load cargo when we arrive for pickup
+                    if (CurrentTask is ResourceDeliveryTask resourceTask)
+                    {
+                        LoadCargo(resourceTask.Resource, resourceTask.Amount);
+                    }
                     break;
                     
                 case VehicleState.MovingToDelivery:
                     State = VehicleState.Unloading;
                     StateTimer = 0;
                     CurrentPath = null;
+                    // Cargo will be unloaded after timer completes
                     break;
                     
                 case VehicleState.ReturningToHub:
@@ -194,6 +205,8 @@ namespace CityBuilder.Simulation
         
         private void OnUnloadingComplete()
         {
+            // Unload the cargo when unloading timer completes
+            UnloadCargo();
         }
         
         public void Reset()
@@ -202,6 +215,7 @@ namespace CityBuilder.Simulation
             CurrentPath = null;
             CurrentTask = null;
             StateTimer = 0;
+            UnloadCargo(); // Clear any cargo
             
             if (HomeHub.HasValue)
             {
@@ -247,5 +261,28 @@ namespace CityBuilder.Simulation
             
             return basePosition + offset;
         }
+        
+        /// <summary>
+        /// Load cargo into the vehicle
+        /// </summary>
+        public void LoadCargo(ResourceType resource, float amount)
+        {
+            CargoType = resource;
+            CargoAmount = Math.Min(amount, CargoCapacity);
+        }
+        
+        /// <summary>
+        /// Unload cargo from the vehicle
+        /// </summary>
+        public void UnloadCargo()
+        {
+            CargoType = ResourceType.None;
+            CargoAmount = 0;
+        }
+        
+        /// <summary>
+        /// Check if vehicle has cargo
+        /// </summary>
+        public bool HasCargo => CargoAmount > 0 && CargoType != ResourceType.None;
     }
 }

@@ -311,6 +311,38 @@
   - Used LLM bridges for complex test diagnosis
 - **Key Achievement**: Game is fully playable with visual simulation!
 
+### Session 7 (2025-08-18) - Afternoon
+- **Implemented Procedural City Generator** 🏙️
+  - Created ProceduralCityGenerator class with deterministic generation
+  - Branching road network algorithm starting from hub
+  - Building placement along roads with configurable density
+  - Generation parameters: seed, radius, branch probability, turn probability
+  - Three modes: Small (G), Large (Shift+G), Clear (Ctrl+G)
+  - Respects terrain constraints - no building on water or mountains
+  - Perfect for stress testing with instant city creation
+- **Key Achievement**: Can instantly generate cities for performance testing!
+
+### Session 8 (2025-08-18) - Late Afternoon
+- **Implemented Supply Chain System Foundation** 📦
+  - Created ResourceType enum (RawMaterials, Goods, Waste + future Energy/Water)
+  - Built InventorySlot struct with production/consumption rates
+  - Added BuildingData class with per-building inventories
+  - Industrial produces raw materials → Commercial transforms to goods → Residential consumes
+  - Implemented TaskMatcher with O(1) resource matching (fixed O(N*M) issue)
+  - Added hysteresis thresholds to prevent task flickering
+  - Resource reservation system (InTransit) prevents double-booking
+  - Hub acts as infinite import/export safety valve
+- **Vehicle Cargo Visualization** 🚚
+  - Vehicles now track cargo type and amount (20 unit capacity)
+  - Color changes based on cargo: Brown (raw), Sky Blue (goods), Gray (waste)
+  - Added cargo type indicator (V0:R for raw materials, etc.)
+  - Loading/unloading properly updates cargo state
+- **Testing**: Added 38 new unit tests (152 total, all passing!)
+  - 14 InventorySlot tests
+  - 13 BuildingData tests
+  - 11 TaskMatcher tests
+- **Key Achievement**: Supply chain foundation ready for integration!
+
 ### Next Session Focus
 - Implement proper sprites to replace colored rectangles
 - Add road connection graphics

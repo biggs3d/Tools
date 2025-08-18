@@ -3,11 +3,17 @@
 ## Current Status ✅
 **Phase 5 IN PROGRESS**: Full simulation working with visual feedback! All tests passing (114/114)!
 
-## What Was Just Completed (Session 5 & 6 - 2025-08-18)
-1. **Visual Vehicle Integration**
-   - Vehicles render as colored circles with state-based colors
-   - Vehicle IDs displayed for debugging (V0, V1, etc.)
-   - Smooth interpolated movement at 60 FPS
+## What Was Just Completed (Session 7 - 2025-08-18)
+1. **Procedural City Generator**
+   - Created deterministic city generation with seeded Random
+   - Branching road network algorithm from hub
+   - Building placement along roads with density control
+   - Three generation modes:
+     - G key: Small city (radius 10, 8 branches)
+     - Shift+G: Large city (radius 40, 50 branches)
+     - Ctrl+G: Clear city (keeps hub)
+   - Parameters: seed, radius, branch probability, turn probability, building density
+   - Respects terrain constraints (no building on water/mountains)
 
 2. **Delivery Task Visualization**
    - Pickup markers (blue diamonds with "P") appear during pickup phase
@@ -63,13 +69,24 @@ dotnet test --filter "FullyQualifiedName~Grid"  # Run just Grid tests
 
 ### What To Do Next Session
 
-1. **Performance Stress Testing** (Fun idea!):
-   - Create procedural road network generator for stress tests
-   - Algorithm: Start from hub, randomly grow roads outward
-   - Place buildings along roads automatically
-   - Target: Test with 100, 500, 1000+ vehicles
-   - Add metrics: Pathfinding cache hit rate, avg frame time, vehicle update time
-   - Consider: Spatial partitioning for vehicle collision detection at scale
+1. **Integrate Supply Chain into SimulationManager**:
+   - Wire up BuildingManager to track all buildings
+   - Buildings generate tasks based on inventory levels
+   - Replace simple task generation with supply chain tasks
+   - Test with procedural city generator
+
+2. **Visual Design Pass**:
+   - Define consistent color scheme for buildings and resources
+   - Building colors should inform cargo colors (industrial → raw materials color)
+   - Add building shapes/icons for accessibility (not just colors)
+   - Consider patterns/textures for better distinction
+   - Update cargo colors to match producer buildings
+
+3. **Gameplay Tuning**:
+   - Balance production/consumption rates
+   - Adjust inventory thresholds for better flow
+   - Test different city layouts for emergent behavior
+   - Add UI feedback for resource shortages
 
 2. **Visual Polish:**
 ```csharp

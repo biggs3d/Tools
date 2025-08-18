@@ -25,6 +25,7 @@ public class PlayState : BaseGameState
     
     // Simulation
     private SimulationManager _simulationManager = null!;
+    private ProceduralCityGenerator _cityGenerator = null!;
     
     // Settings
     private readonly GameSettings _gameSettings;
@@ -55,6 +56,9 @@ public class PlayState : BaseGameState
         
         // Initialize simulation with settings
         _simulationManager = new SimulationManager(_gridSystem, EventBus, _gameSettings);
+        
+        // Initialize procedural city generator
+        _cityGenerator = new ProceduralCityGenerator(_gridSystem);
         
         // Place initial hub at origin
         _gridSystem.PlaceTileAt(new Vector2Int(0, 0), TileType.LandingPad);
@@ -224,6 +228,28 @@ public class PlayState : BaseGameState
             Console.WriteLine($"Spawned 100 vehicles for SUPER stress test! Total: {_simulationManager.ActiveVehicles.Count}");
         }
         
+        // Generate procedural city (G key)
+        if (Raylib.IsKeyPressed(KeyboardKey.G))
+        {
+            if (Raylib.IsKeyDown(KeyboardKey.LeftShift) || Raylib.IsKeyDown(KeyboardKey.RightShift))
+            {
+                // Shift+G: Generate large city
+                Console.WriteLine("Generating LARGE procedural city...");
+                _cityGenerator.GenerateLargeCity();
+            }
+            else if (Raylib.IsKeyDown(KeyboardKey.LeftControl) || Raylib.IsKeyDown(KeyboardKey.RightControl))
+            {
+                // Ctrl+G: Clear city
+                _cityGenerator.ClearCity();
+            }
+            else
+            {
+                // G: Generate small city
+                Console.WriteLine("Generating small procedural city...");
+                _cityGenerator.GenerateSmallCity();
+            }
+        }
+        
         // Return to menu
         if (Raylib.IsKeyPressed(KeyboardKey.Escape))
         {
@@ -315,23 +341,47 @@ public class PlayState : BaseGameState
         foreach (var vehicle in _simulationManager.ActiveVehicles)
         {
             // Draw vehicle as a colored circle
-            Color vehicleColor = vehicle.State switch
+            Color vehicleColor;
+            
+            // Show cargo color when carrying resources
+            if (vehicle.State == VehicleState.MovingToDelivery && vehicle.HasCargo)
             {
-                VehicleState.Idle => Color.Gray,
-                VehicleState.MovingToPickup => Color.Blue,
-                VehicleState.Loading => Color.Yellow,
-                VehicleState.MovingToDelivery => Color.Green,
-                VehicleState.Unloading => Color.Orange,
-                VehicleState.ReturningToHub => Color.Purple,
-                _ => Color.White
-            };
+                vehicleColor = GetCargoColor(vehicle.CargoType);
+            }
+            else
+            {
+                vehicleColor = vehicle.State switch
+                {
+                    VehicleState.Idle => Color.Gray,
+                    VehicleState.MovingToPickup => Color.Blue,
+                    VehicleState.Loading => Color.Yellow,
+                    VehicleState.MovingToDelivery => Color.Green, // Fallback if no cargo
+                    VehicleState.Unloading => Color.Orange,
+                    VehicleState.ReturningToHub => Color.Purple,
+                    _ => Color.White
+                };
+            }
             
             Raylib.DrawCircleV(vehicle.InterpolatedPosition, 8, vehicleColor);
             Raylib.DrawCircleLinesV(vehicle.InterpolatedPosition, 8, Color.Black);
             
-            // Draw vehicle ID for debugging
-            Raylib.DrawText($"V{vehicle.Id}", 
-                (int)vehicle.InterpolatedPosition.X - 8, 
+            // Draw vehicle ID and cargo info for debugging
+            string vehicleLabel = $"V{vehicle.Id}";
+            if (vehicle.HasCargo)
+            {
+                // Show cargo type abbreviation
+                string cargoAbbr = vehicle.CargoType switch
+                {
+                    ResourceType.RawMaterials => "R",
+                    ResourceType.Goods => "G",
+                    ResourceType.Waste => "W",
+                    _ => "?"
+                };
+                vehicleLabel += $":{cargoAbbr}";
+            }
+            
+            Raylib.DrawText(vehicleLabel, 
+                (int)vehicle.InterpolatedPosition.X - 12, 
                 (int)vehicle.InterpolatedPosition.Y - 20, 
                 10, Color.White);
         }
@@ -447,10 +497,13 @@ public class PlayState : BaseGameState
             }
         }
         
-        // Controls help
-        string controls = "WASD/SHIFT: Move | Click: Place Road | 1-3: Buildings | V: Vehicle | T: 10 Vehicles | Shift+T: 100 Vehicles | F1: Grid | ESC: Menu";
-        int controlsWidth = Raylib.MeasureText(controls, 14);
-        Raylib.DrawText(controls, screenWidth / 2 - controlsWidth / 2, screenHeight - 30, 14, Color.Gray);
+        // Controls help - split into two lines for all the new controls
+        string controls1 = "WASD/SHIFT: Move | Click: Place Road | 1-3: Buildings | F1: Grid | P: Pause | ESC: Menu";
+        string controls2 = "V: Vehicle | T: 10 Vehicles | Shift+T: 100 | G: Gen City | Shift+G: Large City | Ctrl+G: Clear";
+        int controls1Width = Raylib.MeasureText(controls1, 14);
+        int controls2Width = Raylib.MeasureText(controls2, 14);
+        Raylib.DrawText(controls1, screenWidth / 2 - controls1Width / 2, screenHeight - 50, 14, Color.Gray);
+        Raylib.DrawText(controls2, screenWidth / 2 - controls2Width / 2, screenHeight - 30, 14, Color.Gray);
         
         // Pause overlay
         if (_isPaused)
@@ -467,6 +520,22 @@ public class PlayState : BaseGameState
             int resumeWidth = Raylib.MeasureText(resumeText, 20);
             Raylib.DrawText(resumeText, screenWidth / 2 - resumeWidth / 2, screenHeight / 2 + 40, 20, Color.Gray);
         }
+    }
+    
+    /// <summary>
+    /// Get color based on cargo type for visual distinction
+    /// </summary>
+    private Color GetCargoColor(ResourceType cargoType)
+    {
+        return cargoType switch
+        {
+            ResourceType.RawMaterials => new Color(139, 90, 43, 255),  // Brown for raw materials
+            ResourceType.Goods => new Color(135, 206, 235, 255),       // Sky blue for goods
+            ResourceType.Waste => new Color(105, 105, 105, 255),       // Dark gray for waste
+            ResourceType.Energy => new Color(255, 255, 0, 255),        // Yellow for energy (future)
+            ResourceType.Water => new Color(0, 191, 255, 255),         // Deep sky blue for water (future)
+            _ => Color.Green // Default fallback
+        };
     }
 }
 
