@@ -8,6 +8,7 @@
 - **Model Changes**: ONLY edit `/model/*.model/src/`, then run `npm run generate-model`
 - **Quick Reference**: See `_QUICK_REF.md` for commands, paths, and common fixes
 - **Framework Guide**: See `./ai-guide/_START_HERE.md` for framework overview
+- **Sprint Status**: See `NEXT_SESSION_GUIDE.md` for current demo priorities
 
 ## 📋 Session Protocols
 
@@ -18,18 +19,31 @@
 3. Ask for missing context/files if needed
 4. Check for NOTE-AI comments in relevant files
 
+### Finding Examples
+
+**IMPORTANT**: When implementing new features:
+1. **Search for existing examples** using Grep/Glob tools
+2. **Ask the user** for a good example if pattern is unclear
+3. **Follow existing patterns** rather than inventing new ones
+
+Example searches:
+- Component pattern: `grep -r "extends BaseViewModel" --include="*.ts"`
+- Display registration: `grep -r "registerDisplayInfo" --include="*.tsx"`
+- Entity ViewModels: Look in `*/core/src/lib/viewModels/`
+- UI Components: Check `client/libs/alpha/alpha.components/`
+
 ### When User Says X → Do Y
 
-| User Input | Required Action | Documentation |
-|------------|-----------------|---------------|
-| "morning", "hello", "hey" | Friendly greeting, ask about task | - |
-| "new feature", "implement", "add" | Read COOKBOOK_PATTERNS.md first | `./ai-guide/COOKBOOK_PATTERNS.md` |
-| "fix", "bug", "error", "broken" | Check COMMON_PITFALLS.md | `./ai-guide/COMMON_PITFALLS.md` |
-| "update model", "change entity" | Read MODEL_GENERATION_GUIDE.md | `./ai-guide/MODEL_GENERATION_GUIDE.md` |
-| "style", "theme", "css" | Check THEMING_GUIDE.md | `./ai-guide/THEMING_GUIDE.md` |
-| "panel", "grid", "layout" | Read DISPLAY_REGISTRATION_GUIDE.md | `./ai-guide/DISPLAY_REGISTRATION_GUIDE.md` |
-| "done", "thanks", "that's all" | Run session retrospective | See below |
-| Mentions relative path `./` | Assume repo root, not CWD | - |
+| User Input | Required Action |
+|------------|-----------------|
+| "morning", "hello", "hey" | Friendly greeting, read the quick ref, ask about task; `_QUICK_REF.md` |
+| "new feature", "implement", "add" | Read COOKBOOK_PATTERNS.md first |
+| "fix", "bug", "error", "broken" | Check COMMON_PITFALLS.md |
+| "update model", "change entity" | Read MODEL_GENERATION_GUIDE.md |
+| "style", "theme", "css" | Check THEMING_GUIDE.md |
+| "panel", "grid", "layout" | Read DISPLAY_REGISTRATION_GUIDE.md |
+| "done", "thanks", "that's all" | Run session retrospective; see below |
+| Mentions relative path `./` | Assume repo root, not CWD |
 
 ### Task-Based Documentation Map
 

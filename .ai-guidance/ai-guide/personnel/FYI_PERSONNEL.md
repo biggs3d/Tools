@@ -28,7 +28,7 @@
 - Jake - user studies and resulting metrics-driven analysis, drives a tesla, in-office Fridays usually, disc golf too
 - Daniel - user studies and interaction
 
-- Patricia - General Services hero coder of the backend, solid programmer with her experience with the code, but admits to hating people and doesn't work well on a team unfortunately
+- Patricia - General Services hero coder of the backend, solid programmer with her experience with the code, but admits to hating people and doesn't work well on a team
 - Troy - General Services coder, customer interactions, use to do the data models, always going crazy because not enough time
 - Aaron - General Services programmer, data models, game dev background, really likes the backend chunks of coding, best friend with AI discussions with Steve (me the user)
 - 
