@@ -59,7 +59,13 @@
       "mcp__llm-bridges__send_to_llm",
       "mcp__llm-bridges__estimate_context_size",
       "Bash(python:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(dotnet build)",
+      "Bash(dotnet test)",
+      "Bash(dotnet test:*)",
+      "Bash(/mnt/d/Tools/Learning/csharp_graphics/CityBuilder/test-build.sh:*)",
+      "Bash(./test-build.sh:*)",
+      "Bash(./test-game.sh:*)"
     ],
     "deny": []
   },
