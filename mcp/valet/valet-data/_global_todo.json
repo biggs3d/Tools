@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-08-06T15:22:18.627Z",
+  "updated": "2025-08-19T20:53:17.070Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -176,17 +176,18 @@
       "content": "Email Erin with example of new AI tool/interest (homework from talk)",
       "priority": "medium",
       "category": "Work",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-25T00:15:06.142Z",
       "due": "2025-07-31",
-      "notes": []
+      "notes": [],
+      "completed_at": "2025-08-11T13:56:09.034Z"
     },
     {
       "id": "484acab4-6871-4497-88d3-09f41674ee22",
       "content": "Get Nate's forked repo running or check if MR went through for Eric to fork",
       "priority": "high",
       "category": "Work",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-30T16:32:36.262Z",
       "due": "2025-08-02",
       "notes": [
@@ -195,7 +196,8 @@
         "If not merged, get Nate's fork running locally",
         "UPDATE: Waiting on upgrade MR to go through first - can't be done until Friday"
       ],
-      "updated_at": "2025-07-30T18:50:55.422Z"
+      "updated_at": "2025-07-30T18:50:55.422Z",
+      "completed_at": "2025-08-11T13:56:03.904Z"
     },
     {
       "id": "32a4a1e0-00fc-4468-ae2c-c6fa9fb67e53",
@@ -220,14 +222,19 @@
       "created": "2025-07-30T18:52:53.543Z",
       "due": "2025-08-19",
       "notes": [
-        "Implement saved modes and saved layouts for UI grid system",
-        "Create map fill panel for UI grid system",
-        "Allow users to save and restore grid configurations",
-        "Panel that expands to fill available space with map content",
-        "Track Management Panel (from OGNate)",
-        "Finalize grid management with dual rails"
+        "✅ DONE: Finalize grid management with dual rails",
+        "✅ DONE: Create map fill panel for UI grid system",
+        "✅ DONE: Swap the notch on the right rail (completed Friday)",
+        "✅ DONE: Update track table list with map standard icons and categories",
+        "✅ DONE: Panel design specifications created (PANEL_DESIGNS.md)",
+        "✅ DONE: Better placeholder panels (draft content completed)",
+        "📋 TODO: Tracks data models (supports Track Management Panel)",
+        "📋 TODO: Icon map layer implementation",
+        "📋 TODO: Open/close animations for panels",
+        "📋 TODO: Implement saved modes and saved layouts for UI grid system",
+        "📋 TODO: Allow users to save and restore grid configurations"
       ],
-      "updated_at": "2025-07-30T18:59:00.914Z"
+      "updated_at": "2025-08-19T20:53:11.806Z"
     },
     {
       "id": "288deabc-18c3-48a9-9205-1e9dfb1b5a62",
@@ -244,12 +251,48 @@
       "content": "Get new button active color from Ken",
       "priority": "medium",
       "category": "Work",
-      "completed": false,
+      "completed": true,
       "created": "2025-08-06T15:22:18.627Z",
       "due": "2025-08-06",
       "notes": [
         "UI design update",
         "For grid system buttons"
+      ],
+      "completed_at": "2025-08-15T10:33:55.330Z"
+    },
+    {
+      "id": "df2e2821-6dbd-4de8-9c85-e9e81d7daa4a",
+      "content": "Better simulation",
+      "priority": "medium",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-08-15T11:52:10.290Z",
+      "due": null,
+      "notes": []
+    },
+    {
+      "id": "2d4c6ed6-a170-4a70-875a-efbe2c3c59a5",
+      "content": "Update track table list with map standard icons",
+      "priority": "medium",
+      "category": "Development",
+      "completed": true,
+      "created": "2025-08-15T16:42:40.378Z",
+      "due": null,
+      "notes": [],
+      "completed_at": "2025-08-18T12:05:44.365Z"
+    },
+    {
+      "id": "d626fdd4-66fc-42cc-aa29-3864ce0e3c84",
+      "content": "Update level bar design (from Nate)",
+      "priority": "high",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-08-19T20:53:17.070Z",
+      "due": "2025-08-26",
+      "notes": [
+        "For next sprint",
+        "Use prototypic sim data",
+        "Part of UI enhancements"
       ]
     }
   ]
