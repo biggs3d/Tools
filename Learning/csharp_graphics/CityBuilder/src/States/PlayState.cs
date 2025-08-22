@@ -378,9 +378,12 @@ public class PlayState : BaseGameState
                 // Show cargo type abbreviation
                 string cargoAbbr = vehicle.CargoType switch
                 {
-                    ResourceType.RawMaterials => "R",
-                    ResourceType.Goods => "G",
-                    ResourceType.Waste => "W",
+                    ResourceType.BlueTeardrop => "💧",
+                    ResourceType.RedSquare => "■",
+                    ResourceType.YellowTriangle => "▲",
+                    ResourceType.PurpleDiamond => "♦",
+                    ResourceType.GreenHexagon => "⬢",
+                    ResourceType.OrangeCircle => "●",
                     _ => "?"
                 };
                 vehicleLabel += $":{cargoAbbr}";
@@ -535,11 +538,15 @@ public class PlayState : BaseGameState
     {
         return cargoType switch
         {
-            ResourceType.RawMaterials => new Color(139, 90, 43, 255),  // Brown for raw materials
-            ResourceType.Goods => new Color(135, 206, 235, 255),       // Sky blue for goods
-            ResourceType.Waste => new Color(105, 105, 105, 255),       // Dark gray for waste
-            ResourceType.Energy => new Color(255, 255, 0, 255),        // Yellow for energy (future)
-            ResourceType.Water => new Color(0, 191, 255, 255),         // Deep sky blue for water (future)
+            ResourceType.BlueTeardrop => new Color(0, 191, 255, 255),     // Blue
+            ResourceType.RedSquare => new Color(255, 0, 0, 255),          // Red
+            ResourceType.YellowTriangle => new Color(255, 255, 0, 255),   // Yellow
+            ResourceType.PurpleDiamond => new Color(128, 0, 128, 255),    // Purple
+            ResourceType.GreenHexagon => new Color(0, 255, 0, 255),       // Green
+            ResourceType.OrangeCircle => new Color(255, 165, 0, 255),     // Orange
+            ResourceType.BlackBeam => new Color(0, 0, 0, 255),            // Black
+            ResourceType.WhitePillar => new Color(255, 255, 255, 255),    // White
+            ResourceType.SilverTruss => new Color(192, 192, 192, 255),    // Silver
             _ => Color.Green // Default fallback
         };
     }

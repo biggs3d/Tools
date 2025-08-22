@@ -298,7 +298,7 @@ namespace CityBuilder.Simulation
                         _hubLocation.Value,
                         request.Building.Location,
                         request.Resource,
-                        Math.Min(request.Amount, 20f), // Limit per vehicle
+                        Math.Min(request.Amount, 20), // Limit per vehicle
                         isExport: false,
                         isImport: true,
                         sourceBuilding: null,
@@ -316,15 +316,15 @@ namespace CityBuilder.Simulation
                 {
                     if (tasks.Count >= 8) break; // Limit tasks per update
                     
-                    // Prioritize waste removal
-                    if (offer.Resource != ResourceType.Waste && tasks.Count >= 6)
+                    // Limit number of active tasks (removed waste prioritization)
+                    if (tasks.Count >= 6)
                         continue;
                     
                     var task = new ResourceDeliveryTask(
                         offer.Building.Location,
                         _hubLocation.Value,
                         offer.Resource,
-                        Math.Min(offer.Amount, 20f), // Limit per vehicle
+                        Math.Min(offer.Amount, 20), // Limit per vehicle
                         isExport: true,
                         isImport: false,
                         sourceBuilding: offer.Building,

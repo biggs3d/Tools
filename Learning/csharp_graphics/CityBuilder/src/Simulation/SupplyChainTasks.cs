@@ -10,7 +10,7 @@ public class PickupRequest
     public Guid Id { get; } = Guid.NewGuid();
     public BuildingData Building { get; set; } = null!;
     public ResourceType Resource { get; set; }
-    public float Amount { get; set; }
+    public int Amount { get; set; }
     public float WaitTime { get; set; }
     public DateTime CreatedAt { get; } = DateTime.UtcNow;
 }
@@ -23,7 +23,7 @@ public class DeliveryOffer
     public Guid Id { get; } = Guid.NewGuid();
     public BuildingData Building { get; set; } = null!;
     public ResourceType Resource { get; set; }
-    public float Amount { get; set; }
+    public int Amount { get; set; }
     public float WaitTime { get; set; }
     public DateTime CreatedAt { get; } = DateTime.UtcNow;
 }
@@ -41,7 +41,7 @@ public class ResourceDeliveryTask : DeliveryTask
     /// <summary>
     /// Amount of resource (respects vehicle capacity)
     /// </summary>
-    public float Amount { get; }
+    public int Amount { get; }
     
     /// <summary>
     /// Is this an export to the hub?
@@ -69,7 +69,7 @@ public class ResourceDeliveryTask : DeliveryTask
         Vector2Int pickupLocation,
         Vector2Int deliveryLocation,
         ResourceType resource,
-        float amount,
+        int amount,
         bool isExport = false,
         bool isImport = false,
         BuildingData? sourceBuilding = null,

@@ -1,19 +1,29 @@
 namespace CityBuilder.Simulation;
 
 /// <summary>
-/// Types of resources that can be produced, consumed, and transported in the supply chain
+/// Shape/color-based resources for the supply chain system
 /// </summary>
 public enum ResourceType
 {
     None = 0,
-    RawMaterials = 1,  // Produced by Industrial buildings
-    Goods = 2,         // Produced by Commercial, consumed by Residential
-    Waste = 3,         // Produced by all, collected to Hub
-    Energy = 4,        // Future: power plant → all buildings
-    Water = 5,         // Future: water treatment → all buildings
+    
+    // Tier 1: Basic gathered resources (from terrain)
+    BlueTeardrop = 1,    // Gathered from water tiles
+    RedSquare = 2,       // Mined from ore deposits
+    YellowTriangle = 3,  // Gathered from rock formations
+    
+    // Tier 2: Factory-created resources (two inputs)
+    GreenHexagon = 4,    // Blue Teardrop + Yellow Triangle
+    OrangeCircle = 5,    // Yellow Triangle + Red Square
+    PurpleDiamond = 6,   // Blue Teardrop + Red Square
+    
+    // Tier 3: Advanced resources (complex recipes)
+    BlackBeam = 7,       // Green Hexagon + Purple Diamond (horizontal rectangle)
+    WhitePillar = 8,     // Purple Diamond + Orange Circle (vertical rectangle)
+    SilverTruss = 9,     // Black Beam + White Pillar (X-shape, for hub upgrades)
     
     // Keep this at the end for array sizing
-    Count = 6
+    Count = 10
 }
 
 /// <summary>
@@ -25,39 +35,39 @@ public struct InventorySlot
     /// <summary>
     /// Current amount of this resource in inventory
     /// </summary>
-    public float Current;
+    public int Current;
     
     /// <summary>
     /// Maximum capacity for this resource
     /// </summary>
-    public float Max;
+    public int Max;
     
     /// <summary>
     /// Amount reserved for pending deliveries (prevents double-booking)
     /// </summary>
-    public float InTransit;
+    public int InTransit;
     
     /// <summary>
-    /// Units produced per second (0 if not produced)
+    /// Units produced per tick (0 if not produced)
     /// </summary>
-    public float ProductionRate;
+    public int ProductionRate;
     
     /// <summary>
-    /// Units consumed per second (0 if not consumed)
+    /// Units consumed per tick (0 if not consumed)
     /// </summary>
-    public float ConsumptionRate;
+    public int ConsumptionRate;
     
     /// <summary>
     /// Gets the available amount (not reserved)
     /// </summary>
-    public readonly float Available => Current - InTransit;
+    public readonly int Available => Current - InTransit;
     
     /// <summary>
     /// Gets the effective inventory considering in-transit resources
     /// For consumers: Current + InTransit (what's coming)
     /// For producers: Current - InTransit (what's leaving)
     /// </summary>
-    public readonly float Effective => ConsumptionRate > 0 
+    public readonly int Effective => ConsumptionRate > 0 
         ? Current + InTransit 
         : Current - InTransit;
     
@@ -74,29 +84,29 @@ public struct InventorySlot
     /// <summary>
     /// Produces resources based on the production rate
     /// </summary>
-    public void Produce(float deltaTime)
+    public void Produce(int ticksElapsed = 1)
     {
         if (ProductionRate > 0)
         {
-            Current = Math.Min(Current + ProductionRate * deltaTime, Max);
+            Current = Math.Min(Current + ProductionRate * ticksElapsed, Max);
         }
     }
     
     /// <summary>
     /// Consumes resources based on the consumption rate
     /// </summary>
-    public void Consume(float deltaTime)
+    public void Consume(int ticksElapsed = 1)
     {
         if (ConsumptionRate > 0)
         {
-            Current = Math.Max(Current - ConsumptionRate * deltaTime, 0);
+            Current = Math.Max(Current - ConsumptionRate * ticksElapsed, 0);
         }
     }
     
     /// <summary>
     /// Reserves amount for a pending delivery
     /// </summary>
-    public bool Reserve(float amount)
+    public bool Reserve(int amount)
     {
         if (amount <= Available)
         {
@@ -109,7 +119,7 @@ public struct InventorySlot
     /// <summary>
     /// Releases a reservation (e.g., if delivery cancelled)
     /// </summary>
-    public void ReleaseReservation(float amount)
+    public void ReleaseReservation(int amount)
     {
         InTransit = Math.Max(InTransit - amount, 0);
     }
@@ -117,7 +127,7 @@ public struct InventorySlot
     /// <summary>
     /// Completes a pickup (removes from inventory)
     /// </summary>
-    public bool Pickup(float amount)
+    public bool Pickup(int amount)
     {
         if (amount <= Current)
         {
@@ -131,7 +141,7 @@ public struct InventorySlot
     /// <summary>
     /// Completes a delivery (adds to inventory)
     /// </summary>
-    public void Deliver(float amount)
+    public void Deliver(int amount)
     {
         Current = Math.Min(Current + amount, Max);
         InTransit = Math.Max(InTransit - amount, 0);
@@ -140,7 +150,7 @@ public struct InventorySlot
     /// <summary>
     /// Marks that resources are incoming (for consumers)
     /// </summary>
-    public void ExpectIncoming(float amount)
+    public void ExpectIncoming(int amount)
     {
         InTransit += amount;
     }
@@ -148,7 +158,7 @@ public struct InventorySlot
     /// <summary>
     /// Cancels expected incoming resources
     /// </summary>
-    public void CancelIncoming(float amount)
+    public void CancelIncoming(int amount)
     {
         InTransit = Math.Max(InTransit - amount, 0);
     }
@@ -156,7 +166,7 @@ public struct InventorySlot
     /// <summary>
     /// Receives incoming resources
     /// </summary>
-    public void ReceiveIncoming(float amount)
+    public void ReceiveIncoming(int amount)
     {
         Current = Math.Min(Current + amount, Max);
         InTransit = Math.Max(InTransit - amount, 0);
@@ -165,7 +175,7 @@ public struct InventorySlot
     /// <summary>
     /// Releases reserved resources (for failed pickups)
     /// </summary>
-    public void ReleaseReserved(float amount)
+    public void ReleaseReserved(int amount)
     {
         InTransit = Math.Max(InTransit - amount, 0);
     }
@@ -173,7 +183,7 @@ public struct InventorySlot
     /// <summary>
     /// Completes a reservation (actually removes the resources)
     /// </summary>
-    public void CompleteReservation(float amount)
+    public void CompleteReservation(int amount)
     {
         Current = Math.Max(Current - amount, 0);
         InTransit = Math.Max(InTransit - amount, 0);

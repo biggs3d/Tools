@@ -61,75 +61,59 @@ public class BuildingData
         }
         
         // Set up production and consumption based on building type
+        // TODO: This is placeholder logic - will be replaced with proper
+        // terrain-based gathering and recipe-based conversion
         switch (Type)
         {
             case TileType.Industrial:
-                // Produces raw materials
-                Inventory[(int)ResourceType.RawMaterials] = new InventorySlot
+                // Placeholder: Will become terrain-based gatherer
+                // For now, produces basic resources
+                Inventory[(int)ResourceType.BlueTeardrop] = new InventorySlot
                 {
                     Max = 100,
-                    ProductionRate = 1.0f,
-                    Current = 0
-                };
-                // Produces some waste
-                Inventory[(int)ResourceType.Waste] = new InventorySlot
-                {
-                    Max = 20,
-                    ProductionRate = 0.1f,
+                    ProductionRate = 1,
                     Current = 0
                 };
                 break;
                 
             case TileType.Commercial:
-                // Consumes raw materials
-                Inventory[(int)ResourceType.RawMaterials] = new InventorySlot
+                // Placeholder: Will become conversion factory
+                // For now, converts blue teardrops to purple diamonds
+                Inventory[(int)ResourceType.BlueTeardrop] = new InventorySlot
                 {
                     Max = 50,
-                    ConsumptionRate = 1.0f,
+                    ConsumptionRate = 1,
                     Current = 25 // Start with some
                 };
-                // Produces goods
-                Inventory[(int)ResourceType.Goods] = new InventorySlot
+                Inventory[(int)ResourceType.PurpleDiamond] = new InventorySlot
                 {
                     Max = 50,
-                    ProductionRate = 0.5f,
-                    Current = 0
-                };
-                // Produces waste
-                Inventory[(int)ResourceType.Waste] = new InventorySlot
-                {
-                    Max = 20,
-                    ProductionRate = 0.1f,
+                    ProductionRate = 1,
                     Current = 0
                 };
                 break;
                 
             case TileType.Residential:
-                // Consumes goods
-                Inventory[(int)ResourceType.Goods] = new InventorySlot
+                // Placeholder: Will consume various resources based on level
+                // For now, consumes purple diamonds
+                Inventory[(int)ResourceType.PurpleDiamond] = new InventorySlot
                 {
                     Max = 30,
-                    ConsumptionRate = 0.3f,
+                    ConsumptionRate = 1,
                     Current = 15 // Start with some
-                };
-                // Produces waste
-                Inventory[(int)ResourceType.Waste] = new InventorySlot
-                {
-                    Max = 20,
-                    ProductionRate = 0.2f,
-                    Current = 0
                 };
                 break;
                 
             case TileType.LandingPad:
             case TileType.UndergroundEntrance:
-                // Hub has infinite capacity (import/export point)
+                // Hub accepts all resources (especially Silver Trusses for upgrades)
+                // Acts as the sink for the orbital delivery contracts
                 for (int i = 1; i < (int)ResourceType.Count; i++)
                 {
                     Inventory[i] = new InventorySlot
                     {
-                        Max = float.MaxValue,
-                        Current = 1000 // Infinite supply for imports
+                        Max = int.MaxValue,
+                        Current = 100 // Some initial resources for testing
                     };
                 }
                 break;
@@ -145,6 +129,7 @@ public class BuildingData
         if (Type == TileType.LandingPad || Type == TileType.UndergroundEntrance)
             return;
             
+        // For now, update every tick (later we can accumulate time and update in batches)
         // Update each resource slot
         for (int i = 0; i < Inventory.Length; i++)
         {
@@ -158,13 +143,13 @@ public class BuildingData
                 canProduce = HasRequiredInputs();
             }
             
-            // Consume first
-            slot.Consume(deltaTime);
+            // Consume first (1 tick worth)
+            slot.Consume(1);
             
             // Then produce (if we can)
             if (canProduce)
             {
-                slot.Produce(deltaTime);
+                slot.Produce(1);
             }
             
             Inventory[i] = slot;
@@ -176,20 +161,21 @@ public class BuildingData
     /// </summary>
     private bool HasRequiredInputs()
     {
-        // Commercial needs raw materials to produce goods
+        // TODO: Implement recipe-based checking
+        // For now, Commercial (placeholder factory) needs blue teardrops to produce purple diamonds
         if (Type == TileType.Commercial)
         {
-            return Inventory[(int)ResourceType.RawMaterials].Current > 0;
+            return Inventory[(int)ResourceType.BlueTeardrop].Current > 0;
         }
         
-        // Industrial and Residential don't need inputs for their production
+        // Gatherers don't need inputs (they check terrain instead)
         return true;
     }
     
     /// <summary>
     /// Gets the effective inventory considering in-transit resources
     /// </summary>
-    public float GetEffectiveInventory(ResourceType resource)
+    public int GetEffectiveInventory(ResourceType resource)
     {
         return Inventory[(int)resource].Effective;
     }
@@ -219,20 +205,20 @@ public class BuildingData
     /// <summary>
     /// Gets the amount this building wants to request
     /// </summary>
-    public float GetRequestAmount(ResourceType resource)
+    public int GetRequestAmount(ResourceType resource)
     {
         var slot = Inventory[(int)resource];
         // Request enough to fill to 80%
-        return Math.Max(0, slot.Max * 0.8f - slot.Effective);
+        return Math.Max(0, (int)(slot.Max * 0.8f) - slot.Effective);
     }
     
     /// <summary>
     /// Gets the amount this building can offer
     /// </summary>
-    public float GetOfferAmount(ResourceType resource)
+    public int GetOfferAmount(ResourceType resource)
     {
         var slot = Inventory[(int)resource];
         // Offer excess above 50%
-        return Math.Max(0, slot.Available - slot.Max * 0.5f);
+        return Math.Max(0, slot.Available - (int)(slot.Max * 0.5f));
     }
 }

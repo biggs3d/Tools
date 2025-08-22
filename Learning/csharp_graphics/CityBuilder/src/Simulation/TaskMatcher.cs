@@ -28,7 +28,7 @@ public class TaskMatcher
     /// <summary>
     /// Default vehicle capacity if not specified
     /// </summary>
-    public float DefaultVehicleCapacity { get; set; } = 20.0f;
+    public int DefaultVehicleCapacity { get; set; } = 20;
     
     public TaskMatcher(EventBus eventBus)
     {
@@ -62,7 +62,7 @@ public class TaskMatcher
     /// <summary>
     /// Tries to match tasks for a vehicle with specific capacity
     /// </summary>
-    public ResourceDeliveryTask? MatchTasks(float vehicleCapacity)
+    public ResourceDeliveryTask? MatchTasks(int vehicleCapacity)
     {
         // 1. Try to match producer → consumer (most efficient)
         var task = TryMatchProducerToConsumer(vehicleCapacity);
@@ -87,7 +87,7 @@ public class TaskMatcher
         return MatchTasks(DefaultVehicleCapacity);
     }
     
-    private ResourceDeliveryTask? TryMatchProducerToConsumer(float vehicleCapacity)
+    private ResourceDeliveryTask? TryMatchProducerToConsumer(int vehicleCapacity)
     {
         foreach (var resourceType in _offersByResource.Keys)
         {
@@ -98,7 +98,7 @@ public class TaskMatcher
                 var request = requests.Dequeue();
                 
                 // Handle vehicle capacity limits
-                float amount = Math.Min(offer.Amount, Math.Min(request.Amount, vehicleCapacity));
+                int amount = Math.Min(offer.Amount, Math.Min(request.Amount, vehicleCapacity));
                 
                 // Reserve the resources
                 offer.Building.Inventory[(int)resourceType].Reserve(amount);
@@ -131,14 +131,14 @@ public class TaskMatcher
         return null;
     }
     
-    private ResourceDeliveryTask? TryMatchProducerToHub(float vehicleCapacity)
+    private ResourceDeliveryTask? TryMatchProducerToHub(int vehicleCapacity)
     {
         foreach (var (resource, offers) in _offersByResource)
         {
             if (offers.Count > 0)
             {
                 var offer = offers.Dequeue();
-                float amount = Math.Min(offer.Amount, vehicleCapacity);
+                int amount = Math.Min(offer.Amount, vehicleCapacity);
                 
                 offer.Building.Inventory[(int)resource].Reserve(amount);
                 
@@ -163,14 +163,14 @@ public class TaskMatcher
         return null;
     }
     
-    private ResourceDeliveryTask? TryMatchHubToConsumer(float vehicleCapacity)
+    private ResourceDeliveryTask? TryMatchHubToConsumer(int vehicleCapacity)
     {
         foreach (var (resource, requests) in _requestsByResource)
         {
             if (requests.Count > 0 && requests.Peek().WaitTime >= ImportWaitTime)
             {
                 var request = requests.Dequeue();
-                float amount = Math.Min(request.Amount, vehicleCapacity);
+                int amount = Math.Min(request.Amount, vehicleCapacity);
                 
                 request.Building.Inventory[(int)resource].InTransit += amount;
                 
@@ -299,7 +299,7 @@ public class TaskMatcher
         public PickupRequest Request { get; set; } = null!;
         public DeliveryOffer Offer { get; set; } = null!;
         public ResourceType Resource { get; set; }
-        public float Amount { get; set; }
+        public int Amount { get; set; }
     }
     
     /// <summary>
