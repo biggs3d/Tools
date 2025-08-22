@@ -16,6 +16,7 @@ namespace CityBuilder.Simulation
         private readonly List<Vector2Int> _buildingLocations;
         private readonly EventBus _eventBus;
         private readonly GameSettings _gameSettings;
+        private readonly BuildingManager _buildingManager;
         private readonly Random _random;
         
         private float _accumulator;
@@ -23,6 +24,7 @@ namespace CityBuilder.Simulation
         private int _nextTaskId;
         private Vector2Int? _hubLocation;
         private float _totalTime;
+        private bool _useSupplyChain = true;
         
         public IReadOnlyList<Vehicle> ActiveVehicles => _vehiclePool.ActiveVehicles;
         public int PendingTaskCount => _pendingTasks.Count;
@@ -37,6 +39,7 @@ namespace CityBuilder.Simulation
             
             _pathfindingService = new PathfindingService(gridSystem);
             _vehiclePool = new VehiclePool(GameConstants.VehiclePoolInitialSize, GameConstants.MaxVehicles, gameSettings);
+            _buildingManager = new BuildingManager(gridSystem, eventBus);
             _pendingTasks = new Queue<DeliveryTask>();
             _activeTasks = new List<DeliveryTask>();
             _buildingLocations = new List<Vector2Int>();
@@ -50,7 +53,9 @@ namespace CityBuilder.Simulation
             SubscribeToEvents();
             FindHubLocation();
             ScanForBuildings();
+            _hubLocation = _buildingManager.HubLocation;
             Console.WriteLine($"SimulationManager initialized. Hub: {_hubLocation}, Buildings: {_buildingLocations.Count}");
+            Console.WriteLine($"Supply chain mode: {(_useSupplyChain ? "ENABLED" : "DISABLED")}");
         }
         
         private void SubscribeToEvents()
@@ -229,14 +234,61 @@ namespace CityBuilder.Simulation
             
             _vehiclePool.Update(deltaTime);
             
-            if (_taskGenerationTimer >= GameConstants.TaskGenerationInterval)
+            // Update building manager if using supply chain
+            if (_useSupplyChain)
             {
-                GenerateRandomTask();
-                _taskGenerationTimer = 0f;
+                _buildingManager.Update(deltaTime, _totalTime);
+                
+                // Generate supply chain tasks periodically
+                if (_taskGenerationTimer >= GameConstants.TaskGenerationInterval)
+                {
+                    GenerateSupplyChainTasks();
+                    _taskGenerationTimer = 0f;
+                }
+            }
+            else
+            {
+                // Use simple random task generation
+                if (_taskGenerationTimer >= GameConstants.TaskGenerationInterval)
+                {
+                    GenerateRandomTask();
+                    _taskGenerationTimer = 0f;
+                }
             }
             
             AssignTasksToVehicles();
             UpdateVehiclePaths();
+        }
+        
+        private void GenerateSupplyChainTasks()
+        {
+            var tasks = _buildingManager.GenerateDeliveryTasks(_totalTime);
+            
+            foreach (var task in tasks)
+            {
+                // Find nearest road tile for pickup and delivery locations
+                var pickupRoad = FindNearestRoadTile(task.PickupLocation);
+                var deliveryRoad = FindNearestRoadTile(task.DeliveryLocation);
+                
+                if (pickupRoad.HasValue && deliveryRoad.HasValue)
+                {
+                    // Create a wrapper task with road locations
+                    var deliveryTask = new ResourceDeliveryTask(
+                        pickupRoad.Value,
+                        deliveryRoad.Value,
+                        task.Resource,
+                        task.Amount,
+                        task.IsExport,
+                        task.IsImport,
+                        task.SourceBuilding,
+                        task.DestinationBuilding,
+                        _totalTime
+                    );
+                    
+                    _pendingTasks.Enqueue(deliveryTask);
+                    _eventBus.Publish(new DeliveryCreatedEvent { Task = deliveryTask });
+                }
+            }
         }
         
         private void GenerateRandomTask()
@@ -343,6 +395,13 @@ namespace CityBuilder.Simulation
                         {
                             vehicle.CurrentTask.IsCompleted = true;
                             _activeTasks.Remove(vehicle.CurrentTask);
+                            
+                            // Notify building manager if this is a supply chain task
+                            if (_useSupplyChain && vehicle.CurrentTask is ResourceDeliveryTask resourceTask)
+                            {
+                                _buildingManager.OnDeliveryCompleted(resourceTask, true);
+                            }
+                            
                             _eventBus.Publish(new DeliveryCompletedEvent { Task = vehicle.CurrentTask });
                         }
                     }
@@ -370,6 +429,21 @@ namespace CityBuilder.Simulation
             }
         }
         
+        public void ToggleSupplyChainMode()
+        {
+            _useSupplyChain = !_useSupplyChain;
+            Console.WriteLine($"Supply chain mode: {(_useSupplyChain ? "ENABLED" : "DISABLED")}");
+            
+            // Clear existing tasks when switching modes
+            _pendingTasks.Clear();
+            _activeTasks.Clear();
+            
+            if (_useSupplyChain)
+            {
+                _buildingManager.Reset();
+            }
+        }
+        
         public void Reset()
         {
             _vehiclePool.ReleaseAll();
@@ -377,12 +451,14 @@ namespace CityBuilder.Simulation
             _activeTasks.Clear();
             _buildingLocations.Clear();
             _pathfindingService.ClearCache();
+            _buildingManager.Reset();
             _accumulator = 0f;
             _taskGenerationTimer = 0f;
             _nextTaskId = 0;
             _totalTime = 0f;
             FindHubLocation();
             ScanForBuildings();
+            _hubLocation = _buildingManager.HubLocation;
         }
     }
     

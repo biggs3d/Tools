@@ -228,6 +228,12 @@ public class PlayState : BaseGameState
             Console.WriteLine($"Spawned 100 vehicles for SUPER stress test! Total: {_simulationManager.ActiveVehicles.Count}");
         }
         
+        // Toggle supply chain mode (C key)
+        if (Raylib.IsKeyPressed(KeyboardKey.C))
+        {
+            _simulationManager.ToggleSupplyChainMode();
+        }
+        
         // Generate procedural city (G key)
         if (Raylib.IsKeyPressed(KeyboardKey.G))
         {
@@ -498,7 +504,7 @@ public class PlayState : BaseGameState
         }
         
         // Controls help - split into two lines for all the new controls
-        string controls1 = "WASD/SHIFT: Move | Click: Place Road | 1-3: Buildings | F1: Grid | P: Pause | ESC: Menu";
+        string controls1 = "WASD/SHIFT: Move | Click: Place Road | 1-3: Buildings | F1: Grid | P: Pause | C: Supply Chain | ESC: Menu";
         string controls2 = "V: Vehicle | T: 10 Vehicles | Shift+T: 100 | G: Gen City | Shift+G: Large City | Ctrl+G: Clear";
         int controls1Width = Raylib.MeasureText(controls1, 14);
         int controls2Width = Raylib.MeasureText(controls2, 14);

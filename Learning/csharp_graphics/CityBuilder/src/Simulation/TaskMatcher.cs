@@ -290,4 +290,66 @@ public class TaskMatcher
             queue.Clear();
         }
     }
+    
+    /// <summary>
+    /// Simple matching for BuildingManager without using internal queues
+    /// </summary>
+    public class Match
+    {
+        public PickupRequest Request { get; set; } = null!;
+        public DeliveryOffer Offer { get; set; } = null!;
+        public ResourceType Resource { get; set; }
+        public float Amount { get; set; }
+    }
+    
+    /// <summary>
+    /// Matches external lists of requests and offers
+    /// </summary>
+    public List<Match> MatchRequestsAndOffers(List<PickupRequest> requests, List<DeliveryOffer> offers)
+    {
+        var matches = new List<Match>();
+        var availableOffers = offers.ToList();
+        
+        foreach (var request in requests)
+        {
+            var matchingOffer = availableOffers.FirstOrDefault(o => 
+                o.Resource == request.Resource && 
+                o.Amount > 0);
+                
+            if (matchingOffer != null)
+            {
+                var amount = Math.Min(request.Amount, matchingOffer.Amount);
+                
+                matches.Add(new Match
+                {
+                    Request = request,
+                    Offer = matchingOffer,
+                    Resource = request.Resource,
+                    Amount = amount
+                });
+                
+                // Remove fully matched offer
+                if (matchingOffer.Amount <= amount)
+                {
+                    availableOffers.Remove(matchingOffer);
+                }
+                else
+                {
+                    matchingOffer.Amount -= amount;
+                }
+                
+                // Stop if request is fully matched
+                if (request.Amount <= amount)
+                {
+                    continue;
+                }
+                else
+                {
+                    request.Amount -= amount;
+                }
+            }
+        }
+        
+        return matches;
+    }
 }

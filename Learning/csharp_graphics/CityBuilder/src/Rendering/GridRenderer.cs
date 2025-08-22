@@ -27,16 +27,17 @@ public class GridRenderer
             { TerrainType.Mountain, new Color(130, 130, 130, 255) }
         };
         
-        // Initialize tile colors
+        // Initialize tile colors - matching cargo colors for visual consistency
         _tileColors = new Dictionary<TileType, Color>
         {
             { TileType.Empty, Color.Blank },
             { TileType.Road, new Color(80, 80, 80, 255) },
             { TileType.LandingPad, new Color(150, 150, 180, 255) },
             { TileType.UndergroundEntrance, new Color(60, 60, 90, 255) },
-            { TileType.Residential, new Color(100, 200, 100, 255) },
-            { TileType.Commercial, new Color(100, 100, 200, 255) },
-            { TileType.Industrial, new Color(200, 150, 100, 255) },
+            // Buildings colored by what they produce/consume
+            { TileType.Industrial, new Color(160, 100, 60, 255) },     // Brown-ish - produces raw materials
+            { TileType.Commercial, new Color(100, 180, 220, 255) },     // Light blue - produces goods
+            { TileType.Residential, new Color(120, 200, 120, 255) },    // Green - consumes goods
             { TileType.Park, new Color(80, 160, 80, 255) }
         };
     }
@@ -110,6 +111,14 @@ public class GridRenderer
                         if (tile.Type == TileType.Road)
                         {
                             DrawRoadConnections(worldX, worldY, tile.NeighborMask);
+                        }
+                        
+                        // Draw building icons and inventory indicators
+                        if (tile.Type == TileType.Industrial || 
+                            tile.Type == TileType.Commercial || 
+                            tile.Type == TileType.Residential)
+                        {
+                            DrawBuildingIcon(rect, tile.Type);
                         }
                     }
                 }
@@ -230,6 +239,48 @@ public class GridRenderer
             // Draw chunk coordinates
             string chunkText = $"C({chunk.ChunkCoord.X},{chunk.ChunkCoord.Y})";
             Raylib.DrawText(chunkText, worldX + 5, worldY + 5, 12, Color.Red);
+        }
+    }
+    
+    /// <summary>
+    /// Draws building type icons for accessibility
+    /// </summary>
+    private void DrawBuildingIcon(Rectangle rect, TileType buildingType)
+    {
+        // Draw a simple shape to identify building type
+        var centerX = rect.X + rect.Width / 2;
+        var centerY = rect.Y + rect.Height / 2;
+        var iconSize = GridSystem.TileSize / 4;
+        
+        switch (buildingType)
+        {
+            case TileType.Industrial:
+                // Draw factory icon (gear/cog shape)
+                Raylib.DrawCircle((int)centerX, (int)centerY, iconSize, new Color(80, 50, 30, 200));
+                Raylib.DrawText("I", (int)(centerX - 4), (int)(centerY - 6), 12, Color.White);
+                break;
+                
+            case TileType.Commercial:
+                // Draw shop icon ($ symbol)
+                Raylib.DrawRectangle((int)(centerX - iconSize), (int)(centerY - iconSize), 
+                    iconSize * 2, iconSize * 2, new Color(50, 100, 150, 200));
+                Raylib.DrawText("$", (int)(centerX - 4), (int)(centerY - 6), 12, Color.White);
+                break;
+                
+            case TileType.Residential:
+                // Draw house icon (triangle roof)
+                Vector2[] points = new Vector2[]
+                {
+                    new Vector2(centerX, centerY - iconSize),
+                    new Vector2(centerX - iconSize, centerY + iconSize/2),
+                    new Vector2(centerX + iconSize, centerY + iconSize/2)
+                };
+                // DrawTriangle doesn't exist in Raylib-cs, use lines instead
+                Raylib.DrawLine((int)points[0].X, (int)points[0].Y, (int)points[1].X, (int)points[1].Y, Color.DarkGreen);
+                Raylib.DrawLine((int)points[1].X, (int)points[1].Y, (int)points[2].X, (int)points[2].Y, Color.DarkGreen);
+                Raylib.DrawLine((int)points[2].X, (int)points[2].Y, (int)points[0].X, (int)points[0].Y, Color.DarkGreen);
+                Raylib.DrawText("H", (int)(centerX - 4), (int)(centerY - 6), 12, Color.White);
+                break;
         }
     }
 }

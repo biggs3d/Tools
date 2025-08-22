@@ -136,4 +136,46 @@ public struct InventorySlot
         Current = Math.Min(Current + amount, Max);
         InTransit = Math.Max(InTransit - amount, 0);
     }
+    
+    /// <summary>
+    /// Marks that resources are incoming (for consumers)
+    /// </summary>
+    public void ExpectIncoming(float amount)
+    {
+        InTransit += amount;
+    }
+    
+    /// <summary>
+    /// Cancels expected incoming resources
+    /// </summary>
+    public void CancelIncoming(float amount)
+    {
+        InTransit = Math.Max(InTransit - amount, 0);
+    }
+    
+    /// <summary>
+    /// Receives incoming resources
+    /// </summary>
+    public void ReceiveIncoming(float amount)
+    {
+        Current = Math.Min(Current + amount, Max);
+        InTransit = Math.Max(InTransit - amount, 0);
+    }
+    
+    /// <summary>
+    /// Releases reserved resources (for failed pickups)
+    /// </summary>
+    public void ReleaseReserved(float amount)
+    {
+        InTransit = Math.Max(InTransit - amount, 0);
+    }
+    
+    /// <summary>
+    /// Completes a reservation (actually removes the resources)
+    /// </summary>
+    public void CompleteReservation(float amount)
+    {
+        Current = Math.Max(Current - amount, 0);
+        InTransit = Math.Max(InTransit - amount, 0);
+    }
 }

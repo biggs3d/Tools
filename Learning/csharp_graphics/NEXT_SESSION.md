@@ -1,9 +1,34 @@
 # Next Session Guide
 
 ## Current Status ✅
-**Phase 5 IN PROGRESS**: Full simulation working with visual feedback! All tests passing (114/114)!
+**Phase 5 COMPLETE**: Supply chain system integrated! Buildings produce/consume resources, vehicles deliver based on inventory needs!
 
-## What Was Just Completed (Session 7 - 2025-08-18)
+## What Was Just Completed (Session 8 - 2025-08-22)
+1. **Supply Chain Integration**
+   - Created BuildingManager to track all buildings
+   - Buildings maintain inventory with production/consumption rates
+   - Industrial produces raw materials, Commercial converts to goods, Residential consumes
+   - Waste accumulates and needs export to hub
+   - Task generation based on inventory thresholds with hysteresis
+
+2. **Resource Delivery System**
+   - ResourceDeliveryTask extends DeliveryTask with resource info
+   - PickupRequest/DeliveryOffer matching system
+   - Import from hub when local supply unavailable
+   - Export to hub for excess resources (especially waste)
+   - Visual cargo colors matching resource types
+
+3. **Visual Design Improvements**
+   - Building colors match their production (brown=Industrial, blue=Commercial, green=Residential)
+   - Vehicle cargo shown with matching colors during delivery
+   - Building icons added (I=Industrial, $=Commercial, H=House)
+   - Consistent color scheme across buildings and cargo
+
+4. **New Controls**
+   - C key: Toggle between supply chain mode and simple random tasks
+   - Supply chain enabled by default
+
+## What Was Previously Completed (Session 7 - 2025-08-18)
 1. **Procedural City Generator**
    - Created deterministic city generation with seeded Random
    - Branching road network algorithm from hub
@@ -69,24 +94,24 @@ dotnet test --filter "FullyQualifiedName~Grid"  # Run just Grid tests
 
 ### What To Do Next Session
 
-1. **Integrate Supply Chain into SimulationManager**:
-   - Wire up BuildingManager to track all buildings
-   - Buildings generate tasks based on inventory levels
-   - Replace simple task generation with supply chain tasks
-   - Test with procedural city generator
-
-2. **Visual Design Pass**:
-   - Define consistent color scheme for buildings and resources
-   - Building colors should inform cargo colors (industrial → raw materials color)
-   - Add building shapes/icons for accessibility (not just colors)
-   - Consider patterns/textures for better distinction
-   - Update cargo colors to match producer buildings
-
-3. **Gameplay Tuning**:
-   - Balance production/consumption rates
-   - Adjust inventory thresholds for better flow
+1. **Gameplay Tuning & Balance**:
+   - Balance production/consumption rates for better flow
+   - Adjust inventory thresholds to prevent stockpiling
+   - Fine-tune vehicle capacity and speed
    - Test different city layouts for emergent behavior
-   - Add UI feedback for resource shortages
+   - Add UI feedback for resource shortages/surpluses
+
+2. **Performance Optimization**:
+   - Implement spatial indexing for building lookups
+   - Optimize task matching algorithm
+   - Add LOD system for distant buildings
+   - Profile and optimize inventory updates
+
+3. **Enhanced Visuals**:
+   - Add inventory level bars on buildings
+   - Show resource icons floating when produced/consumed
+   - Add particle effects for deliveries
+   - Implement day/night cycle with lighting
 
 2. **Visual Polish:**
 ```csharp
