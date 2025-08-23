@@ -1,5 +1,6 @@
 using CityBuilder.Core;
 using CityBuilder.Grid;
+using CityBuilder.Simulation.Buildings;
 
 namespace CityBuilder.Simulation;
 
@@ -12,6 +13,11 @@ public class BuildingData
     /// Type of building (determines production/consumption patterns)
     /// </summary>
     public TileType Type { get; set; }
+    
+    /// <summary>
+    /// The definition that controls this building's behavior
+    /// </summary>
+    public IBuildingDefinition? Definition { get; private set; }
     
     /// <summary>
     /// Location in the grid
@@ -48,7 +54,10 @@ public class BuildingData
         Location = location;
         Inventory = new InventorySlot[(int)ResourceType.Count];
         
-        // Initialize inventory based on building type
+        // Get the definition from the registry
+        Definition = BuildingRegistry.GetDefinition(type);
+        
+        // Initialize inventory based on building definition
         InitializeInventory();
     }
     
@@ -60,68 +69,33 @@ public class BuildingData
             Inventory[i] = new InventorySlot();
         }
         
-        // Set up production and consumption based on building type
-        // TODO: This is placeholder logic - will be replaced with proper
-        // terrain-based gathering and recipe-based conversion
-        switch (Type)
-        {
-            case TileType.Industrial:
-                // Placeholder: Will become terrain-based gatherer
-                // For now, produces basic resources
-                Inventory[(int)ResourceType.BlueTeardrop] = new InventorySlot
-                {
-                    Max = 100,
-                    ProductionRate = 1,
-                    Current = 0
-                };
-                break;
-                
-            case TileType.Commercial:
-                // Placeholder: Will become conversion factory
-                // For now, converts blue teardrops to purple diamonds
-                Inventory[(int)ResourceType.BlueTeardrop] = new InventorySlot
-                {
-                    Max = 50,
-                    ConsumptionRate = 1,
-                    Current = 25 // Start with some
-                };
-                Inventory[(int)ResourceType.PurpleDiamond] = new InventorySlot
-                {
-                    Max = 50,
-                    ProductionRate = 1,
-                    Current = 0
-                };
-                break;
-                
-            case TileType.Residential:
-                // Placeholder: Will consume various resources based on level
-                // For now, consumes purple diamonds
-                Inventory[(int)ResourceType.PurpleDiamond] = new InventorySlot
-                {
-                    Max = 30,
-                    ConsumptionRate = 1,
-                    Current = 15 // Start with some
-                };
-                break;
-                
-            case TileType.LandingPad:
-            case TileType.UndergroundEntrance:
-                // Hub accepts all resources (especially Silver Trusses for upgrades)
-                // Acts as the sink for the orbital delivery contracts
-                for (int i = 1; i < (int)ResourceType.Count; i++)
-                {
-                    Inventory[i] = new InventorySlot
-                    {
-                        Max = int.MaxValue,
-                        Current = 100 // Some initial resources for testing
-                    };
-                }
-                break;
-        }
+        // Let the definition set up the inventory
+        Definition?.InitializeInventory(Inventory);
     }
     
     /// <summary>
-    /// Updates production and consumption for this building
+    /// Updates production rate based on adjacent terrain (for gathering buildings)
+    /// </summary>
+    public void UpdateProductionFromTerrain(Func<Vector2Int, TerrainType> getTerrainAt)
+    {
+        Definition?.UpdateProductionFromTerrain(Location, Inventory, getTerrainAt);
+    }
+    
+    /// <summary>
+    /// Gets the priority for updating this building (hubs are highest priority)
+    /// </summary>
+    public int GetUpdatePriority()
+    {
+        return Type switch
+        {
+            TileType.LandingPad => 0,
+            TileType.UndergroundEntrance => 0,
+            _ => 1
+        };
+    }
+    
+    /// <summary>
+    /// Updates the building's production and consumption
     /// </summary>
     public void Update(float deltaTime)
     {
@@ -139,8 +113,8 @@ public class BuildingData
             bool canProduce = true;
             if (slot.ProductionRate > 0)
             {
-                // Check if we have required inputs
-                canProduce = HasRequiredInputs();
+                // Check if we have required inputs using the definition
+                canProduce = Definition?.HasRequiredInputs(Inventory) ?? true;
             }
             
             // Consume first (1 tick worth)
@@ -154,22 +128,6 @@ public class BuildingData
             
             Inventory[i] = slot;
         }
-    }
-    
-    /// <summary>
-    /// Checks if building has required inputs for production
-    /// </summary>
-    private bool HasRequiredInputs()
-    {
-        // TODO: Implement recipe-based checking
-        // For now, Commercial (placeholder factory) needs blue teardrops to produce purple diamonds
-        if (Type == TileType.Commercial)
-        {
-            return Inventory[(int)ResourceType.BlueTeardrop].Current > 0;
-        }
-        
-        // Gatherers don't need inputs (they check terrain instead)
-        return true;
     }
     
     /// <summary>

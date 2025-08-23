@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CityBuilder.Core;
 using CityBuilder.Grid;
+using CityBuilder.Simulation.Buildings;
 
 namespace CityBuilder.Simulation
 {
@@ -76,9 +77,7 @@ namespace CityBuilder.Simulation
             _pathfindingService.InvalidateCache(dirtyRegion);
             
             // Update building locations list
-            if (e.TileType == TileType.Residential || 
-                e.TileType == TileType.Commercial || 
-                e.TileType == TileType.Industrial)
+            if (BuildingRegistry.IsBuilding(e.TileType))
             {
                 if (!_buildingLocations.Contains(position))
                     _buildingLocations.Add(position);
@@ -146,9 +145,7 @@ namespace CityBuilder.Simulation
                         var worldY = chunk.ChunkCoord.Y * TileChunk.Size + y;
                         var tile = _gridSystem.GetTileAt(new Vector2Int(worldX, worldY));
                         
-                        if (tile.Type == TileType.Residential || 
-                            tile.Type == TileType.Commercial || 
-                            tile.Type == TileType.Industrial)
+                        if (BuildingRegistry.IsBuilding(tile.Type))
                         {
                             _buildingLocations.Add(new Vector2Int(worldX, worldY));
                         }

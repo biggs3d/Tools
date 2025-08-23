@@ -224,9 +224,9 @@ public class ProceduralCityGenerator
             // Choose a random building type
             var buildingType = _random.Next(3) switch
             {
-                0 => TileType.Residential,
-                1 => TileType.Commercial,
-                _ => TileType.Industrial
+                0 => TileType.WaterGatherer,
+                1 => TileType.OreExtractor,
+                _ => TileType.RockHarvester
             };
             
             if (_gridSystem.PlaceTileAt(buildingPos, buildingType))

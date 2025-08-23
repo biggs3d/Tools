@@ -84,7 +84,12 @@ public enum TerrainType {
 - **Building level affects production speed** - Config-driven balancing
 
 ## 🐛 Known Issues
-- Tests are broken (still reference old ResourceType values)
+- Tests are broken (still reference old ResourceType values) - **140 errors**
+  - To fix: Replace ResourceType.RawMaterials → BlueTeardrop/RedSquare
+  - To fix: Replace ResourceType.Goods → GreenHexagon/OrangeCircle  
+  - To fix: Replace ResourceType.Waste → YellowTriangle
+  - To fix: Replace TerrainType.Grass → TerrainType.Normal
+  - To fix: Convert float values to int (remove 'f' suffix)
 - Buildings still use Industrial/Commercial/Residential placeholders
 - No visual feedback for resource production yet
 - Need to update building placement UI for gatherers

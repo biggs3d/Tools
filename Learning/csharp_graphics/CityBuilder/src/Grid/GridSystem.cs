@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Numerics;
 using CityBuilder.Core;
+using CityBuilder.Simulation.Buildings;
 using Raylib_cs;
 
 namespace CityBuilder.Grid;
@@ -384,9 +385,7 @@ public class GridSystem : IDisposable
     /// </summary>
     private bool IsBuilding(TileType type)
     {
-        return type == TileType.Residential ||
-               type == TileType.Commercial ||
-               type == TileType.Industrial;
+        return BuildingRegistry.IsBuilding(type);
     }
     
     /// <summary>
@@ -546,7 +545,45 @@ public class GridSystem : IDisposable
                 int worldY = worldStartY + localY;
                 
                 var terrain = _terrainGenerator.GenerateTile(worldX, worldY);
+                
+                // Check for guaranteed resources first
+                if (_terrainGenerator.IsSpecialWaterAt(worldX, worldY))
+                {
+                    terrain = new TerrainTile
+                    {
+                        Type = TerrainType.Water,
+                        Elevation = terrain.Elevation,
+                        MovementCost = 10,
+                        CanBuild = false
+                    };
+                }
+                else if (_terrainGenerator.IsGuaranteedOreAt(worldX, worldY))
+                {
+                    terrain = new TerrainTile
+                    {
+                        Type = TerrainType.OreDeposit,
+                        Elevation = terrain.Elevation,
+                        MovementCost = 1,
+                        CanBuild = false
+                    };
+                }
+                else if (_terrainGenerator.IsGuaranteedRockAt(worldX, worldY))
+                {
+                    terrain = new TerrainTile
+                    {
+                        Type = TerrainType.RockFormation,
+                        Elevation = terrain.Elevation,
+                        MovementCost = 2,
+                        CanBuild = false
+                    };
+                }
+                
                 chunk.SetTerrain(localX, localY, terrain);
+                
+                // Also update the main tile's terrain type
+                var tile = chunk.GetTile(localX, localY);
+                tile.Terrain = terrain.Type;
+                chunk.SetTile(localX, localY, tile);
             }
         }
     }

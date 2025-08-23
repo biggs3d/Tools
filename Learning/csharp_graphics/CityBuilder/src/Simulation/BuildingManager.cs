@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CityBuilder.Core;
 using CityBuilder.Grid;
+using CityBuilder.Simulation.Buildings;
 
 namespace CityBuilder.Simulation
 {
@@ -49,9 +50,7 @@ namespace CityBuilder.Simulation
             var type = e.TileType;
             
             // Check if this is a building type
-            if (type == TileType.Residential || 
-                type == TileType.Commercial || 
-                type == TileType.Industrial ||
+            if (BuildingRegistry.IsBuilding(type) || 
                 type == TileType.LandingPad ||
                 type == TileType.UndergroundEntrance)
             {
@@ -59,6 +58,16 @@ namespace CityBuilder.Simulation
                 {
                     var building = new BuildingData(type, position);
                     _buildings[position] = building;
+                    
+                    // Update production based on terrain for gathering buildings
+                    if (building.Definition?.IsGatherer == true)
+                    {
+                        building.UpdateProductionFromTerrain(pos => 
+                        {
+                            var tile = _gridSystem.GetTileAt(pos);
+                            return tile.Terrain;
+                        });
+                    }
                     
                     // Update hub location if this is a hub
                     if (type == TileType.LandingPad || type == TileType.UndergroundEntrance)
@@ -110,9 +119,7 @@ namespace CityBuilder.Simulation
                         var position = new Vector2Int(worldX, worldY);
                         var tile = _gridSystem.GetTileAt(position);
                         
-                        if (tile.Type == TileType.Residential || 
-                            tile.Type == TileType.Commercial || 
-                            tile.Type == TileType.Industrial ||
+                        if (BuildingRegistry.IsBuilding(tile.Type) ||
                             tile.Type == TileType.LandingPad ||
                             tile.Type == TileType.UndergroundEntrance)
                         {

@@ -11,6 +11,11 @@ public struct Tile
     public TileType Type { get; set; }
     
     /// <summary>
+    /// The terrain type of this tile (water, ore, rock, etc.)
+    /// </summary>
+    public TerrainType Terrain { get; set; }
+    
+    /// <summary>
     /// Bit flags indicating which neighbors this tile connects to
     /// </summary>
     public NeighborMask NeighborMask { get; set; }
@@ -26,6 +31,7 @@ public struct Tile
     public static readonly Tile Empty = new Tile 
     { 
         Type = TileType.Empty,
+        Terrain = TerrainType.Normal,
         NeighborMask = NeighborMask.None
     };
     
@@ -35,6 +41,7 @@ public struct Tile
     public static Tile CreateRoad() => new Tile
     {
         Type = TileType.Road,
+        Terrain = TerrainType.Normal,
         NeighborMask = NeighborMask.None
     };
     
@@ -44,6 +51,7 @@ public struct Tile
     public static Tile CreateBuilding(TileType buildingType) => new Tile
     {
         Type = buildingType,
+        Terrain = TerrainType.Normal,
         NeighborMask = NeighborMask.None
     };
     
@@ -86,11 +94,11 @@ public struct TerrainTile
     public bool CanBuild { get; set; }
     
     /// <summary>
-    /// Creates a default grass terrain tile
+    /// Creates a default normal terrain tile
     /// </summary>
-    public static readonly TerrainTile Grass = new TerrainTile
+    public static readonly TerrainTile Normal = new TerrainTile
     {
-        Type = TerrainType.Grass,
+        Type = TerrainType.Normal,
         Elevation = 0f,
         MovementCost = 1,
         CanBuild = true

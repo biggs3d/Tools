@@ -20,11 +20,13 @@ public class GridRenderer
         // Initialize terrain colors
         _terrainColors = new Dictionary<TerrainType, Color>
         {
-            { TerrainType.Grass, new Color(50, 120, 50, 255) },
-            { TerrainType.Water, new Color(30, 90, 180, 255) },
-            { TerrainType.Sand, new Color(194, 178, 128, 255) },
-            { TerrainType.Forest, new Color(30, 80, 30, 255) },
-            { TerrainType.Mountain, new Color(130, 130, 130, 255) }
+            { TerrainType.Normal, new Color(50, 120, 50, 255) },        // Green grass
+            { TerrainType.Water, new Color(30, 90, 180, 255) },         // Blue water
+            { TerrainType.OreDeposit, new Color(180, 80, 40, 255) },    // Brown/rust for ore
+            { TerrainType.RockFormation, new Color(150, 150, 130, 255) }, // Gray/yellow for rock
+            { TerrainType.Sand, new Color(194, 178, 128, 255) },        // Sandy color
+            { TerrainType.Forest, new Color(30, 80, 30, 255) },         // Dark green
+            { TerrainType.Mountain, new Color(100, 100, 100, 255) }     // Dark gray
         };
         
         // Initialize tile colors - matching cargo colors for visual consistency
@@ -34,10 +36,16 @@ public class GridRenderer
             { TileType.Road, new Color(80, 80, 80, 255) },
             { TileType.LandingPad, new Color(150, 150, 180, 255) },
             { TileType.UndergroundEntrance, new Color(60, 60, 90, 255) },
-            // Buildings colored by what they produce/consume
-            { TileType.Industrial, new Color(160, 100, 60, 255) },     // Brown-ish - produces raw materials
-            { TileType.Commercial, new Color(100, 180, 220, 255) },     // Light blue - produces goods
-            { TileType.Residential, new Color(120, 200, 120, 255) },    // Green - consumes goods
+            // Gathering buildings - colored by what they gather
+            { TileType.WaterGatherer, new Color(60, 120, 200, 255) },   // Blue - gathers water
+            { TileType.OreExtractor, new Color(200, 60, 60, 255) },     // Red - extracts ore
+            { TileType.RockHarvester, new Color(200, 200, 60, 255) },   // Yellow - harvests rock
+            // Factory buildings
+            { TileType.FactoryTier2, new Color(150, 100, 200, 255) },   // Purple - combines resources
+            { TileType.FactoryTier3, new Color(100, 100, 100, 255) },   // Gray - advanced factory
+            // Usage buildings
+            { TileType.Residential, new Color(120, 200, 120, 255) },    // Green - consumes resources
+            { TileType.Research, new Color(80, 160, 160, 255) },        // Cyan - research center
             { TileType.Park, new Color(80, 160, 80, 255) }
         };
     }
@@ -114,9 +122,13 @@ public class GridRenderer
                         }
                         
                         // Draw building icons and inventory indicators
-                        if (tile.Type == TileType.Industrial || 
-                            tile.Type == TileType.Commercial || 
-                            tile.Type == TileType.Residential)
+                        if (tile.Type == TileType.WaterGatherer || 
+                            tile.Type == TileType.OreExtractor || 
+                            tile.Type == TileType.RockHarvester ||
+                            tile.Type == TileType.FactoryTier2 ||
+                            tile.Type == TileType.FactoryTier3 ||
+                            tile.Type == TileType.Residential ||
+                            tile.Type == TileType.Research)
                         {
                             DrawBuildingIcon(rect, tile.Type);
                         }
@@ -254,17 +266,28 @@ public class GridRenderer
         
         switch (buildingType)
         {
-            case TileType.Industrial:
-                // Draw factory icon (gear/cog shape)
-                Raylib.DrawCircle((int)centerX, (int)centerY, iconSize, new Color(80, 50, 30, 200));
-                Raylib.DrawText("I", (int)(centerX - 4), (int)(centerY - 6), 12, Color.White);
+            case TileType.WaterGatherer:
+                // Draw circle for water gatherer (round building)
+                Raylib.DrawCircle((int)centerX, (int)centerY, iconSize, new Color(30, 60, 120, 200));
+                Raylib.DrawText("W", (int)(centerX - 4), (int)(centerY - 6), 12, Color.White);
                 break;
                 
-            case TileType.Commercial:
-                // Draw shop icon ($ symbol)
+            case TileType.OreExtractor:
+                // Draw square for ore extractor
                 Raylib.DrawRectangle((int)(centerX - iconSize), (int)(centerY - iconSize), 
-                    iconSize * 2, iconSize * 2, new Color(50, 100, 150, 200));
-                Raylib.DrawText("$", (int)(centerX - 4), (int)(centerY - 6), 12, Color.White);
+                    iconSize * 2, iconSize * 2, new Color(120, 30, 30, 200));
+                Raylib.DrawText("O", (int)(centerX - 4), (int)(centerY - 6), 12, Color.White);
+                break;
+                
+            case TileType.RockHarvester:
+                // Draw triangle for rock harvester - will draw using lines
+                Raylib.DrawText("R", (int)(centerX - 4), (int)(centerY - 6), 12, Color.Yellow);
+                break;
+                
+            case TileType.FactoryTier2:
+                // Draw factory icon
+                Raylib.DrawCircle((int)centerX, (int)centerY, iconSize, new Color(100, 50, 150, 200));
+                Raylib.DrawText("F", (int)(centerX - 4), (int)(centerY - 6), 12, Color.White);
                 break;
                 
             case TileType.Residential:

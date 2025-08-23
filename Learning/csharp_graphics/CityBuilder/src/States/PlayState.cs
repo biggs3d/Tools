@@ -291,23 +291,30 @@ public class PlayState : BaseGameState
         // Number keys for building placement
         if (Raylib.IsKeyPressed(KeyboardKey.One))
         {
-            if (_gridSystem.PlaceTileAt(tilePos, TileType.Residential))
+            if (_gridSystem.PlaceTileAt(tilePos, TileType.WaterGatherer))
             {
-                Console.WriteLine($"Placed residential at {tilePos}");
+                Console.WriteLine($"Placed water gatherer at {tilePos}");
             }
         }
         else if (Raylib.IsKeyPressed(KeyboardKey.Two))
         {
-            if (_gridSystem.PlaceTileAt(tilePos, TileType.Commercial))
+            if (_gridSystem.PlaceTileAt(tilePos, TileType.OreExtractor))
             {
-                Console.WriteLine($"Placed commercial at {tilePos}");
+                Console.WriteLine($"Placed ore extractor at {tilePos}");
             }
         }
         else if (Raylib.IsKeyPressed(KeyboardKey.Three))
         {
-            if (_gridSystem.PlaceTileAt(tilePos, TileType.Industrial))
+            if (_gridSystem.PlaceTileAt(tilePos, TileType.RockHarvester))
             {
-                Console.WriteLine($"Placed industrial at {tilePos}");
+                Console.WriteLine($"Placed rock harvester at {tilePos}");
+            }
+        }
+        else if (Raylib.IsKeyPressed(KeyboardKey.Four))
+        {
+            if (_gridSystem.PlaceTileAt(tilePos, TileType.FactoryTier2))
+            {
+                Console.WriteLine($"Placed factory at {tilePos}");
             }
         }
     }

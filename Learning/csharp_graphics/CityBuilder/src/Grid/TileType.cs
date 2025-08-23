@@ -16,24 +16,32 @@ public enum TileType : byte
     LandingPad = 10,
     UndergroundEntrance = 11,
     
-    // Buildings
-    Residential = 20,
-    Commercial = 21,
-    Industrial = 22,
+    // Gathering Buildings (extract basic resources from terrain)
+    WaterGatherer = 20,    // Round building - extracts Blue Teardrops from water
+    OreExtractor = 21,     // Square building - mines Red Squares from ore
+    RockHarvester = 22,    // Triangle building - gathers Yellow Triangles from rock
+    
+    // Factory Buildings (combine resources)
+    FactoryTier2 = 25,     // Combines two basic resources
+    FactoryTier3 = 26,     // Combines tier 2 resources
+    
+    // Usage Buildings  
+    Residential = 30,      // Consumes resources, provides population
+    Research = 31,         // Converts resources to tech points
     
     // Services (future)
-    Police = 30,
-    Fire = 31,
-    Hospital = 32,
-    School = 33,
+    Police = 40,
+    Fire = 41,
+    Hospital = 42,
+    School = 43,
     
     // Utilities (future)
-    PowerPlant = 40,
-    WaterTower = 41,
+    PowerPlant = 50,
+    WaterTower = 51,
     
     // Special
-    Park = 50,
-    Monument = 51
+    Park = 60,
+    Monument = 61
 }
 
 /// <summary>
@@ -41,11 +49,13 @@ public enum TileType : byte
 /// </summary>
 public enum TerrainType : byte
 {
-    Grass = 0,      // Default, buildable
-    Water = 1,      // Not buildable without bridge
-    Sand = 2,       // Buildable, visual variety
-    Forest = 3,     // Buildable, visual variety
-    Mountain = 4    // Not buildable
+    Normal = 0,         // Default, buildable terrain
+    Water = 1,          // For blue teardrops (gathering)
+    OreDeposit = 2,     // For red squares (gathering)
+    RockFormation = 3,  // For yellow triangles (gathering)
+    Sand = 4,           // Buildable, visual variety
+    Forest = 5,         // Buildable, visual variety
+    Mountain = 6        // Not buildable
 }
 
 /// <summary>

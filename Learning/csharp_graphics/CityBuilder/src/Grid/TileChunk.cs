@@ -54,7 +54,7 @@ public class TileChunk
         for (int i = 0; i < TileCount; i++)
         {
             Tiles[i] = Tile.Empty;
-            Terrain[i] = TerrainTile.Grass; // Default terrain
+            Terrain[i] = TerrainTile.Normal; // Default terrain
         }
     }
     

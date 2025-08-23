@@ -32,11 +32,11 @@
   - [x] Removed all generic resource references
 
 ### Phase 2: Terrain & Gathering 🚀 IN PROGRESS
-- [ ] **Terrain System**
-  - [ ] Add TerrainType enum to Tile struct
-  - [ ] Generate ore deposits and rock formations
-  - [ ] Create water tiles in terrain generation
-  - [ ] Visual distinction for terrain types
+- [x] **Terrain System** ✅ COMPLETE (2025-08-22)
+  - [x] Add TerrainType enum to Tile struct
+  - [x] Generate ore deposits and rock formations
+  - [x] Create water tiles in terrain generation
+  - [x] Visual distinction for terrain types
   
 - [ ] **Gathering Buildings**
   - [ ] Round buildings check for adjacent water

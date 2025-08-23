@@ -1,5 +1,6 @@
 using Raylib_cs;
 using CityBuilder.States;
+using CityBuilder.Simulation.Buildings;
 
 namespace CityBuilder.Core;
 
@@ -39,6 +40,9 @@ public class Game : IDisposable
         
         // Load settings
         _gameSettings = GameSettings.Load();
+        
+        // Initialize building registry
+        BuildingRegistry.Initialize();
         
         // Create core systems
         _eventBus = new EventBus();
