@@ -12,10 +12,12 @@ public class GridRenderer
     private readonly GridSystem _gridSystem;
     private readonly Dictionary<TerrainType, Color> _terrainColors;
     private readonly Dictionary<TileType, Color> _tileColors;
+    private readonly RoadSpriteAtlas _roadAtlas;
     
     public GridRenderer(GridSystem gridSystem)
     {
         _gridSystem = gridSystem ?? throw new ArgumentNullException(nameof(gridSystem));
+        _roadAtlas = new RoadSpriteAtlas();
         
         // Initialize terrain colors
         _terrainColors = new Dictionary<TerrainType, Color>
@@ -28,6 +30,9 @@ public class GridRenderer
             { TerrainType.Forest, new Color(30, 80, 30, 255) },         // Dark green
             { TerrainType.Mountain, new Color(100, 100, 100, 255) }     // Dark gray
         };
+        
+        // Load road atlas texture
+        _roadAtlas.LoadTexture("assets/textures/transportation/roads.png");
         
         // Initialize tile colors - matching cargo colors for visual consistency
         _tileColors = new Dictionary<TileType, Color>
@@ -115,10 +120,15 @@ public class GridRenderer
                         );
                         Raylib.DrawRectangleRec(tileRect, tileColor);
                         
-                        // Draw road connections
+                        // Draw road using sprite atlas
                         if (tile.Type == TileType.Road)
                         {
-                            DrawRoadConnections(worldX, worldY, tile.NeighborMask);
+                            // Use sprite atlas instead of programmatic drawing
+                            _roadAtlas.DrawRoad(
+                                new Vector2(worldX, worldY), 
+                                tile.NeighborMask,
+                                1.0f // Scale to match tile size
+                            );
                         }
                         
                         // Draw building icons and inventory indicators
@@ -138,55 +148,7 @@ public class GridRenderer
         }
     }
     
-    /// <summary>
-    /// Draws road connection lines
-    /// </summary>
-    private void DrawRoadConnections(int worldX, int worldY, NeighborMask mask)
-    {
-        int centerX = worldX + GridSystem.TileSize / 2;
-        int centerY = worldY + GridSystem.TileSize / 2;
-        var roadColor = new Color(100, 100, 100, 255);
-        int thickness = 4;
-        
-        if ((mask & NeighborMask.North) != 0)
-        {
-            Raylib.DrawLineEx(
-                new Vector2(centerX, centerY),
-                new Vector2(centerX, worldY),
-                thickness,
-                roadColor);
-        }
-        
-        if ((mask & NeighborMask.East) != 0)
-        {
-            Raylib.DrawLineEx(
-                new Vector2(centerX, centerY),
-                new Vector2(worldX + GridSystem.TileSize, centerY),
-                thickness,
-                roadColor);
-        }
-        
-        if ((mask & NeighborMask.South) != 0)
-        {
-            Raylib.DrawLineEx(
-                new Vector2(centerX, centerY),
-                new Vector2(centerX, worldY + GridSystem.TileSize),
-                thickness,
-                roadColor);
-        }
-        
-        if ((mask & NeighborMask.West) != 0)
-        {
-            Raylib.DrawLineEx(
-                new Vector2(centerX, centerY),
-                new Vector2(worldX, centerY),
-                thickness,
-                roadColor);
-        }
-        
-        // Draw center dot for intersection
-        Raylib.DrawCircle(centerX, centerY, 3, roadColor);
-    }
+    // DrawRoadConnections method removed - now using RoadSpriteAtlas for texture-based rendering
     
     /// <summary>
     /// Draws the grid overlay
@@ -252,6 +214,14 @@ public class GridRenderer
             string chunkText = $"C({chunk.ChunkCoord.X},{chunk.ChunkCoord.Y})";
             Raylib.DrawText(chunkText, worldX + 5, worldY + 5, 12, Color.Red);
         }
+    }
+    
+    /// <summary>
+    /// Clean up resources
+    /// </summary>
+    public void Dispose()
+    {
+        _roadAtlas?.UnloadTexture();
     }
     
     /// <summary>

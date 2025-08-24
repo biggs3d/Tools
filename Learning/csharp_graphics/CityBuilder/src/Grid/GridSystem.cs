@@ -110,7 +110,7 @@ public class GridSystem : IDisposable
     }
     
     /// <summary>
-    /// Gets chunks that are visible in the given camera view
+    /// Gets chunks that are visible in the given camera view, creating them if needed
     /// </summary>
     public IEnumerable<TileChunk> GetVisibleChunks(Camera2D camera, int screenWidth, int screenHeight)
     {
@@ -128,10 +128,9 @@ public class GridSystem : IDisposable
             for (int y = minChunk.Y - 1; y <= maxChunk.Y + 1; y++)
             {
                 var chunkCoord = new Vector2Int(x, y);
-                if (_chunks.TryGetValue(chunkCoord, out var chunk))
-                {
-                    yield return chunk;
-                }
+                // Create chunk if it doesn't exist
+                var chunk = GetOrCreateChunk(chunkCoord);
+                yield return chunk;
             }
         }
     }
