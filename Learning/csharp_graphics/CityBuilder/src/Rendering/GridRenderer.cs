@@ -1,6 +1,7 @@
 using System.Numerics;
 using Raylib_cs;
 using CityBuilder.Grid;
+using CityBuilder.Core;
 
 namespace CityBuilder.Rendering;
 
@@ -131,7 +132,7 @@ public class GridRenderer
                             );
                         }
                         
-                        // Draw building icons and inventory indicators
+                        // Draw building textures or icons
                         if (tile.Type == TileType.WaterGatherer || 
                             tile.Type == TileType.OreExtractor || 
                             tile.Type == TileType.RockHarvester ||
@@ -140,7 +141,25 @@ public class GridRenderer
                             tile.Type == TileType.Residential ||
                             tile.Type == TileType.Research)
                         {
-                            DrawBuildingIcon(rect, tile.Type);
+                            // Try to draw texture first, fallback to icon
+                            var texture = BuildingTextures.GetTexture(tile.Type);
+                            if (texture.HasValue)
+                            {
+                                // Draw the building texture scaled to tile size
+                                Raylib.DrawTexturePro(
+                                    texture.Value,
+                                    new Rectangle(0, 0, texture.Value.Width, texture.Value.Height),
+                                    tileRect,
+                                    new Vector2(0, 0),
+                                    0f,
+                                    Color.White
+                                );
+                            }
+                            else
+                            {
+                                // Fallback to icon drawing if texture not found
+                                DrawBuildingIcon(rect, tile.Type);
+                            }
                         }
                     }
                 }

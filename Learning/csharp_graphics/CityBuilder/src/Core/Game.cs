@@ -50,6 +50,10 @@ public class Game : IDisposable
         _gameLoop = new GameLoop();
         _stateManager = new StateManager(_eventBus, _gameLoop);
         
+        // Load resource and building textures
+        ResourceTextures.LoadAll(_assetManager);
+        BuildingTextures.LoadAll(_assetManager);
+        
         // Subscribe to exit event
         _eventBus.Subscribe<GameExitRequest>(OnGameExitRequested);
         

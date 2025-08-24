@@ -1,73 +1,87 @@
 # Next Session Guide
 
 ## 🎯 Where We Left Off
-Successfully implemented Phase 1 of the shape-based resource system! The game now uses colored shapes (teardrops, squares, triangles, etc.) instead of generic resources.
+Building placement system is fully operational with visual feedback! Players can now place all 5 building types with smart terrain validation and see their actual PNG graphics.
 
-## ✅ Last Session Accomplishments (2025-08-22)
-- **Converted entire resource system to shape-based**:
-  - BlueTeardrop, RedSquare, YellowTriangle (basic resources)
-  - GreenHexagon, OrangeCircle, PurpleDiamond (factory-created)
-  - BlackBeam, WhitePillar, SilverTruss (advanced)
-- **Integer-based inventory** - No more float resources!
-- **Created placeholder textures** - 9 shape PNGs in assets/textures/shapes/
-- **Built ResourceTextures helper** - Easy texture loading and color mapping
-- **Updated all core systems** - BuildingData, TaskMatcher, BuildingManager
-- **Consolidated documentation** - DESIGN.md is now the single source of truth
+## ✅ Last Session Accomplishments (2025-08-24)
+- **Building Placement System Complete!**
+  - Created 5 building PNG textures (64x64): water_gatherer, ore_extractor, rock_harvester, factory_purple_diamond, residential
+  - Built BuildingTextures helper class for texture management
+  - Implemented BuildingPlacementMode with smart validation
+  - Added color-coded placement preview (green=valid, yellow=warning, red=invalid)
+  - Integrated building textures into GridRenderer
+  
+- **UI Improvements**
+  - Hotkeys 1-5 for building selection
+  - Visual placement validation with terrain checking  
+  - Warning indicators for suboptimal placement
+  - Status text shows selected building
+  - Q key to cancel placement mode
+  
+- **Documentation**
+  - Created NEEDED.md with comprehensive texture list
+  - Advised on test project structure (keep separate)
+  - Updated all progress tracking
 
-## 🚀 Ready to Start: Phase 2 - Terrain & Gathering
+## 🚀 Ready to Start: Phase 3 - Production Chains
 
 ### Quick Start Commands
 ```bash
 cd /Users/sbiggs/Development/D-Drive/Tools/Learning/csharp_graphics/CityBuilder
-dotnet build  # Main project builds successfully (tests broken but expected)
+dotnet build  # Main project builds successfully
 dotnet run    # Test the game
 ```
 
 ### Immediate Next Steps
 
-#### 1. Add Terrain System (2-3 hours)
-Create TerrainType enum and integrate with tiles:
-```csharp
-public enum TerrainType {
-    Normal = 0,      // Default buildable
-    Water = 1,       // For blue teardrops
-    OreDeposit = 2,  // For red squares  
-    RockFormation = 3 // For yellow triangles
-}
-```
+#### 1. Implement Factory Production Logic (2-3 hours)
+The FactoryTier2Definition exists but needs actual production:
+- Consume Blue Teardrops + Red Squares → Produce Purple Diamonds
+- Check HasRequiredInputs() before production
+- Implement production tick in BuildingManager
+- Update inventory consumption/production rates
 
-#### 2. Implement Gathering Buildings (2-3 hours)
-- Round buildings check for adjacent Water tiles
-- Square buildings check for OreDeposit tiles
-- Triangle buildings check for RockFormation tiles
-- Production only happens near correct terrain
+#### 2. Create Additional Factory Types (1-2 hours)
+Need separate factory definitions for:
+- `FactoryGreenHexagon` - Blue + Yellow → Green
+- `FactoryOrangeCircle` - Yellow + Red → Orange
+- Later: Tier 3 factories for advanced resources
 
-#### 3. Visual Integration (1-2 hours)
-- Display shape textures on vehicles using ResourceTextures helper
+#### 3. Visual Feedback for Production (2-3 hours)
+- Display shape textures on vehicles (already have ResourceTextures)
 - Show floating resource icons when buildings produce
-- Add inventory bars to buildings
+- Add inventory bars showing resource levels
+- Production state indicators (active/idle/blocked)
 
 ### Key Files to Modify
-1. `src/Grid/Tile.cs` - Add TerrainType property
-2. `src/Grid/TerrainGenerator.cs` - Generate ore/rock patches
-3. `src/Simulation/BuildingData.cs` - Check terrain for production
-4. `src/Simulation/BuildingManager.cs` - Validate placement near terrain
-5. `src/States/PlayState.cs` - Render resource icons
+1. `src/Simulation/BuildingManager.cs` - Add production tick logic
+2. `src/Simulation/Buildings/` - Create new factory definitions
+3. `src/Rendering/GridRenderer.cs` - Add resource flow visuals
+4. `src/States/PlayState.cs` - Display production indicators
+5. `src/Simulation/Vehicle.cs` - Show cargo shape textures
 
 ### Testing Checklist
-- [ ] Ore deposits and rock formations generate on map
-- [ ] Round buildings only produce near water
-- [ ] Square buildings only produce near ore
-- [ ] Triangle buildings only produce near rock
-- [ ] Vehicles display shape icon for cargo
-- [ ] Resource textures load and display correctly
+- [x] Buildings place with visual feedback ✅
+- [x] Terrain validation works for gatherers ✅
+- [x] Building textures display correctly ✅
+- [ ] Factories consume input resources
+- [ ] Factories produce output resources
+- [ ] Vehicles show shape textures as cargo
+- [ ] Resource flow animations work
+- [ ] Production stops when inputs unavailable
 
 ## 🎮 Game Controls Reference
 - **WASD/Arrows** - Move camera (hold SHIFT for 3x speed)
 - **Mouse scroll** - Zoom in/out
-- **Left click** - Place road/building
-- **Right click** - Remove tile
-- **1-3 keys** - Place buildings (res/com/ind - need updating for gatherers)
+- **Left click** - Place selected item
+- **Right click** - Remove tile / Cancel placement
+- **1-5 keys** - Select buildings:
+  - 1: Water Gatherer (round, gathers blue teardrops)
+  - 2: Ore Extractor (square, mines red squares)
+  - 3: Rock Harvester (triangle, harvests yellow triangles)
+  - 4: Factory Tier 2 (produces purple diamonds)
+  - 5: Residential (consumes resources)
+- **Q** - Cancel building placement mode
 - **V** - Spawn test vehicle
 - **G** - Generate small city
 - **C** - Toggle supply chain mode
@@ -84,15 +98,13 @@ public enum TerrainType {
 - **Building level affects production speed** - Config-driven balancing
 
 ## 🐛 Known Issues
-- Tests are broken (still reference old ResourceType values) - **140 errors**
-  - To fix: Replace ResourceType.RawMaterials → BlueTeardrop/RedSquare
-  - To fix: Replace ResourceType.Goods → GreenHexagon/OrangeCircle  
-  - To fix: Replace ResourceType.Waste → YellowTriangle
-  - To fix: Replace TerrainType.Grass → TerrainType.Normal
-  - To fix: Convert float values to int (remove 'f' suffix)
-- Buildings still use Industrial/Commercial/Residential placeholders
-- No visual feedback for resource production yet
-- Need to update building placement UI for gatherers
+- Tests are broken (reference old TileType values) - **4 errors**
+  - TileType.Commercial and TileType.Industrial no longer exist
+  - Tests need updating to use new building types
+- Factory production not yet implemented (buildings exist but don't produce)
+- Vehicles don't display cargo shape textures yet
+- No floating resource icons on production
+- No inventory bar visualization
 
 ## 💡 Configuration Ideas
 Add to GameConstants.cs:
@@ -104,13 +116,14 @@ public static readonly int[] GatheringRatesByLevel = { 1, 2, 3, 5, 8 };
 public const int TerrainCheckRadius = 1; // Adjacent tiles only
 ```
 
-## 🎯 Phase 2 Completion Criteria
-- [ ] Terrain types visible on map (ore = brown, rock = gray)
-- [ ] Gathering buildings work with terrain
-- [ ] Resources produced are correct shapes
-- [ ] Visual feedback shows production
-- [ ] Can build basic supply chain: Water → Factory → Purple Diamond
+## 🎯 Phase 3 Completion Criteria
+- [ ] Factories consume input resources properly
+- [ ] Factories produce output resources at correct rates
+- [ ] Supply chain works: Gatherer → Factory → Consumer
+- [ ] Visual feedback shows resource flow
+- [ ] Production states clearly indicated (active/idle/blocked)
+- [ ] Can build complete chain: Water + Ore → Purple Diamond → Residential
 
 ---
 
-**Ready to continue?** Start with adding TerrainType to the Tile struct!
+**Ready to continue?** Start with implementing factory production logic in BuildingManager!

@@ -9,6 +9,8 @@ namespace CityBuilder.Core;
 public static class ResourceTextures
 {
     private const string ShapeTexturesPath = "assets/textures/shapes/";
+    private static readonly Dictionary<ResourceType, Texture2D> _resourceTextures = new();
+    private static bool _initialized = false;
     
     /// <summary>
     /// Gets the texture path for a specific resource type
@@ -71,11 +73,53 @@ public static class ResourceTextures
     }
     
     /// <summary>
+    /// Initialize and load all resource textures
+    /// </summary>
+    public static void LoadAll(AssetManager assetManager)
+    {
+        if (_initialized) return;
+        
+        Console.WriteLine("Loading resource textures...");
+        
+        // Load each resource texture
+        foreach (ResourceType resourceType in Enum.GetValues<ResourceType>())
+        {
+            if (resourceType == ResourceType.None) continue;
+            
+            var path = GetTexturePath(resourceType);
+            if (!string.IsNullOrEmpty(path))
+            {
+                var texture = assetManager.GetTexture(path);
+                _resourceTextures[resourceType] = texture;
+                Console.WriteLine($"  Loaded {resourceType}: {path}");
+            }
+        }
+        
+        _initialized = true;
+        Console.WriteLine($"Loaded {_resourceTextures.Count} resource textures");
+    }
+    
+    /// <summary>
     /// Loads a resource texture using the AssetManager
     /// </summary>
     public static Texture2D LoadResourceTexture(AssetManager assetManager, ResourceType resource)
     {
+        // Try to get from cache first
+        if (_resourceTextures.TryGetValue(resource, out var cachedTexture))
+        {
+            return cachedTexture;
+        }
+        
+        // Fallback to loading on demand
         var path = GetTexturePath(resource);
         return string.IsNullOrEmpty(path) ? new Texture2D() : assetManager.GetTexture(path);
+    }
+    
+    /// <summary>
+    /// Get texture from cache (requires LoadAll to be called first)
+    /// </summary>
+    public static Texture2D? GetTexture(ResourceType resource)
+    {
+        return _resourceTextures.TryGetValue(resource, out var texture) ? texture : null;
     }
 }

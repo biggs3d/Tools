@@ -27,6 +27,9 @@ public class PlayState : BaseGameState
     private SimulationManager _simulationManager = null!;
     private ProceduralCityGenerator _cityGenerator = null!;
     
+    // Building placement
+    private BuildingPlacementMode _buildingPlacement = null!;
+    
     // Settings
     private readonly GameSettings _gameSettings;
     
@@ -60,6 +63,9 @@ public class PlayState : BaseGameState
         // Initialize procedural city generator
         _cityGenerator = new ProceduralCityGenerator(_gridSystem);
         
+        // Initialize building placement mode
+        _buildingPlacement = new BuildingPlacementMode(_gridSystem);
+        
         // Place initial hub at origin
         _gridSystem.PlaceTileAt(new Vector2Int(0, 0), TileType.LandingPad);
         Console.WriteLine("Hub placed at origin");
@@ -77,7 +83,15 @@ public class PlayState : BaseGameState
         if (!_isPaused)
         {
             HandleCameraInput(deltaTime);
-            HandlePlacementInput();
+            
+            // Update building placement mode
+            _buildingPlacement.Update(_camera);
+            
+            // Only handle regular placement if not in building mode
+            if (!_buildingPlacement.IsActive)
+            {
+                HandlePlacementInput();
+            }
             
             // Update simulation
             _simulationManager.Update(deltaTime);
@@ -122,6 +136,9 @@ public class PlayState : BaseGameState
         
         // Draw placement preview
         DrawPlacementPreview();
+        
+        // Draw building placement preview
+        _buildingPlacement.DrawPreview(_camera);
         
         // Draw vehicles
         DrawVehicles();
@@ -288,35 +305,7 @@ public class PlayState : BaseGameState
             }
         }
         
-        // Number keys for building placement
-        if (Raylib.IsKeyPressed(KeyboardKey.One))
-        {
-            if (_gridSystem.PlaceTileAt(tilePos, TileType.WaterGatherer))
-            {
-                Console.WriteLine($"Placed water gatherer at {tilePos}");
-            }
-        }
-        else if (Raylib.IsKeyPressed(KeyboardKey.Two))
-        {
-            if (_gridSystem.PlaceTileAt(tilePos, TileType.OreExtractor))
-            {
-                Console.WriteLine($"Placed ore extractor at {tilePos}");
-            }
-        }
-        else if (Raylib.IsKeyPressed(KeyboardKey.Three))
-        {
-            if (_gridSystem.PlaceTileAt(tilePos, TileType.RockHarvester))
-            {
-                Console.WriteLine($"Placed rock harvester at {tilePos}");
-            }
-        }
-        else if (Raylib.IsKeyPressed(KeyboardKey.Four))
-        {
-            if (_gridSystem.PlaceTileAt(tilePos, TileType.FactoryTier2))
-            {
-                Console.WriteLine($"Placed factory at {tilePos}");
-            }
-        }
+        // Building placement is now handled by BuildingPlacementMode
     }
     
     private void DrawPlacementPreview()
@@ -513,9 +502,18 @@ public class PlayState : BaseGameState
             }
         }
         
+        // Building placement status
+        if (_buildingPlacement.IsActive)
+        {
+            string statusText = _buildingPlacement.GetStatusText();
+            int statusWidth = Raylib.MeasureText(statusText, 24);
+            Raylib.DrawRectangle(screenWidth / 2 - statusWidth / 2 - 20, 70, statusWidth + 40, 40, new Color(0, 0, 0, 200));
+            Raylib.DrawText(statusText, screenWidth / 2 - statusWidth / 2, 80, 24, Color.Yellow);
+        }
+        
         // Controls help - split into two lines for all the new controls
-        string controls1 = "WASD/SHIFT: Move | Click: Place Road | 1-3: Buildings | F1: Grid | P: Pause | C: Supply Chain | ESC: Menu";
-        string controls2 = "V: Vehicle | T: 10 Vehicles | Shift+T: 100 | G: Gen City | Shift+G: Large City | Ctrl+G: Clear";
+        string controls1 = "WASD/SHIFT: Move | Click: Place | 1-5: Buildings | Q: Cancel | F1: Grid | P: Pause | ESC: Menu";
+        string controls2 = "V: Vehicle | T: 10 Vehicles | G: Gen City | Shift+G: Large | C: Supply Chain";
         int controls1Width = Raylib.MeasureText(controls1, 14);
         int controls2Width = Raylib.MeasureText(controls2, 14);
         Raylib.DrawText(controls1, screenWidth / 2 - controls1Width / 2, screenHeight - 50, 14, Color.Gray);

@@ -66,7 +66,8 @@
       "Bash(/mnt/d/Tools/Learning/csharp_graphics/CityBuilder/test-build.sh:*)",
       "Bash(./test-build.sh:*)",
       "Bash(./test-game.sh:*)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run:*)"
     ],
     "deny": []
   },
