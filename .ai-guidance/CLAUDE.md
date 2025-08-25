@@ -261,3 +261,8 @@ All helper scripts are in `./tools/build-helpers/`:
 - `check-test-success.sh` - Quick test status check
 - `count-test-errors.sh` - Count test failures
 - `show-test-errors.sh` - Display test failures
+
+### Other
+- color vars are kept here: client/libs/alpha/alpha.tokens/src/lib/stylesheets/theme.css
+- No need to add time estimates to any task(s)
+- Don't delete failing tests, fix what's not working. Ask the user if you're unsure what side, the tests or implementation, to update.
