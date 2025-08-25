@@ -1,0 +1,18 @@
+{
+  "date": "2025-08-22",
+  "type": "journal",
+  "sections": {
+    "reflections": "",
+    "personal_reminders": "",
+    "tasks": "- Working on refactoring simulation bits in other repo\n- Need clearer picture of input data before adjusting confidence scores\n- Focus: simplify and understand data flow first"
+  },
+  "metadata": {
+    "keywords": [
+      "journal",
+      "personal",
+      "2025-08-22"
+    ],
+    "created": "2025-08-22T11:02:35.841Z",
+    "updated": "2025-08-22T11:02:35.841Z"
+  }
+}
