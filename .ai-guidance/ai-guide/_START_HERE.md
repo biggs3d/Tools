@@ -4,7 +4,7 @@ Welcome to the Phoenix framework documentation! This guide is organized by usage
 
 ## 🎯 Quick Overview
 
-The framework is a **React/MobX/TypeScript** application built using **MVVM (Model-View-ViewModel)** architecture for tactical applications. It features:
+The Phoenix framework is a **React/MobX/TypeScript** application built using **MVVM (Model-View-ViewModel)** architecture for tactical/military applications. It features:
 
 - **Reactive state management** with MobX
 - **Strong typing** with TypeScript  
