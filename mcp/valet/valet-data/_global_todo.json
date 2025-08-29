@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2025-08-22T11:02:30.039Z",
+  "updated": "2025-08-29T13:24:27.502Z",
   "tasks": [
     {
       "id": "793affc0-1a08-4123-abac-557f8b607981",
@@ -128,16 +128,6 @@
       "completed_at": "2025-07-23T19:13:29.999Z"
     },
     {
-      "id": "b60bd536-b2eb-4d9c-b573-1c976cc128d8",
-      "content": "Check into redoing map-feature-deselect branch work",
-      "priority": "low",
-      "category": "Development",
-      "completed": false,
-      "created": "2025-07-22T11:45:04.644Z",
-      "due": null,
-      "notes": []
-    },
-    {
       "id": "dfe547b1-9f31-4adc-9d99-3b28572f984c",
       "content": "Build UI showcase for customer demo by Monday - show 6 months of backend work",
       "priority": "high",
@@ -218,7 +208,7 @@
       "content": "Sprint Development - UI Grid System Enhancements",
       "priority": "high",
       "category": "Development",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-30T18:52:53.543Z",
       "due": "2025-08-19",
       "notes": [
@@ -238,17 +228,19 @@
         "📋 TODO: Implement saved modes and saved layouts for UI grid system",
         "📋 TODO: Allow users to save and restore grid configurations"
       ],
-      "updated_at": "2025-08-21T13:00:05.703Z"
+      "updated_at": "2025-08-21T13:00:05.703Z",
+      "completed_at": "2025-08-28T13:49:09.255Z"
     },
     {
       "id": "288deabc-18c3-48a9-9205-1e9dfb1b5a62",
       "content": "Simulation Server Adapter",
       "priority": "high",
       "category": "Development",
-      "completed": false,
+      "completed": true,
       "created": "2025-07-30T18:52:59.195Z",
       "due": "2025-08-19",
-      "notes": []
+      "notes": [],
+      "completed_at": "2025-08-28T13:49:17.050Z"
     },
     {
       "id": "59cc4200-41fb-4944-a458-65ca82e0249d",
@@ -263,16 +255,6 @@
         "For grid system buttons"
       ],
       "completed_at": "2025-08-15T10:33:55.330Z"
-    },
-    {
-      "id": "df2e2821-6dbd-4de8-9c85-e9e81d7daa4a",
-      "content": "Better simulation",
-      "priority": "medium",
-      "category": "Development",
-      "completed": false,
-      "created": "2025-08-15T11:52:10.290Z",
-      "due": null,
-      "notes": []
     },
     {
       "id": "2d4c6ed6-a170-4a70-875a-efbe2c3c59a5",
@@ -290,14 +272,15 @@
       "content": "Update level bar design (from Nate)",
       "priority": "high",
       "category": "Development",
-      "completed": false,
+      "completed": true,
       "created": "2025-08-19T20:53:17.070Z",
       "due": "2025-08-26",
       "notes": [
         "For next sprint",
         "Use prototypic sim data",
         "Part of UI enhancements"
-      ]
+      ],
+      "completed_at": "2025-08-28T13:49:20.271Z"
     },
     {
       "id": "3b002a0c-4d0c-49eb-9892-655edadfc9a4",
@@ -311,6 +294,36 @@
         "Career development article",
         "About navigating tech complexity"
       ]
+    },
+    {
+      "id": "689aa82b-b27b-4e7f-b60f-fd419c02bde8",
+      "content": "Incorrect Track Info Display",
+      "priority": "high",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-08-29T13:24:20.692Z",
+      "due": null,
+      "notes": []
+    },
+    {
+      "id": "cced0ed3-ae26-4de6-90ad-9de0bc269cb9",
+      "content": "Hovering on Track should show the far-right panel data",
+      "priority": "high",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-08-29T13:24:22.857Z",
+      "due": null,
+      "notes": []
+    },
+    {
+      "id": "9b5ee605-9d22-4a69-88f6-91758b6ebe58",
+      "content": "Refining Engagement Panel (see Louis)",
+      "priority": "high",
+      "category": "Development",
+      "completed": false,
+      "created": "2025-08-29T13:24:27.502Z",
+      "due": null,
+      "notes": []
     }
   ]
 }

@@ -63,6 +63,7 @@ yalc.lock
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 
+
 # Misc ai files to strip
 
 .history/
@@ -70,10 +71,9 @@ vitest.config.*.timestamp*
 # Claude Code
 **/.claude/
 **CLAUDE.md
-**CODING_STANDARDS*.md
-**AI_COLLABORATION_GUIDE*.md
-**NEXT_SESSION_GUIDE*.md
-**SESSION_JOURNEY*.md
+**_GUIDE*.md
+.claude/settings.json
+.claude/settings.local.json
 /tools/ai-helpers
 /tools/mcp
 .mcp.json
@@ -88,34 +88,8 @@ vitest.config.*.timestamp*
 .windsurf/
 .windsurfignore
 
-# Kodu Coder
-.kodu/
-.koduignore
-
-# Continue.dev
-.continue/
-.continueconfig.json
-
-# Aider
-.aider*
-.aider.chat.history.md
-.aider.tags.cache.v3
-
 # GitHub Copilot
 .copilot/
-
-# Sourcegraph Cody
-.cody/
-cody.json
-
-# Tabnine
-.tabnine/
-
-# AWS CodeWhisperer / Amazon Q
-.aws-toolkit-vscode/
-
-# Pieces for Developers
-.pieces/
 
 # Kiro IDE (AWS)
 .kiro/

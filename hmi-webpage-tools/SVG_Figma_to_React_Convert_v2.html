@@ -1,0 +1,1594 @@
+<!--
+README: Advanced web interface for converting Figma SVG exports into interactive React components.
+This v2 version transforms complex UI panels from SVG to div-based React components with:
+- Hybrid rendering (divs for layout, inline SVG for complex artwork)
+- Component detection for repeating patterns
+- Design token extraction (colors, spacing, typography, shadows)
+- Smart CSS generation with deduplication
+- Path extraction and optimization
+Questions: Steve Biggs
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG to React Component Converter v2 - Panel Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/standalone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/parser-typescript.js"></script>
+    
+    <!-- SVG Favicon -->
+    <link rel="icon" type="image/svg+xml"
+          href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚛️</text></svg>'>
+    
+    <style>
+        :root {
+            --color-bg-primary: #0f0f10;
+            --color-bg-secondary: #1a1a1d;
+            --color-bg-tertiary: #252529;
+            --color-bg-input: #1f1f23;
+            --color-bg-readonly: #2a2a2e;
+            --color-text-primary: #e8e8ea;
+            --color-text-secondary: #a8a8b0;
+            --color-text-muted: #6a6a75;
+            --color-border: #3a3a40;
+            --color-button-primary: #0084ff;
+            --color-button-primary-hover: #0066cc;
+            --color-button-success: #00c851;
+            --color-button-success-hover: #00a441;
+            --color-accent-cyan: #00e5ff;
+            --color-accent-purple: #aa00ff;
+            --color-focus: #0084ff;
+            --color-focus-shadow: rgba(0, 132, 255, 0.25);
+            --color-warning: #ffaa00;
+            --color-error: #ff3838;
+            --font-mono: 'Fira Code', 'Consolas', 'Monaco', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--color-bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .column {
+            background: var(--color-bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .section-badge {
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-secondary);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            background: var(--color-bg-input);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            resize: vertical;
+            line-height: 1.5;
+            transition: all 0.2s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-focus);
+            box-shadow: 0 0 0 3px var(--color-focus-shadow);
+        }
+
+        textarea[readonly] {
+            background: var(--color-bg-readonly);
+            cursor: default;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--color-bg-input);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--color-focus);
+            box-shadow: 0 0 0 3px var(--color-focus-shadow);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--color-button-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: var(--color-button-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 132, 255, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.success {
+            background: var(--color-button-success);
+        }
+
+        button.success:hover {
+            background: var(--color-button-success-hover);
+            box-shadow: 0 4px 12px rgba(0, 200, 81, 0.3);
+        }
+
+        button.secondary {
+            background: var(--color-bg-tertiary);
+        }
+
+        button.secondary:hover {
+            background: var(--color-border);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: var(--color-bg-tertiary);
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .option-item:hover {
+            background: var(--color-border);
+        }
+
+        .option-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .option-item label {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .preview-container {
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            position: relative;
+        }
+
+        .preview-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .preview-control {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid var(--color-border);
+            transition: all 0.2s ease;
+        }
+
+        .preview-control:hover {
+            transform: scale(1.1);
+            border-color: var(--color-focus);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--color-bg-tertiary);
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            color: var(--color-text-secondary);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: var(--color-bg-input);
+        }
+
+        .tab.active {
+            background: var(--color-button-primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: var(--color-bg-tertiary);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-accent-cyan);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            margin-top: 4px;
+        }
+
+        .code-output {
+            position: relative;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-button:hover {
+            background: var(--color-border);
+            color: var(--color-text-primary);
+        }
+
+        .copy-button.copied {
+            background: var(--color-button-success);
+            color: white;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--color-text-secondary);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg-tertiary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 SVG to React Converter v2</h1>
+        <p>Transform Figma panel exports into interactive React components with optimized CSS and design tokens</p>
+    </div>
+
+    <div class="container">
+        <div class="column">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📥 Input</h2>
+                    <span class="section-badge" id="inputStats">0 elements</span>
+                </div>
+                <textarea id="svgInput" placeholder="Paste your Figma SVG export here..."></textarea>
+                <input type="text" id="componentName" placeholder="Component name (e.g., AlertPanel)" value="PanelComponent">
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">⚙️ Conversion Options</h2>
+                </div>
+                <div class="options-grid">
+                    <div class="option-item">
+                        <input type="checkbox" id="hybridMode" checked>
+                        <label for="hybridMode">Hybrid mode (divs + inline SVG)</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="detectComponents" checked>
+                        <label for="detectComponents">Detect repeating components</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="extractTokens" checked>
+                        <label for="extractTokens">Extract design tokens</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="optimizePaths" checked>
+                        <label for="optimizePaths">Optimize paths</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="semanticHtml" checked>
+                        <label for="semanticHtml">Use semantic HTML</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="addAccessibility" checked>
+                        <label for="addAccessibility">Add ARIA attributes</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">👁️ Preview</h2>
+                </div>
+                <div class="preview-container" id="preview">
+                    <div class="preview-controls">
+                        <div class="preview-control" style="background: white;" onclick="setPreviewBg('white')"></div>
+                        <div class="preview-control" style="background: #666;" onclick="setPreviewBg('#666')"></div>
+                        <div class="preview-control" style="background: black;" onclick="setPreviewBg('black')"></div>
+                    </div>
+                    <div id="previewContent" style="color: #999;">Preview will appear here</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="convertSVG()" class="success">
+                    <span>🚀</span> Convert to React
+                </button>
+                <button onclick="analyzeStructure()" class="secondary">
+                    <span>🔍</span> Analyze Structure
+                </button>
+                <button onclick="clearAll()" class="secondary">
+                    <span>🗑️</span> Clear All
+                </button>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📤 Output</h2>
+                </div>
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('combined')">Combined .tsx</button>
+                    <button class="tab" onclick="switchTab('component')">Component</button>
+                    <button class="tab" onclick="switchTab('styles')">Styles</button>
+                    <button class="tab" onclick="switchTab('paths')">Paths</button>
+                </div>
+                
+                <div class="tab-content active" id="combinedTab">
+                    <div class="code-output">
+                        <button class="copy-button" onclick="copyToClipboard('combinedOutput')">Copy</button>
+                        <textarea id="combinedOutput" readonly placeholder="Complete .tsx file will appear here..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="componentTab">
+                    <div class="code-output">
+                        <button class="copy-button" onclick="copyToClipboard('componentOutput')">Copy</button>
+                        <textarea id="componentOutput" readonly placeholder="React component will appear here..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="stylesTab">
+                    <div class="code-output">
+                        <button class="copy-button" onclick="copyToClipboard('stylesOutput')">Copy</button>
+                        <textarea id="stylesOutput" readonly placeholder="CSS styles will appear here..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="pathsTab">
+                    <div class="code-output">
+                        <button class="copy-button" onclick="copyToClipboard('pathsOutput')">Copy</button>
+                        <textarea id="pathsOutput" readonly placeholder="Path constants will appear here..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📊 Conversion Stats</h2>
+                </div>
+                <div class="stats" id="stats">
+                    <div class="stat-item">
+                        <div class="stat-value">-</div>
+                        <div class="stat-label">Elements</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">-</div>
+                        <div class="stat-label">Colors</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">-</div>
+                        <div class="stat-label">Paths</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">-</div>
+                        <div class="stat-label">Components</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let conversionResult = null;
+        let currentTab = 'combined';
+
+        // Utility functions
+        function setPreviewBg(color) {
+            document.getElementById('preview').style.backgroundColor = color;
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            currentTab = tabName;
+        }
+
+        function copyToClipboard(elementId) {
+            const textarea = document.getElementById(elementId);
+            textarea.select();
+            document.execCommand('copy');
+            
+            // Visual feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('copied');
+            }, 2000);
+        }
+
+        function clearAll() {
+            document.getElementById('svgInput').value = '';
+            document.getElementById('combinedOutput').value = '';
+            document.getElementById('componentOutput').value = '';
+            document.getElementById('stylesOutput').value = '';
+            document.getElementById('pathsOutput').value = '';
+            document.getElementById('previewContent').innerHTML = '<div style="color: #999;">Preview will appear here</div>';
+            updateStats(null);
+        }
+
+        function updateStats(result) {
+            const statsContainer = document.getElementById('stats');
+            if (!result) {
+                statsContainer.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-value">-</div>
+                        <div class="stat-label">Elements</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">-</div>
+                        <div class="stat-label">Colors</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">-</div>
+                        <div class="stat-label">Paths</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">-</div>
+                        <div class="stat-label">Components</div>
+                    </div>
+                `;
+                return;
+            }
+
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${result.elementCount || 0}</div>
+                    <div class="stat-label">Elements</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${result.colorCount || 0}</div>
+                    <div class="stat-label">Colors</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${result.pathCount || 0}</div>
+                    <div class="stat-label">Paths</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${result.componentCount || 0}</div>
+                    <div class="stat-label">Components</div>
+                </div>
+            `;
+        }
+
+        // SVG Analysis and Conversion
+        class SVGToReactConverter {
+            constructor(options = {}) {
+                this.options = {
+                    hybridMode: options.hybridMode !== false,
+                    detectComponents: options.detectComponents !== false,
+                    extractTokens: options.extractTokens !== false,
+                    optimizePaths: options.optimizePaths !== false,
+                    semanticHtml: options.semanticHtml !== false,
+                    addAccessibility: options.addAccessibility !== false,
+                };
+                
+                this.colors = new Map();
+                this.paths = new Map();
+                this.styles = new Map();
+                this.styleClasses = new Map(); // For extracted inline styles
+                this.components = new Map();
+                this.icons = new Map();  // Store complete icon SVGs
+                this.tokens = {
+                    colors: new Map(),
+                    spacing: new Map(),
+                    typography: new Map(),
+                    shadows: new Map(),
+                    radii: new Map()
+                };
+                
+                this.elementCounter = 0;
+                this.classCounter = 0;
+                this.pathCounter = 0;
+                this.colorCounter = 0;
+                this.iconCounter = 0;
+                
+                // Conversion ratio: 10px = 1rem
+                this.pxToRemRatio = 10;
+            }
+
+            convert(svgString, componentName) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgString, 'image/svg+xml');
+                const svg = doc.documentElement;
+
+                if (svg.tagName !== 'svg') {
+                    throw new Error('Invalid SVG input');
+                }
+
+                // Phase 1: Analysis
+                this.analyzeSVG(svg);
+                
+                // Phase 2: Token extraction
+                if (this.options.extractTokens) {
+                    this.extractDesignTokens();
+                }
+                
+                // Phase 3: Component detection
+                if (this.options.detectComponents) {
+                    this.detectRepeatingPatterns(svg);
+                }
+                
+                // Phase 4: Transformation
+                const jsxElement = this.transformElement(svg, true);
+                
+                // Phase 5: Generate outputs
+                const jsxString = this.jsxToString(jsxElement, 1);
+                const stylesCSS = this.generateStylesCSS();
+                const pathConsts = this.generatePathConstants();
+                const colorVars = this.generateColorVariables();
+                
+                // Generate individual outputs
+                const component = this.generateComponent(jsxString, componentName);
+                const styles = this.generateCSSStyles();
+                const paths = pathConsts;
+                
+                // Generate combined .tsx file
+                const combined = this.generateCombinedTSX({
+                    componentName,
+                    jsxString,
+                    stylesCSS,
+                    pathConsts
+                });
+                
+                return {
+                    combined,
+                    component,
+                    styles,
+                    paths,
+                    elementCount: this.elementCounter,
+                    colorCount: this.colors.size,
+                    pathCount: this.paths.size + this.icons.size,
+                    componentCount: this.components.size
+                };
+            }
+
+            analyzeSVG(element, depth = 0) {
+                this.elementCounter++;
+                
+                // Detect and extract icon groups
+                if (this.isIconGroup(element)) {
+                    this.extractIcon(element);
+                }
+                
+                // Extract colors
+                ['fill', 'stroke', 'stop-color'].forEach(attr => {
+                    const value = element.getAttribute(attr);
+                    if (value && value !== 'none' && value !== 'currentColor') {
+                        if (!this.colors.has(value)) {
+                            this.colors.set(value, `color${++this.colorCounter}`);
+                        }
+                    }
+                });
+                
+                // Extract paths
+                if (element.tagName === 'path') {
+                    const d = element.getAttribute('d');
+                    if (d) {
+                        const pathHash = this.hashString(d);
+                        if (!this.paths.has(pathHash)) {
+                            const pathName = element.id ? this.toCamelCase(element.id) : `path${++this.pathCounter}`;
+                            this.paths.set(pathHash, {
+                                name: pathName,
+                                d: d,
+                                uses: 1
+                            });
+                        } else {
+                            this.paths.get(pathHash).uses++;
+                        }
+                    }
+                }
+                
+                // Extract styles
+                const style = element.getAttribute('style');
+                if (style) {
+                    const styleObj = this.parseInlineStyle(style);
+                    // Convert px to rem in styles
+                    Object.keys(styleObj).forEach(prop => {
+                        styleObj[prop] = this.convertPxToRem(styleObj[prop]);
+                    });
+                    
+                    const styleHash = this.hashObject(styleObj);
+                    if (!this.styles.has(styleHash)) {
+                        this.styles.set(styleHash, {
+                            className: element.id ? this.toCamelCase(element.id) : `class${++this.classCounter}`,
+                            styles: styleObj,
+                            uses: 1
+                        });
+                    } else {
+                        this.styles.get(styleHash).uses++;
+                    }
+                }
+                
+                // Recurse through children
+                Array.from(element.children).forEach(child => {
+                    this.analyzeSVG(child, depth + 1);
+                });
+            }
+            
+            // Check if a group is likely an icon (complex nested structure)
+            isIconGroup(element) {
+                if (element.tagName !== 'g' && element.tagName !== 'G') return false;
+                
+                const id = element.id?.toLowerCase() || '';
+                // Check for icon-like names
+                if (id.includes('icon') || id.includes('alert') || id.includes('exclamation') || 
+                    id.includes('check') || id.includes('arrow') || id.includes('triangle') ||
+                    id.includes('square') || id.includes('circle')) {
+                    
+                    // Check if it has complex nested paths
+                    const paths = element.querySelectorAll('path');
+                    if (paths.length >= 2) return true;
+                    
+                    // Or if it has masks, clips, or gradients
+                    if (element.querySelector('mask, clipPath, linearGradient, radialGradient')) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            // Extract icon as a complete const element
+            extractIcon(element) {
+                const iconName = element.id ? this.toCamelCase(element.id) : `icon${++this.iconCounter}`;
+                const iconSVG = element.outerHTML;
+                
+                // Store the icon with its viewBox calculated from its bounds
+                const bbox = this.getElementBounds(element);
+                
+                this.icons.set(iconName, {
+                    name: iconName,
+                    svg: iconSVG,
+                    viewBox: `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`,
+                    width: bbox.width,
+                    height: bbox.height
+                });
+            }
+            
+            // Get element bounds for viewBox calculation
+            getElementBounds(element) {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                
+                // Get all positioned elements
+                const allElements = element.querySelectorAll('[x], [y], [cx], [cy]');
+                allElements.forEach(el => {
+                    const x = parseFloat(el.getAttribute('x') || el.getAttribute('cx') || 0);
+                    const y = parseFloat(el.getAttribute('y') || el.getAttribute('cy') || 0);
+                    const width = parseFloat(el.getAttribute('width') || el.getAttribute('r') || 0);
+                    const height = parseFloat(el.getAttribute('height') || el.getAttribute('r') || 0);
+                    
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x + width);
+                    maxY = Math.max(maxY, y + height);
+                });
+                
+                // Fallback to parent element dimensions
+                if (!isFinite(minX)) {
+                    minX = 0;
+                    minY = 0;
+                    maxX = 100;
+                    maxY = 100;
+                }
+                
+                return {
+                    x: minX,
+                    y: minY,
+                    width: maxX - minX,
+                    height: maxY - minY
+                };
+            }
+            
+            // Convert px values to rem (10px = 1rem)
+            convertPxToRem(value) {
+                if (typeof value !== 'string') return value;
+                
+                // Match px values
+                return value.replace(/(\d+(?:\.\d+)?)px/g, (match, num) => {
+                    const px = parseFloat(num);
+                    const rem = px / this.pxToRemRatio;
+                    // Keep whole numbers clean, use decimals when needed
+                    return rem % 1 === 0 ? `${rem}rem` : `${rem.toFixed(1)}rem`;
+                });
+            }
+
+            extractDesignTokens() {
+                // Extract color tokens
+                this.colors.forEach((name, value) => {
+                    // Group similar colors
+                    const category = this.categorizeColor(value);
+                    this.tokens.colors.set(name, {
+                        value,
+                        category,
+                        usage: 'fill/stroke'
+                    });
+                });
+                
+                // Extract spacing from transforms and positions
+                // This would analyze x, y, width, height attributes
+                // and group them into spacing tokens
+            }
+
+            detectRepeatingPatterns(element) {
+                // Detect repeating group structures
+                const groups = element.querySelectorAll('g[id*="Alert"], g[id*="Button"], g[id*="Checkbox"]');
+                const patterns = new Map();
+                
+                groups.forEach(group => {
+                    const structure = this.getElementStructure(group);
+                    const structureHash = this.hashObject(structure);
+                    
+                    if (!patterns.has(structureHash)) {
+                        patterns.set(structureHash, {
+                            elements: [group],
+                            structure,
+                            count: 1
+                        });
+                    } else {
+                        patterns.get(structureHash).elements.push(group);
+                        patterns.get(structureHash).count++;
+                    }
+                });
+                
+                // Convert patterns with 2+ instances to components
+                patterns.forEach((pattern, hash) => {
+                    if (pattern.count >= 2) {
+                        const componentName = this.extractComponentName(pattern.elements[0]);
+                        this.components.set(hash, {
+                            name: componentName,
+                            instances: pattern.elements,
+                            structure: pattern.structure
+                        });
+                    }
+                });
+            }
+
+            transformElement(element, isRoot = false, parentClass = '') {
+                const tagName = element.tagName.toLowerCase();
+                
+                // Decide conversion strategy
+                const strategy = this.getConversionStrategy(element);
+                
+                if (strategy === 'skip') {
+                    return null;
+                }
+                
+                if (strategy === 'inline-svg') {
+                    // Keep as inline SVG for complex graphics
+                    return this.createInlineSVG(element);
+                }
+                
+                // Convert to div or semantic HTML
+                const jsxTag = this.getSemanticTag(element);
+                const { props, styles } = this.extractPropsAndStyles(element, parentClass);
+                
+                // Store extracted styles
+                if (styles && Object.keys(styles).length > 0) {
+                    const rawClassName = props.className || `element${++this.classCounter}`;
+                    // Ensure valid identifier - prefix numbers with underscore
+                    const className = /^\d/.test(rawClassName) ? `_${rawClassName}` : rawClassName;
+                    this.styleClasses.set(className, styles);
+                    props.className = className;
+                }
+                
+                const children = Array.from(element.children)
+                    .map(child => this.transformElement(child, false, props.className || parentClass))
+                    .filter(Boolean);
+                
+                return {
+                    tag: jsxTag,
+                    props,
+                    children,
+                    text: element.textContent && element.children.length === 0 ? element.textContent : null
+                };
+            }
+
+            getConversionStrategy(element) {
+                const tagName = element.tagName.toLowerCase();
+                
+                // Keep complex SVG elements as inline SVG
+                if (['defs', 'linearGradient', 'radialGradient', 'mask', 'filter', 'clipPath'].includes(tagName)) {
+                    return 'skip';
+                }
+                
+                // Complex paths with gradients or filters
+                if (tagName === 'path') {
+                    const fill = element.getAttribute('fill');
+                    if (fill && fill.startsWith('url(')) {
+                        return 'inline-svg';
+                    }
+                    // Simple paths can be converted to divs with clip-path
+                    return this.options.hybridMode ? 'inline-svg' : 'div';
+                }
+                
+                // Text elements
+                if (tagName === 'text' || tagName === 'tspan') {
+                    return 'span';
+                }
+                
+                // Simple shapes
+                if (['rect', 'circle', 'ellipse'].includes(tagName)) {
+                    return 'div';
+                }
+                
+                // Groups
+                if (tagName === 'g') {
+                    return 'div';
+                }
+                
+                return 'div';
+            }
+
+            getSemanticTag(element) {
+                if (!this.options.semanticHtml) {
+                    return 'div';
+                }
+                
+                const id = element.id?.toLowerCase() || '';
+                const tagName = element.tagName.toLowerCase();
+                
+                // Semantic mappings based on ID patterns
+                if (id.includes('button') || id.includes('btn')) return 'button';
+                if (id.includes('nav') || id.includes('tab')) return 'nav';
+                if (id.includes('list') || id.includes('cards')) return 'ul';
+                if (id.includes('card') || id.includes('item')) return 'li';
+                if (id.includes('header')) return 'header';
+                if (id.includes('footer')) return 'footer';
+                if (id.includes('section')) return 'section';
+                if (tagName === 'text' || tagName === 'tspan') return 'span';
+                
+                return 'div';
+            }
+
+            extractPropsAndStyles(element, parentClass) {
+                const props = {};
+                const styles = {};
+                const id = element.id;
+                
+                if (id) {
+                    props.className = this.toCamelCase(id);
+                }
+                
+                // Extract positioning and dimensions as styles
+                const positionAttrs = ['x', 'y', 'width', 'height'];
+                positionAttrs.forEach(attr => {
+                    let value = element.getAttribute(attr);
+                    if (value && !isNaN(value)) {
+                        const px = parseFloat(value);
+                        const rem = px / this.pxToRemRatio;
+                        const remValue = rem % 1 === 0 ? `${rem}rem` : `${rem.toFixed(1)}rem`;
+                        
+                        // Map SVG attributes to CSS properties
+                        switch(attr) {
+                            case 'x': styles.left = remValue; break;
+                            case 'y': styles.top = remValue; break;
+                            case 'width': styles.width = remValue; break;
+                            case 'height': styles.height = remValue; break;
+                        }
+                    }
+                });
+                
+                // Extract transform
+                const transform = element.getAttribute('transform');
+                if (transform) {
+                    styles.transform = transform;
+                }
+                
+                // Extract fill and stroke as styles
+                const fill = element.getAttribute('fill');
+                if (fill && fill !== 'none') {
+                    styles.backgroundColor = this.colors.has(fill) ? `var(--${this.colors.get(fill)})` : fill;
+                }
+                
+                const stroke = element.getAttribute('stroke');
+                if (stroke && stroke !== 'none') {
+                    styles.borderColor = this.colors.has(stroke) ? `var(--${this.colors.get(stroke)})` : stroke;
+                }
+                
+                // Extract inline styles
+                const inlineStyle = element.getAttribute('style');
+                if (inlineStyle) {
+                    const inlineStyles = this.parseInlineStyle(inlineStyle);
+                    Object.assign(styles, inlineStyles);
+                }
+                
+                // Add accessibility
+                if (this.options.addAccessibility) {
+                    const role = this.getAriaRole(element);
+                    if (role) {
+                        props.role = role;
+                    }
+                }
+                
+                return { props, styles };
+            }
+
+            getAriaRole(element) {
+                const id = element.id?.toLowerCase() || '';
+                
+                if (id.includes('button')) return 'button';
+                if (id.includes('checkbox')) return 'checkbox';
+                if (id.includes('tab')) return 'tab';
+                if (id.includes('panel')) return 'tabpanel';
+                
+                return null;
+            }
+
+            createInlineSVG(element) {
+                return {
+                    tag: 'svg',
+                    props: {
+                        viewBox: element.getAttribute('viewBox') || '0 0 24 24',
+                        className: 'inline-svg'
+                    },
+                    children: [{
+                        tag: 'path',
+                        props: {
+                            d: element.getAttribute('d'),
+                            fill: 'currentColor'
+                        }
+                    }]
+                };
+            }
+            
+            getElementViewBox(element) {
+                // Try to get viewBox from element or calculate from bounds
+                const viewBox = element.getAttribute('viewBox');
+                if (viewBox) return viewBox;
+                
+                const bbox = this.getElementBounds(element);
+                return `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`;
+            }
+
+            generateCombinedTSX({ componentName, jsxString, stylesCSS, pathConsts }) {
+                let tsx = `import React from 'react';
+
+// ============= Path Constants =============
+${pathConsts}
+
+// ============= Styles =============
+const styles = \`
+${stylesCSS}
+\`;
+
+// Add styles to document head
+if (typeof document !== 'undefined' && !document.getElementById('${componentName}-styles')) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = '${componentName}-styles';
+    styleSheet.textContent = styles;
+    document.head.appendChild(styleSheet);
+}
+
+// ============= Component =============
+interface ${componentName}Props {
+    className?: string;
+    onClick?: (event: React.MouseEvent) => void;
+}
+
+export const ${componentName}: React.FC<${componentName}Props> = ({ 
+    className = '', 
+    onClick,
+    ...props 
+}) => {
+    return (
+${jsxString}
+    );
+};
+
+export default ${componentName};`;
+                
+                return tsx;
+            }
+            
+            generateComponent(jsxString, componentName) {
+                return `import React from 'react';
+import { styles } from './styles';
+import { paths } from './paths';
+
+interface ${componentName}Props {
+    className?: string;
+    onClick?: (event: React.MouseEvent) => void;
+}
+
+export const ${componentName}: React.FC<${componentName}Props> = ({ 
+    className = '', 
+    onClick,
+    ...props 
+}) => {
+    return (
+${jsxString}
+    );
+};`;
+            }
+
+            jsxToString(element, indent = 0) {
+                if (!element) return '';
+                
+                const spaces = '        '.repeat(indent); // 8 spaces per indent
+                const { tag, props, children, text } = element;
+                
+                if (text) {
+                    return `${spaces}<${tag}${this.propsToString(props, true)}>${text}</${tag}>`;
+                }
+                
+                if (!children || children.length === 0) {
+                    return `${spaces}<${tag}${this.propsToString(props, true)} />`;
+                }
+                
+                const childrenStr = children
+                    .map(child => this.jsxToString(child, indent + 1))
+                    .filter(Boolean)
+                    .join('\n');
+                
+                return `${spaces}<${tag}${this.propsToString(props, true)}>
+${childrenStr}
+${spaces}</${tag}>`;
+            }
+
+            propsToString(props, useStyles = false) {
+                if (!props || Object.keys(props).length === 0) {
+                    return '';
+                }
+                
+                const propsArray = [];
+                
+                Object.entries(props).forEach(([key, value]) => {
+                    if (key === 'className') {
+                        // Always use className for CSS classes
+                        propsArray.push(`className="${value}"`);
+                    } else if (key === 'role' || key.startsWith('aria-')) {
+                        propsArray.push(`${key}="${value}"`);
+                    } else {
+                        propsArray.push(`${key}="${value}"`);
+                    }
+                });
+                
+                return propsArray.length > 0 ? ' ' + propsArray.join(' ') : '';
+            }
+            
+            generateStylesCSS() {
+                let css = '';
+                
+                // Add root variables for colors
+                css += ':root {\n';
+                this.colors.forEach((name, value) => {
+                    css += `    --${name}: ${value};\n`;
+                });
+                css += '}\n\n';
+                
+                // Add extracted element styles as CSS classes
+                this.styleClasses.forEach((styles, className) => {
+                    css += `.${className} {\n`;
+                    
+                    Object.entries(styles).forEach(([prop, value]) => {
+                        // Convert camelCase to kebab-case for CSS
+                        const cssProp = this.camelToKebab(prop);
+                        
+                        // Convert color values to CSS variables
+                        if (typeof value === 'string') {
+                            const colorVarName = this.colors.get(value);
+                            if (colorVarName) {
+                                css += `    ${cssProp}: var(--${colorVarName});\n`;
+                            } else {
+                                css += `    ${cssProp}: ${value};\n`;
+                            }
+                        } else {
+                            css += `    ${cssProp}: ${value};\n`;
+                        }
+                    });
+                    
+                    css += '}\n\n';
+                });
+                
+                return css;
+            }
+            
+            generateStylesObject() {
+                let stylesObj = '{\n';
+                
+                // Add extracted element styles
+                this.styleClasses.forEach((styles, className) => {
+                    // className should already be valid from extraction
+                    stylesObj += `    ${className}: {\n`;
+                    
+                    Object.entries(styles).forEach(([prop, value]) => {
+                        // Convert CSS property names to React style names if needed
+                        const reactProp = /^[a-zA-Z]+$/.test(prop) ? prop : this.cssToReactProp(prop);
+                        
+                        // Convert color values to CSS variables
+                        if (typeof value === 'string' && value.includes('var(--')) {
+                            stylesObj += `        ${reactProp}: '${value}',\n`;
+                        } else if (typeof value === 'string') {
+                            // Check if it's a color that should be a variable
+                            const colorVarName = this.colors.get(value);
+                            if (colorVarName) {
+                                stylesObj += `        ${reactProp}: 'var(--${colorVarName})',\n`;
+                            } else {
+                                // Escape quotes in string values
+                                const escapedValue = value.replace(/'/g, "\\'");
+                                stylesObj += `        ${reactProp}: '${escapedValue}',\n`;
+                            }
+                        } else {
+                            stylesObj += `        ${reactProp}: ${value},\n`;
+                        }
+                    });
+                    
+                    stylesObj += '    },\n';
+                });
+                
+                stylesObj += '}';
+                return stylesObj;
+            }
+            
+            cssToReactProp(cssProp) {
+                // Convert CSS property names to React camelCase
+                return cssProp.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+            }
+
+            generateCSSStyles() {
+                let css = '/* Component Styles */\n\n';
+                
+                // Root variables for colors
+                css += ':root {\n';
+                css += '    /* Colors */\n';
+                this.colors.forEach((name, value) => {
+                    css += `    --${name}: ${value};\n`;
+                });
+                css += '\n    /* Base unit: 10px = 1rem */\n';
+                css += '    font-size: 62.5%; /* Makes 1rem = 10px */\n';
+                css += '}\n\n';
+                
+                // Reset for component container
+                css += '.panel-container {\n';
+                css += '    font-size: 1.6rem; /* Reset to 16px for text */\n';
+                css += '    position: relative;\n';
+                css += '}\n\n';
+                
+                // Component styles
+                this.styles.forEach(({ className, styles }) => {
+                    css += `.${className} {\n`;
+                    Object.entries(styles).forEach(([prop, value]) => {
+                        // Convert color values to CSS variables
+                        if (typeof value === 'string' && this.colors.has(value)) {
+                            value = `var(--${this.colors.get(value)})`;
+                        }
+                        // Value already converted to rem in analyzeSVG
+                        css += `    ${this.camelToKebab(prop)}: ${value};\n`;
+                    });
+                    css += '}\n\n';
+                });
+                
+                // Add icon styles
+                css += '/* Icon Styles */\n';
+                css += '[class^="icon-"] {\n';
+                css += '    display: inline-block;\n';
+                css += '    vertical-align: middle;\n';
+                css += '}\n\n';
+                
+                return css;
+            }
+
+            generateColorVariables() {
+                let vars = '// CSS color variables to add to your global styles:\n';
+                vars += '/*\n';
+                vars += ':root {\n';
+                
+                this.colors.forEach((name, value) => {
+                    vars += `    --${name}: ${value};\n`;
+                });
+                
+                vars += '}\n';
+                vars += '*/';
+                
+                return vars;
+            }
+            
+            generatePathConstants() {
+                if (this.paths.size === 0) {
+                    return '';
+                }
+                
+                let paths = '';
+                
+                this.paths.forEach(({ name, d, uses }) => {
+                    paths += `// Used ${uses} time${uses > 1 ? 's' : ''}\n`;
+                    // Escape single quotes in path data
+                    const escapedD = d.replace(/'/g, "\\'" );
+                    paths += `const ${name} = '${escapedD}';\n\n`;
+                });
+                
+                return paths;
+            }
+
+            
+
+            // Utility methods
+            toCamelCase(str) {
+                return str.replace(/[-_]([a-z])/g, (g) => g[1].toUpperCase())
+                    .replace(/^[A-Z]/, (g) => g.toLowerCase())
+                    .replace(/[^a-zA-Z0-9]/g, '');
+            }
+
+            camelToKebab(str) {
+                return str.replace(/([A-Z])/g, '-$1').toLowerCase();
+            }
+
+            hashString(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return hash.toString(36);
+            }
+
+            hashObject(obj) {
+                return this.hashString(JSON.stringify(obj));
+            }
+
+            parseInlineStyle(styleStr) {
+                const styles = {};
+                styleStr.split(';').forEach(rule => {
+                    const [prop, value] = rule.split(':').map(s => s.trim());
+                    if (prop && value) {
+                        const camelProp = this.cssToReactProp(prop);
+                        // Convert px values to rem
+                        const convertedValue = this.convertPxToRem(value);
+                        styles[camelProp] = convertedValue;
+                    }
+                });
+                return styles;
+            }
+
+            categorizeColor(color) {
+                // Simple color categorization
+                if (color.includes('0') || color.includes('1') || color.includes('2')) {
+                    return 'dark';
+                }
+                if (color.includes('f') || color.includes('e') || color.includes('d')) {
+                    return 'light';
+                }
+                return 'accent';
+            }
+
+            getElementStructure(element) {
+                return {
+                    tag: element.tagName,
+                    childCount: element.children.length,
+                    attributes: Array.from(element.attributes).map(a => a.name).sort()
+                };
+            }
+
+            extractComponentName(element) {
+                const id = element.id || '';
+                const base = id.replace(/[_-]\d+$/, '').replace(/\s+/g, '');
+                return this.toCamelCase(base || 'Component');
+            }
+        }
+
+        // Main conversion function
+        function convertSVG() {
+            const svgInput = document.getElementById('svgInput').value;
+            const componentName = document.getElementById('componentName').value || 'PanelComponent';
+            
+            if (!svgInput) {
+                alert('Please paste an SVG first');
+                return;
+            }
+            
+            try {
+                const converter = new SVGToReactConverter({
+                    hybridMode: document.getElementById('hybridMode').checked,
+                    detectComponents: document.getElementById('detectComponents').checked,
+                    extractTokens: document.getElementById('extractTokens').checked,
+                    optimizePaths: document.getElementById('optimizePaths').checked,
+                    semanticHtml: document.getElementById('semanticHtml').checked,
+                    addAccessibility: document.getElementById('addAccessibility').checked,
+                });
+                
+                const result = converter.convert(svgInput, componentName);
+                
+                // Format with Prettier
+                const formattedComponent = prettier.format(result.component, {
+                    parser: 'typescript',
+                    plugins: prettierPlugins,
+                    singleQuote: true,
+                    tabWidth: 2,
+                    printWidth: 100
+                });
+                
+                // Format combined output
+                const formattedCombined = prettier.format(result.combined, {
+                    parser: 'typescript',
+                    plugins: prettierPlugins,
+                    singleQuote: true,
+                    tabWidth: 2,
+                    printWidth: 100
+                });
+                
+                // Update outputs
+                document.getElementById('combinedOutput').value = formattedCombined;
+                document.getElementById('componentOutput').value = formattedComponent;
+                document.getElementById('stylesOutput').value = result.styles;
+                document.getElementById('pathsOutput').value = result.paths;
+                
+                // Update preview
+                document.getElementById('previewContent').innerHTML = svgInput;
+                
+                // Update stats
+                updateStats(result);
+                
+                conversionResult = result;
+                
+            } catch (error) {
+                console.error('Conversion error:', error);
+                alert('Error converting SVG: ' + error.message);
+            }
+        }
+
+        function analyzeStructure() {
+            const svgInput = document.getElementById('svgInput').value;
+            if (!svgInput) {
+                alert('Please paste an SVG first');
+                return;
+            }
+            
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgInput, 'image/svg+xml');
+                const svg = doc.documentElement;
+                
+                // Count different element types
+                const elements = svg.querySelectorAll('*');
+                const elementTypes = {};
+                elements.forEach(el => {
+                    const tag = el.tagName;
+                    elementTypes[tag] = (elementTypes[tag] || 0) + 1;
+                });
+                
+                // Display analysis
+                let analysis = 'SVG Structure Analysis:\n\n';
+                analysis += `Total elements: ${elements.length}\n\n`;
+                analysis += 'Element breakdown:\n';
+                Object.entries(elementTypes)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([tag, count]) => {
+                        analysis += `  ${tag}: ${count}\n`;
+                    });
+                
+                alert(analysis);
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                alert('Error analyzing SVG: ' + error.message);
+            }
+        }
+
+        // Input change listener
+        document.getElementById('svgInput').addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (value) {
+                try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(value, 'image/svg+xml');
+                    const elements = doc.querySelectorAll('*');
+                    document.getElementById('inputStats').textContent = `${elements.length} elements`;
+                    
+                    // Update preview
+                    document.getElementById('previewContent').innerHTML = value;
+                } catch (error) {
+                    document.getElementById('inputStats').textContent = 'Invalid SVG';
+                }
+            } else {
+                document.getElementById('inputStats').textContent = '0 elements';
+                document.getElementById('previewContent').innerHTML = '<div style="color: #999;">Preview will appear here</div>';
+            }
+        });
+    </script>
+</body>
+</html>

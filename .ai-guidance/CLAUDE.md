@@ -6,7 +6,7 @@
 - **Client Code**: Located in `/workspaces/cwmi-hmi-v2/client`
 - **Framework**: React/MobX/TypeScript with MVVM architecture
 - **Model Changes**: ONLY edit `/model/*.model/src/`, then run `npm run generate-model`
-- **Quick Reference**: See `_QUICK_REF.md` for commands, paths, and common fixes
+- **Quick Reference**: See `QUICK_REF_GUIDE.md` for commands, paths, and common fixes
 - **Framework Guide**: See `./ai-guide/_START_HERE.md` for framework overview
 - **Sprint Status**: See `NEXT_SESSION_GUIDE.md` for current demo priorities
 
@@ -14,7 +14,7 @@
 
 ### On Session Start
 
-1. Read `_QUICK_REF.md` for commands/paths
+1. Read `QUICK_REF_GUIDE.md` for commands/paths
 2. Get folder structure if complex task
 3. Ask for missing context/files if needed
 4. Check for NOTE-AI comments in relevant files
@@ -36,7 +36,7 @@ Example searches:
 
 | User Input | Required Action |
 |------------|-----------------|
-| "morning", "hello", "hey" | Friendly greeting, read the quick ref, ask about task; `_QUICK_REF.md` |
+| "morning", "hello", "hey" | Friendly greeting, read the quick ref, ask about task; `QUICK_REF_GUIDE.md` |
 | "new feature", "implement", "add" | Read COOKBOOK_PATTERNS.md first |
 | "fix", "bug", "error", "broken" | Check COMMON_PITFALLS.md |
 | "update model", "change entity" | Read MODEL_GENERATION_GUIDE.md |
@@ -54,11 +54,11 @@ Creating Components:
 
 Fixing Errors:
   primary: COMMON_PITFALLS.md
-  check: _QUICK_REF.md error mappings
+  check: QUICK_REF_GUIDE.md error mappings
 
 Property Values:
   primary: PROPERTY_VIEWMODEL_GUIDE.md
-  reference: _QUICK_REF.md quick reference
+  reference: QUICK_REF_GUIDE.md quick reference
 
 Architecture Decisions:
   primary: ENTITY_ARCHITECTURE.md
@@ -79,8 +79,15 @@ Styling/Theming:
 3. npm run build         # TypeScript compilation
 
 # Or use helper scripts for efficiency:
-./tools/build-helpers/count-build-errors.sh
-./tools/build-helpers/show-build-errors.sh 10
+# Client-side:
+./tools/build-helpers/count-client-errors.sh
+./tools/build-helpers/show-client-errors.sh 10
+
+# Server-side:
+./tools/build-helpers/count-server-errors.sh
+./tools/build-helpers/show-server-errors.sh 10
+./tools/build-helpers/server-error-files.sh      # List files with errors
+./tools/build-helpers/server-error-files.sh -l   # Include line numbers
 ```
 
 ### Debugging Protocol
@@ -234,14 +241,14 @@ Before completing any task, ask yourself:
 ## 📚 Documentation References
 
 ### Essential Reading
-1. `_QUICK_REF.md` - Commands, paths, error fixes
+1. `QUICK_REF_GUIDE.md` - Commands, paths, error fixes
 2. `./ai-guide/_START_HERE.md` - Framework overview
 3. `./ai-guide/COOKBOOK_PATTERNS.md` - Code templates
 4. `./ai-guide/COMMON_PITFALLS.md` - Mistakes to avoid
 
 ### Deep Dives
 - `AI_COLLABORATION_GUIDE.md` - Full collaboration strategies
-- `CODING_STANDARDS.md` - Universal coding principles
+- `CODING_STANDARDS_GUIDE.md` - Universal coding principles
 - `./ai-guide/MODEL_GENERATION_GUIDE.md` - Model system details
 - `./ai-guide/ENTITY_ARCHITECTURE.md` - Data layer architecture
 
@@ -256,8 +263,12 @@ When user mentions relative paths (e.g., `./ai-guide`, `./tools`), these are rel
 
 ### Helper Scripts Location
 All helper scripts are in `./tools/build-helpers/`:
-- `count-build-errors.sh` - Count TypeScript errors
-- `show-build-errors.sh` - Display errors with filtering
+- `count-client-errors.sh` - Count client-side TypeScript errors
+- `show-client-errors.sh` - Display client errors with filtering
+- `count-server-errors.sh` - Count server-side .NET errors
+- `show-server-errors.sh` - Display server errors
+- `server-error-files.sh` - List files with server errors (use -l for line numbers)
+- `show-server-warnings.sh` - Display server warnings
 - `check-test-success.sh` - Quick test status check
 - `count-test-errors.sh` - Count test failures
 - `show-test-errors.sh` - Display test failures
@@ -266,3 +277,4 @@ All helper scripts are in `./tools/build-helpers/`:
 - color vars are kept here: client/libs/alpha/alpha.tokens/src/lib/stylesheets/theme.css
 - No need to add time estimates to any task(s)
 - Don't delete failing tests, fix what's not working. Ask the user if you're unsure what side, the tests or implementation, to update.
+- Do *NOT* put off or mask issues and errors; if you don't think they should be addressed now only continue after asking and getting permission from the user.
